@@ -23,7 +23,7 @@ class IndexController extends Controller
 
        // dd($forecast);
         //return view('welcome', compact('parks'));
-        return view('welcome', compact('forecast'));
+        return view('frontend.pages.startseite', compact('forecast'));
 
     }
 }

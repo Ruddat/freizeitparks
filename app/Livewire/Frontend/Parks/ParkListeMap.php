@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Frontend;
+namespace App\Livewire\Frontend\Parks;
 
 use App\Models\Park;
 use Livewire\Component;
@@ -40,7 +40,7 @@ class ParkListeMap extends Component
             ->sort()
             ->values();
 
-        return view('livewire.frontend.park-liste-map', [
+        return view('livewire.frontend.parks.park-liste-map', [
             'parks' => $parks,
             'laender' => $laender,
         ]);

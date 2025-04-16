@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Frontend;
+namespace App\Livewire\Frontend\Parks;
 
 use App\Models\Park;
 use Livewire\Component;
@@ -109,6 +109,6 @@ class ParkMap extends Component
 
     public function render()
     {
-        return view('livewire.frontend.park-map');
+        return view('livewire.frontend.parks.park-map');
     }
 }

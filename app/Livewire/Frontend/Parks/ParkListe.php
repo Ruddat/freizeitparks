@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Frontend\Parks;
 
 use App\Models\Park;
 use Livewire\Component;
@@ -147,7 +147,7 @@ class ParkListe extends Component
 
         logger('📍 Finale Parks:', ['count' => $parks->count()]);
 
-        return view('livewire.park-liste', [
+        return view('livewire.frontend.parks.park-liste', [
             'parks' => $parks,
             'laender' => $alleLaender,
         ]);

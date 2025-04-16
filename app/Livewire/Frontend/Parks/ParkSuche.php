@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Frontend\Parks;
 
 use App\Models\Park;
 use Livewire\Component;
@@ -76,6 +76,6 @@ class ParkSuche extends Component
 
     public function render()
     {
-        return view('livewire.park-suche');
+        return view('livewire.frontend.parks.park-suche');
     }
 }

@@ -62,7 +62,7 @@
         <div class="relative z-20 space-y-2">
             <h1 class="text-4xl md:text-5xl font-bold">Freizeitparks in Europa entdecken</h1>
             <p class="mt-4 text-lg">Finde Freizeitparks in ganz Europa und entdecke aktuelle Öffnungszeiten, Aktionen und mehr.</p>
-            <livewire:park-suche />
+            <livewire:frontend.parks.park-suche />
         </div>
     </div>
 </header>
@@ -92,14 +92,14 @@
 <section class="mb-16">
     <h2 class="text-2xl font-semibold mb-6">Entdecke Parks in deiner Nähe</h2>
     <div class="w-full rounded-lg">
-        <livewire:frontend.park-map />
+        <livewire:frontend.parks.park-map />
     </div>
 </section>
 
         <!-- Park Cards -->
         <section id="park-liste">
             <h2 class="text-2xl font-semibold mb-6">Beliebte Freizeitparks</h2>
-            <livewire:park-liste />
+            <livewire:frontend.parks.park-liste />
         <!-- Testlink -->
     <div class="mt-6">
         <a href="{{ route('parks.show', 1) }}" class="text-blue-600 hover:text-blue-800 font-semibold">Testlink zu Testpark 1</a>

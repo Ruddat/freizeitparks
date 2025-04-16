@@ -28,6 +28,8 @@ class WeatherService
 
             $response = Http::timeout(10)->get($url);
 
+dd($response->body());
+
             if (!$response->successful() || !isset($response['daily'])) {
                 Log::warning('Open-Meteo: Fehlerhafte Antwort', [
                     'status' => $response->status(),
