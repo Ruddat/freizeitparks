@@ -14,13 +14,16 @@ return new class extends Migration
         Schema::create('park_weather', function (Blueprint $table) {
             $table->id();
             $table->foreignId('park_id')->constrained()->onDelete('cascade');
-            $table->string('temperature')->nullable();
+            $table->date('date'); // Vorhersage-Datum
+            $table->float('temp_day');
+            $table->float('temp_night');
+            $table->integer('weather_code')->nullable();
             $table->string('description')->nullable();
             $table->string('icon')->nullable();
-            $table->string('wind_speed')->nullable();
-            $table->string('humidity')->nullable();
-            $table->timestamp('fetched_at')->nullable();
+            $table->timestamp('fetched_at')->nullable(); // wann wurde es abgefragt
             $table->timestamps();
+
+            $table->unique(['park_id', 'date']); // ein Eintrag pro Park & Tag
         });
     }
 

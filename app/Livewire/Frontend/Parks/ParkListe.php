@@ -5,9 +5,13 @@ namespace App\Livewire\Frontend\Parks;
 use App\Models\Park;
 use Livewire\Component;
 use Livewire\Attributes\On;
+use Livewire\WithPagination;
+use Livewire\WithoutUrlPagination;
 
 class ParkListe extends Component
 {
+    use WithPagination, WithoutUrlPagination;
+
     public $suche = '';
     public $land = '';
     public $status = 'alle'; // 'alle', 'open', 'closed', 'unknown'
@@ -40,6 +44,7 @@ class ParkListe extends Component
         if ($this->userLat === null || $this->userLng === null) {
             $this->dispatch('alert', ['message' => 'Standort konnte nicht gesetzt werden.', 'type' => 'error']);
         } else {
+            $this->resetPage(); // Pagination zurücksetzen, wenn der Standort gesetzt wird
             $this->dispatch('filterAktualisiert', [
                 'suche' => $this->suche,
                 'land' => $this->land,
@@ -70,6 +75,7 @@ class ParkListe extends Component
     public function setSuche($wert)
     {
         $this->suche = trim($wert);
+        $this->resetPage(); // Pagination zurücksetzen, wenn die Suche geändert wird
     }
 
     public function resetFilter()
@@ -80,17 +86,17 @@ class ParkListe extends Component
         // Optional: Standort zurücksetzen
         $this->userLat = null;
         $this->userLng = null;
+        $this->resetPage(); // Pagination zurücksetzen, wenn die Filter zurückgesetzt werden
         $this->dispatch('filterAktualisiert', [
             'suche' => $this->suche,
             'land' => $this->land,
             'status' => $this->status,
         ]);
-        // Event für Kartenaktualisierung
-
     }
 
     public function updated($property)
     {
+        $this->resetPage(); // Pagination zurücksetzen, wenn ein Filter geändert wird
         $this->dispatch('filterAktualisiert', [
             'suche' => $this->suche,
             'land' => $this->land,
@@ -102,6 +108,7 @@ class ParkListe extends Component
     {
         $query = Park::query();
 
+        // Suche
         if ($this->suche) {
             $query->where(function ($q) {
                 $q->where('name', 'like', '%' . $this->suche . '%')
@@ -110,14 +117,28 @@ class ParkListe extends Component
             });
         }
 
+        // Land-Filter
         if ($this->land) {
             $query->where('country', 'like', '%' . $this->land . '%');
         }
 
+        // Status-Filter
         if ($this->status !== 'alle') {
             $query->where('status', $this->status);
         }
 
+        // Entfernungsfilter direkt in der Abfrage
+        if ($this->userLat && $this->userLng) {
+            $query->select('*')
+                  ->selectRaw(
+                      '(6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) AS distance',
+                      [$this->userLat, $this->userLng, $this->userLat]
+                  )
+                  ->having('distance', '<=', $this->radiusKm)
+                  ->orderBy('distance');
+        }
+
+        // Länder für Dropdown
         $alleLaender = Park::whereNotNull('country')
             ->distinct()
             ->pluck('country')
@@ -125,25 +146,8 @@ class ParkListe extends Component
             ->sort()
             ->values();
 
-        $parks = $query->get();
-        logger('📍 Parks nach Filtern:', ['count' => $parks->count()]);
-
-        if ($this->userLat && $this->userLng) {
-            $parks = $parks->filter(function ($park) {
-                if (!$park->latitude || !$park->longitude) {
-                    logger('📍 Park ohne Koordinaten:', ['park' => $park->toArray()]);
-                    return false;
-                }
-                $distance = $this->distanceBetween($this->userLat, $this->userLng, $park->latitude, $park->longitude);
-                logger('📍 Entfernung für Park:', [
-                    'park' => $park->name,
-                    'lat' => $park->latitude,
-                    'lng' => $park->longitude,
-                    'distance_km' => $distance
-                ]);
-                return $distance <= $this->radiusKm;
-            });
-        }
+        // Paginierte Abfrage
+        $parks = $query->paginate(9);
 
         logger('📍 Finale Parks:', ['count' => $parks->count()]);
 

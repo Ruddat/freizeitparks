@@ -38,4 +38,8 @@ return [
         'key' => env('OPENWEATHER_KEY'),
     ],
 
+    'deepinfra' => [
+        'token' => env('DEEPINFRA_API_TOKEN'),
+    ],
+
 ];

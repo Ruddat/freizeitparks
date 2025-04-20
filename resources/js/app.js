@@ -1,5 +1,4 @@
 import './bootstrap';
-import Alpine from 'alpinejs';
 import L from 'leaflet';
 import '../css/leaflet-custom.css'; // Verwende die angepasste CSS
 import Swiper from 'swiper/bundle';
@@ -7,10 +6,9 @@ import 'swiper/css/bundle';
 
 
 window.L = L; // Macht Leaflet global verfügbar
-window.Alpine = Alpine;
 
-// ✅ Alpine starten
-Alpine.start();
+
+
 
 
 

@@ -71,6 +71,7 @@ class AmusementParkService
                         'continent' => $park['continent'] ?? null,
                         'timezone' => $park['timezone'] ?? null,
                         'status' => 'unknown',
+                        'description' => 'unknown',
                         'image' => $imagePath, // Lokaler Pfad zum WebP-Bild
                         'latitude' => $latitude,
                         'longitude' => $longitude,

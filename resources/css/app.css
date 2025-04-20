@@ -1,8 +1,6 @@
 @import 'tailwindcss';
 @import 'swiper/css/bundle';
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+
 
 @source "../views";
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
@@ -14,6 +12,31 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+
+
+
+body {
+    background-color: #010b3f;
+    color: #fff;
+}
+/* Tailwind CSS */
+
+/* hero */
+
+
+
+@keyframes wave {
+    0%, 100% {
+      transform: translateY(0) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-4px) rotate(0deg);
+    }
+  }
+  .animate-wave {
+    animation: wave 3s ease-in-out infinite;
+  }
 
 /* Basis-Styles für Mobilfreundlichkeit */
 @layer base {
@@ -127,3 +150,4 @@
         transform: rotateY(180deg);
     }
 }
+

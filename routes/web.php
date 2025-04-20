@@ -8,5 +8,14 @@ use App\Http\Controllers\Frontend\IndexController;
 //    return view('welcome');
 //});
 Route::get('/', [IndexController::class, 'index'])->name('home');
+Route::get('/scrapper', [IndexController::class, 'testScraper'])->name('testScraper');
+
 
 Route::get('/parks/{id}', [ParkController::class, 'show'])->name('parks.show');
+
+
+
+Route::prefix('verwaltung')->group(function () {
+    Route::view('/', 'backend.dashboard')->name('admin.dashboard');
+    Route::get('/parks', \App\Livewire\Backend\Parks\ParkManager::class)->name('admin.parks');
+});

@@ -30,17 +30,7 @@
         </div>
     </nav>
 
-    <div class="relative h-[85vh] flex flex-col justify-center items-center text-white text-center overflow-hidden">
-        <video class="absolute inset-0 w-full h-full object-cover z-0" autoplay muted loop playsinline>
-            <source src="{{ asset('videos/rollercoaster.mp4') }}" type="video/mp4">
-            Dein Browser unterstützt dieses Video nicht.
-        </video>
-        <div class="absolute inset-0 bg-black/50 z-10"></div>
 
-        <div class="relative z-20 space-y-2">
-            <h1 class="text-4xl md:text-5xl font-bold">Freizeitparks in Europa entdecken</h1>
-            <p class="mt-4 text-lg">Finde Freizeitparks in ganz Europa und entdecke aktuelle Öffnungszeiten, Aktionen und mehr.</p>
-            <livewire:frontend.parks.park-suche />
-        </div>
-    </div>
+    @include('frontend.partials.hero')
+
 </header>
