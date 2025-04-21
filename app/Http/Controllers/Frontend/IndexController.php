@@ -96,7 +96,9 @@ class IndexController extends Controller
                 'temp_night'  => $item['temp_night'],
                 //'icon' => Storage::disk('public')->url('icons/weather/animated/' . $icon),
                 //'icon' => asset('images/weather/animated/' . $icon),
-                'icon' => asset('storage/icons/weather/animated/' . $icon),
+                //'icon' => asset('storage/icons/weather/animated/' . $icon),
+                'icon' => asset('images/weather/animated/' . $icon),
+
 
                 //'icon_day'    => asset('images/weather/animated/' . $weatherIcons[$code]['day'] ?? 'not-available.svg'),
                 'description' => $weatherDescriptions[$code] ?? 'Unbekanntes Wetter',
