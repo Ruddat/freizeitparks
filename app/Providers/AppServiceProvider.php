@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\View;
 use App\Models\StaticPage;
+use App\Models\ModSiteSettings;
 use App\Services\GeocodeService;
 use Illuminate\Support\ServiceProvider;
 
@@ -27,5 +29,11 @@ class AppServiceProvider extends ServiceProvider
             $view->with('navPages', StaticPage::where('show_in_nav', true)->get());
             $view->with('footerPages', StaticPage::where('show_in_footer', true)->get());
         });
+
+
+        View::composer('*', function ($view) {
+            $view->with('siteSettings', ModSiteSettings::getPublicSettings());
+        });
+
     }
 }

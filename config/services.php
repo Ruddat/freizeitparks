@@ -42,4 +42,12 @@ return [
         'token' => env('DEEPINFRA_API_TOKEN'),
     ],
 
+    'unsplash' => [
+        'key' => env('UNSPLASH_ACCESS_KEY'),
+    ],
+
+    'pixabay' => [
+        'key' => env('PIXABAY_API_KEY'),
+    ],
+
 ];

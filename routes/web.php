@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ParkController;
 use App\Http\Controllers\Frontend\IndexController;
 use App\Http\Controllers\Frontend\StaticPageController;
+use App\Livewire\Backend\SettingsComponent\SettingsManager;
 
 //Route::get('/', function () {
 //    return view('welcome');
@@ -23,4 +24,5 @@ Route::prefix('verwaltung')->group(function () {
     Route::view('/', 'backend.dashboard')->name('admin.dashboard');
     Route::get('/parks', \App\Livewire\Backend\Parks\ParkManager::class)->name('admin.parks');
     Route::get('/static-pages', \App\Livewire\Backend\StaticPages\StaticPageManager::class)->name('admin.static-pages');
+    Route::get('/settings-manager', SettingsManager::class)->name('admin.settings-manager');
 });

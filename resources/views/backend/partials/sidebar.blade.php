@@ -34,7 +34,16 @@
               </a>
               <ul class="collapse" id="apps">
                 <li><a href="{{ route('admin.parks') }}">Park Manager</a></li>
-                <li><a href="{{ route('admin.static-pages') }}">Park Manager</a></li>
+                <li><a href="{{ route('admin.static-pages') }}">Statik Pages</a></li>
+                <li class="nav-item">
+                    <a href="{{ route('admin.settings-manager') }}" class="nav-link">
+                        <i class="fas fa-cogs"></i>
+                        <p>Einstellungen</p>
+                    </a>
+                </li>
+
+
+
                 <li class="another-level">
                   <a class="" data-bs-toggle="collapse" href="#Profile-page" aria-expanded="false">
                     Profile

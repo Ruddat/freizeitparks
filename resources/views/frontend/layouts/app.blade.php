@@ -1,17 +1,45 @@
 <!DOCTYPE html>
 <html lang="de" class="min-h-screen">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ $title ?? 'Freizeitparks Europa' }}</title>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @stack('styles')
-    <link href="https://fonts.googleapis.com/css2?family=Bowlby+One&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha384-k6RqeWeci5ZR/Lv4MR0sA0FfDOM8d7xj1z5l5e5b5e5b5e5b5e5b5e5b5e5b5e" crossorigin="anonymous">
-    @livewireStyles
+        @php
+            $siteName = setting('site_name', 'Freizeitparks Europa');
+            $siteFavicon = setting('site_favicon');
+            $icon180 = setting('site_icon_180');
+            $icon192 = setting('site_icon_192');
+            $icon512 = setting('site_icon_512');
+        @endphp
 
-</head>
+        <title>{{ $title ?? $siteName }}</title>
+
+        {{-- Favicon & Icons --}}
+        @if ($siteFavicon)
+            <link rel="icon" type="image/webp" sizes="32x32" href="{{ asset('storage/' . $siteFavicon) }}">
+        @endif
+
+        @if ($icon180)
+            <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('storage/' . $icon180) }}">
+        @endif
+
+        @if ($icon192)
+            <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('storage/' . $icon192) }}">
+        @endif
+
+        @if ($icon512)
+            <link rel="icon" type="image/png" sizes="512x512" href="{{ asset('storage/' . $icon512) }}">
+            <link rel="manifest" href="/manifest.json"> {{-- Optional: falls du PWA machst --}}
+        @endif
+
+        {{-- Fonts, Styles & JS --}}
+        <link href="https://fonts.googleapis.com/css2?family=Bowlby+One&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="..." crossorigin="anonymous">
+
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @livewireStyles
+        @stack('styles')
+    </head>
 <body class="bg-white text-gray-800 min-h-screen flex flex-col">
     <header class="relative">
         @include('frontend.partials.header-nav')

@@ -129,7 +129,7 @@ class ParkController extends Controller
                 'date'        => \Carbon\Carbon::parse($item['date'])->translatedFormat('D d.m.'),
                 'temp_day'    => round($item['temp_day']),
                 'temp_night'  => round($item['temp_night']),
-                'icon'        => asset('icons/weather/animated/' . $icon),
+                'icon'        => asset('images/weather/animated/' . $icon),
                 'description' => $weatherDescriptions[$code] ?? 'Unbekannt',
             ];
         });

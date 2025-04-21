@@ -1,0 +1,22 @@
+{
+    "name": "Parkverzeichnis.de",
+    "short_name": "Parkverzeichnis",
+    "description": "Entdecke alle Freizeitparks in Europa – Öffnungszeiten, Bewertungen und mehr.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#1f2937",
+    "theme_color": "#1f2937",
+    "orientation": "portrait-primary",
+    "icons": [
+      {
+        "src": "/storage/{{ setting('site_icon_192', 'site-assets/site_icon_192.png') }}",
+        "sizes": "192x192",
+        "type": "image/png"
+      },
+      {
+        "src": "/storage/{{ setting('site_icon_512', 'site-assets/site_icon_512.png') }}",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
+    ]
+  }
