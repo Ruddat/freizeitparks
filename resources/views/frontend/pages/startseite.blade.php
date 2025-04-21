@@ -38,7 +38,7 @@
 
         <!-- Hintergrundbild Comic-Style -->
         <div class="absolute inset-0 z-0 bg-center bg-cover"
-             style="background-image: url('/storage/bg/pattern-bg.png'); opacity: 0.95;"></div>
+             style="background-image:url('{{ asset('storage/bg/pattern-bg.png') }}'); opacity: 0.95;"></div>
 
         <!-- Inhalt -->
         <div class="relative z-10 max-w-screen-2xl mx-auto px-4 py-16">

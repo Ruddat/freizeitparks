@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Services\WeatherService;
 use App\Http\Controllers\Controller;
 use App\Services\ParkScraperService;
+use Illuminate\Support\Facades\Storage;
 
 class IndexController extends Controller
 {
@@ -93,7 +94,7 @@ class IndexController extends Controller
                 'date'        => $item['date'],
                 'temp_day'    => $item['temp_day'],
                 'temp_night'  => $item['temp_night'],
-                'icon'        => asset('icons/weather/animated/' . $icon),
+                'icon' => Storage::disk('public')->url('icons/weather/animated/' . $icon),
                 'description' => $weatherDescriptions[$code] ?? 'Unbekanntes Wetter',
             ];
         });
