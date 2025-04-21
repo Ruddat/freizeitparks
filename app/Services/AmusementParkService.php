@@ -190,7 +190,15 @@ class AmusementParkService
             $targetWidth = 480;
             $targetHeight = 280;
 
-            $manager = new ImageManager(new Driver());
+            //$manager = new ImageManager(new Driver());
+            try {
+                $manager = new ImageManager(new \Intervention\Image\Drivers\Imagick\Driver());
+            } catch (\Exception $e) {
+                \Log::warning("Imagick not available, falling back to GD: " . $e->getMessage());
+                $manager = new ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+            }
+
+
             $image = $manager->read($imageContent);
 
             $originalWidth = $image->width();
