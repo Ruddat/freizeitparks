@@ -1,2 +1,16 @@
-/* Jodit-Editor CSS importieren */
+/* TinyMCE-Editor-Container */
+.tox-tinymce {
+    border-radius: 0.5rem !important;
+    border: 1px solid #e2e8f0 !important;
+}
 
+/* Toolbar anpassen */
+.tox .tox-toolbar__primary {
+    background: #f8fafc !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+
+/* Statusbar ausblenden (optional) */
+.tox .tox-statusbar {
+    display: none !important;
+}

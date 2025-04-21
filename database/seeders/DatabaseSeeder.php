@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);
 
-        $this->call(ParkSeeder::class);
-
+        //$this->call(ParkSeeder::class);
+        $this->call(StaticPagesSeeder::class);
     }
 }

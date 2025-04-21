@@ -1,23 +1,28 @@
-<div x-data x-cloak class="fixed bottom-4 right-4 z-50">
-    <div class="bg-white text-gray-700 rounded-lg shadow-lg px-4 py-3 text-sm flex items-center gap-2 border border-green-300 animate-slide-in-down"
-         x-show="$store.debug?.showCrowdNotice ?? false" x-transition.duration.500ms>
-        🛰️ Besuch erfasst – Danke!
-        <button class="ml-2 text-gray-500 hover:text-red-500" @click="$store.debug.showCrowdNotice = false">
+<div>
+@if($showNotification)
+<div
+    x-data="{ visible: true }"
+    x-cloak
+    class="fixed bottom-4 right-4 z-50"
+>
+    <div
+        class="bg-yellow-300 text-black border-4 border-black shadow-comic rounded-xl px-5 py-3 text-base font-comic flex items-center gap-3"
+        x-show="visible"
+        x-transition.duration.500ms
+        x-init="setTimeout(() => visible = false, 6000)"
+    >
+        <span class="text-xl">🛰️</span>
+        <span>Besuch erfasst – Danke!</span>
+
+        <button
+            class="ml-auto text-black hover:text-red-600 text-xl font-bold leading-none"
+            @click="visible = false"
+        >
             &times;
         </button>
     </div>
-
-
-<script>
-    // Nur zeigen, wenn du möchtest
-    document.addEventListener('alpine:init', () => {
-        Alpine.store('debug', {
-            showCrowdNotice: true
-        });
-
-        setTimeout(() => Alpine.store('debug').showCrowdNotice = false, 6000);
-    });
-</script>
+</div>
+@endif
 
 <style>
     @keyframes slide-in-down {
@@ -33,6 +38,14 @@
 
     .animate-slide-in-down {
         animation: slide-in-down 0.4s ease-out;
+    }
+
+    .shadow-comic {
+        box-shadow: 6px 6px 0px #000;
+    }
+
+    .font-comic {
+        font-family: 'Comic Neue', 'Comic Sans MS', cursive;
     }
 </style>
 </div>

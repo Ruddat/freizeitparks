@@ -60,9 +60,25 @@
     </div>
 
 
-    <!-- Alert-Bereich -->
+    <script>
+        document.addEventListener('alpine:init', () => {
+            if (!Alpine.store('alerts')) {
+                Alpine.store('alerts', {
+                    alerts: [],
+                    add(message, type = 'info') {
+                        const id = Date.now();
+                        this.alerts.push({ id, message, type });
+                        setTimeout(() => {
+                            this.alerts = this.alerts.filter(alert => alert.id !== id);
+                        }, 5000);
+                    }
+                });
+            }
+        });
+    </script>
+
 <!-- Alert-Bereich -->
-<div x-show="$store.alerts && $store.alerts.alerts.length" class="mt-2 relative z-20" x-cloak>
+<div x-data x-show="$store.alerts && $store.alerts.alerts.length" class="mt-2 relative z-20" x-cloak>
     <div class="space-y-2">
         <template x-for="alert in $store.alerts.alerts" :key="alert.id">
             <div
@@ -81,60 +97,78 @@
 
 
 <script>
-    document.addEventListener('livewire:init', () => {
-        Livewire.on('alert', (data) => {
-            Alpine.store('alerts').add(data.message, data.type || 'info');
+    document.addEventListener('alpine:init', () => {
+        // Initialisiere den alerts-Store nur einmal
+        Alpine.store('alerts', {
+            alerts: [],
+            add(message, type = 'info') {
+                const id = Date.now().toString() + Math.random().toString(36).substring(2);
+                this.alerts.push({ id, message, type });
+
+                // Auto-Close nach 5 Sekunden
+                setTimeout(() => {
+                    this.alerts = this.alerts.filter(alert => alert.id !== id);
+                }, 5000);
+            }
         });
     });
 
-// Fallback für den Fall, dass Alpine noch nicht geladen ist
-window.showAlert = function(message, type = 'info') {
-    if (window.Alpine && Alpine.store('alerts')) {
-        Alpine.store('alerts').add(message, type);
-    } else {
-        console.error('Alpine.js not loaded yet - fallback alert', { message, type });
-        alert(`${type.toUpperCase()}: ${message}`);
-    }
-};
+    // Fallback, falls Alpine noch nicht geladen ist
+    window.showAlert = function (message, type = 'info') {
+        if (window.Alpine && Alpine.store('alerts')) {
+            Alpine.store('alerts').add(message, type);
+        } else {
+            console.warn('Alpine.js noch nicht bereit. Fallback alert: ', message);
+            alert(`${type.toUpperCase()}: ${message}`);
+        }
+    };
 
-document.addEventListener('livewire:init', () => {
-    console.log('Livewire initialized');
+    document.addEventListener('livewire:init', () => {
+        console.log('Livewire initialized');
 
-    Livewire.on('alert', (data) => {
-        console.log('Livewire alert event received', data);
-        showAlert(data.message, data.type);
+        // Alerts über Livewire empfangen
+        Livewire.on('alert', (data) => {
+            showAlert(data.message, data.type);
+        });
+    // Scroll zu Parkliste nach Standortempfang
+    Livewire.on('userLocationReceived', () => {
+        setTimeout(() => {
+            const el = document.getElementById('park-liste-anchor');
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth' });
+            }
+        }, 500);
     });
+        // Standort-Anfrage
+        window.addEventListener('get-user-location', () => {
+            if (!navigator.geolocation) {
+                Livewire.dispatch('alert', {
+                    message: 'Geolocation wird von deinem Browser nicht unterstützt.',
+                    type: 'error'
+                });
+                Livewire.dispatch('userLocationReceived', { lat: null, lng: null });
+                return;
+            }
 
-            window.addEventListener('get-user-location', () => {
-                if (!navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                position => {
+                    const coords = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    Livewire.dispatch('userLocationReceived', { coords });
+                },
+                error => {
                     Livewire.dispatch('alert', {
-                        message: 'Geolocation wird von deinem Browser nicht unterstützt. Bitte prüfe deine Einstellungen.',
+                        message: 'Standort konnte nicht abgefragt werden. Bitte erlaube die Standortfreigabe.',
                         type: 'error'
                     });
                     Livewire.dispatch('userLocationReceived', { lat: null, lng: null });
-                    return;
-                }
-
-                navigator.geolocation.getCurrentPosition(
-                    position => {
-                        const coords = {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude
-                        };
-                        setTimeout(() => {
-                            Livewire.dispatch('userLocationReceived', { coords });
-                        }, 100);
-                    },
-                    error => {
-                        Livewire.dispatch('alert', {
-                            message: 'Standort konnte nicht abgefragt werden. Bitte erlaube die Standortfreigabe in deinem Browser.',
-                            type: 'error'
-                        });
-                        Livewire.dispatch('userLocationReceived', { lat: null, lng: null });
-                    },
-                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-                );
-            });
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
         });
-    </script>
+    });
+</script>
+
 </div>

@@ -22,7 +22,7 @@ content: [
             'bg-gradient-to-br',
             // usw. alle Utilities, die verschwinden
           ],
-          
+
         fontFamily: {
             bowlby: ['"Bowlby One"', 'sans-serif'],
           },
@@ -34,5 +34,5 @@ content: [
         },
       },
     },
-    plugins: [],
+    plugins: [require('@tailwindcss/typography')],
   }

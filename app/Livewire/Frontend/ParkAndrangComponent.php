@@ -75,6 +75,7 @@ class ParkAndrangComponent extends Component
 
         // Modal immer schließen
         $this->openRatingModal = false;
+        $this->dispatch('bewertungGestartet');
 
         // Form zurücksetzen
         $this->reset([

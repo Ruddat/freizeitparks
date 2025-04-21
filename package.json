@@ -7,6 +7,7 @@
         "tailwind:init": "node ./node_modules/tailwindcss/lib/cli.js init -p"
     },
     "devDependencies": {
+        "@tailwindcss/typography": "^0.5.16",
         "@tailwindcss/vite": "^4.1.4",
         "autoprefixer": "^10.4.21",
         "axios": "^1.8.2",
@@ -21,8 +22,10 @@
     "dependencies": {
         "@tailwindcss/postcss": "^4.1.4",
         "alpinejs": "^3.14.9",
+        "jodit": "^4.6.2",
         "leaflet": "^1.9.4",
         "puppeteer": "^24.6.1",
-        "swiper": "^11.2.6"
+        "swiper": "^11.2.6",
+        "tinymce": "^7.8.0"
     }
 }

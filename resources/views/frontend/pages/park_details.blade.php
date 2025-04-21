@@ -86,9 +86,9 @@
       <!-- Linke Spalte: Beschreibung -->
       <div class="border border-gray-500 p-4 rounded-lg">
         <h2 class="text-2xl font-bold mb-4">Über den Freizeitpark</h2>
-        <p class="text-lg text-gray-300 leading-relaxed">
-          {!! $park->description ?? 'Keine Beschreibung verfügbar.' !!}
-        </p>
+        <div class="text-base leading-relaxed text-gray-100 space-y-4 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:mt-6 [&_ul]:list-disc [&_ul]:pl-6 [&_a]:text-pink-400 [&_a:hover]:underline [&_strong]:font-semibold">
+            {!! $park->description !!}
+          </div>
       </div>
 
 
@@ -167,27 +167,33 @@
         <livewire:frontend.park-bewertungen-component :park="$park" />
 
 
-<!-- Google Maps Embed ohne API Key -->
-<div class="bg-[#1c1e5c] rounded-xl p-4 shadow overflow-hidden">
-    <h3 class="text-xl font-semibold mb-4">📍 Karte & Anfahrt</h3>
+        @php
+        $latitude = $park->latitude;
+        $longitude = $park->longitude;
+        $coords = $latitude . ',' . $longitude;
+    @endphp
 
-    <div class="rounded-lg overflow-hidden aspect-w-16 aspect-h-9">
-      <iframe
-        src="https://www.google.com/maps?q=Europa+Park+Rust+Germany&output=embed"
-        class="w-full h-full border-0"
-        loading="lazy"
-        allowfullscreen>
-      </iframe>
+    <div class="bg-[#1c1e5c] rounded-xl p-4 shadow overflow-hidden">
+        <h3 class="text-xl font-semibold mb-4">📍 Karte & Anfahrt</h3>
+
+        <div class="rounded-lg overflow-hidden aspect-w-16 aspect-h-9">
+            <iframe
+                src="https://www.google.com/maps?q={{ $coords }}&output=embed"
+                class="w-full h-full border-0"
+                loading="lazy"
+                allowfullscreen>
+            </iframe>
+        </div>
+
+        <a
+            href="https://www.google.com/maps/dir/?api=1&destination={{ $coords }}"
+            target="_blank"
+            rel="noopener"
+            class="block mt-4 text-center bg-yellow-400 text-black font-bold py-2 px-4 rounded hover:bg-yellow-300 transition">
+            🚗 Route berechnen mit Google Maps
+        </a>
     </div>
-
-    <a
-      href="https://www.google.com/maps/dir/?api=1&destination=Europa+Park,Rust+Germany"
-      target="_blank"
-      rel="noopener"
-      class="block mt-4 text-center bg-yellow-400 text-black font-bold py-2 px-4 rounded hover:bg-yellow-300 transition">
-      🚗 Route berechnen mit Google Maps
-    </a>
-  </div>
+      </div>
 
 
 
@@ -378,48 +384,102 @@
 
 
 
-    <!-- Karte -->
-    <section class="py-12 px-4 bg-[#0d0f3f]">
-      <h2 class="text-2xl font-bold text-center mb-6">📍 Lage des Parks</h2>
-      <div class="max-w-4xl mx-auto">
-        <div class="rounded-xl overflow-hidden shadow-lg">
-          <!-- Beispielbild für Karte -->
-          <img src="https://via.placeholder.com/800x400?text=Karte+des+Parks" alt="Karte des Parks" class="w-full h-auto" />
+<!-- Karte -->
+<section class="py-12 px-4 bg-[#0d0f3f]">
+    <h2 class="text-2xl font-bold text-center mb-6 text-white">📍 Lage des Parks</h2>
+    <div class="max-w-4xl mx-auto">
+        <div class="rounded-2xl border-4 border-[#ff6600] bg-gray-900 shadow-xl overflow-hidden">
+            <div id="parkMap" class="w-full h-[400px] rounded-xl"></div>
         </div>
-      </div>
-    </section>
+    </div>
+</section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const lat = {{ $park->latitude ?? 'null' }};
+        const lng = {{ $park->longitude ?? 'null' }};
+        const logo = @json($park->logo ? asset($park->logo) : null);
+
+        if (lat && lng) {
+            const map = L.map('parkMap').setView([lat, lng], 16);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> Mitwirkende'
+            }).addTo(map);
+
+            const markerIcon = L.icon({
+                iconUrl: logo || 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+                iconSize: [40, 40],
+                iconAnchor: [20, 40],
+                popupAnchor: [0, -36],
+                className: 'rounded-full border-2 border-white shadow-md bg-white object-cover'
+            });
+
+            L.marker([lat, lng], { icon: markerIcon }).addTo(map)
+                .bindPopup(`<strong>{{ $park->name }}</strong><br>{{ $park->location }}, {{ $park->country }}`)
+                .openPopup();
+        } else {
+            document.getElementById('parkMap').innerHTML = '<p class="text-white p-4">Standortdaten nicht verfügbar.</p>';
+        }
+    });
+</script>
+
+
+
   </div>
 
 
 
-  @if($showCrowdModal)
-  <div x-data="{ open: true }" x-show="open"
-       class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60"
-       x-transition:enter="transition ease-out duration-300"
-       x-transition:leave="transition ease-in duration-200"
-       x-cloak>
-      <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 relative"
-           @click.outside="open = false">
+    <!-- Modal für Bewertung -->
+@if($showCrowdModal)
+<div
+  x-data="{ open: true }"
+  x-init="
+      window.addEventListener('bewertungGestartet', () => open = false);
+  "
+  x-show="open"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm"
+  x-transition:enter="transition ease-out duration-300"
+  x-transition:leave="transition ease-in duration-200"
+  x-cloak>
 
-          <h2 class="text-xl font-semibold text-gray-800 mb-4">🎢 Bist du heute im Park?</h2>
-          <p class="text-gray-600 mb-6">Du bist gerade auf der Parkseite. Möchtest du eine Bewertung abgeben?</p>
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 relative animate-fade-in"
+       @click.outside="open = false">
 
-          <div class="flex flex-col sm:flex-row gap-3 justify-between">
-              <a href="#bewertungsbereich"
-                 class="inline-flex items-center gap-2 px-4 py-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-700 rounded-md font-semibold text-sm">
-                 <livewire:frontend.park-andrang-component :park="$park" />
-              </a>
-              <button @click="open = false"
-                      class="inline-flex justify-center items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md font-medium text-sm">
-                  Später vielleicht
-              </button>
+      <button @click="open = false"
+              class="absolute top-3 right-4 text-gray-400 hover:text-gray-700 text-2xl leading-none">
+          &times;
+      </button>
+
+      <div class="text-center">
+          <h2 class="text-2xl font-bold text-[#1c1e5c] mb-2">🎢 Bist du gerade im Park?</h2>
+          <p class="text-gray-600 text-sm mb-6">Hilf anderen Besuchern mit deiner Einschätzung zur aktuellen Lage im Park!</p>
+
+          <div class="flex flex-col sm:flex-row justify-center items-center gap-3">
+              <!-- Livewire-Komponente mit Event -->
+              <div wire:ignore>
+                  <livewire:frontend.park-andrang-component
+                      :park="$park"
+                      onBewertungGestartet="bewertungGestartet"
+                  />
+              </div>
+
+              <!-- Später vielleicht -->
+              <button
+              @click="
+                  open = false;
+                  document.cookie = 'hideCrowdModal_{{ $park->id }}=1; max-age=' + (60 * 60 * 24) + '; path=/';
+              "
+              class="inline-flex justify-center items-center px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md font-medium shadow">
+              Später vielleicht
+          </button>
           </div>
-
-          <button @click="open = false"
-                  class="absolute top-2 right-3 text-gray-500 hover:text-gray-700 text-xl leading-none">&times;</button>
       </div>
   </div>
+</div>
 @endif
+
+
 
 
 <livewire:frontend.park-crowd-intro-component :park="$park" />

@@ -7,9 +7,8 @@
     <!-- meta and title end-->
     <!-- All CSS files start -->
     @include('backend.partials.css')
-    @stack('styles') {{-- Seiten-spezifische Styles --}}
-    <style>
 
+    <style>
  .app-pagination {
     display: flex;
     gap: 0.25rem;
@@ -27,9 +26,14 @@
     border-color: #3490dc;
 }
     </style>
-    <!-- Livewire Styles -->
-    @livewireStyles
-    {{-- All CSS files end --}}
+
+
+
+@stack('styles')
+@vite(['resources/backend/css/app.css'])
+<!-- Livewire Styles -->
+@livewireStyles
+{{-- All CSS files end --}}
 </head>
 <body>
     <div class="app-wrapper">
@@ -74,8 +78,10 @@
       <!--customizer-->
       <div id="customizer"></div>
       @include('backend.partials.script')
-      <!-- Livewire Scripts -->
-      @livewireScripts
-      @stack('scripts') <!-- Seiten-spezifische Skripte -->
+
+ <!-- Seiten-spezifische Skripte -->
+ @livewireScripts
+ @vite(['resources/backend/js/app.js'])
+ @stack('scripts')
 </body>
 </html>

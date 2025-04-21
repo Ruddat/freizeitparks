@@ -10,10 +10,16 @@
         <div>
             <h4 class="text-lg font-semibold mb-4">Links</h4>
             <ul class="space-y-2 text-sm text-gray-300">
-                <li><a href="#" class="hover:text-white transition">Startseite</a></li>
+                <li><a href="{{ route('home') }}" class="hover:text-white transition">Startseite</a></li>
                 <li><a href="#park-liste" class="hover:text-white transition">Freizeitparks</a></li>
-                <li><a href="#" class="hover:text-white transition">Suche</a></li>
-                <li><a href="#" class="hover:text-white transition">Über uns</a></li>
+
+                @foreach($footerPages as $page)
+                    <li>
+                        <a href="{{ route('static.page', $page->slug) }}" class="hover:text-white transition">
+                            {{ $page->title }}
+                        </a>
+                    </li>
+                @endforeach
             </ul>
         </div>
 

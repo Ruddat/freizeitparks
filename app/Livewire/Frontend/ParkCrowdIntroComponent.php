@@ -11,21 +11,26 @@ use GeoIp2\Database\Reader;
 class ParkCrowdIntroComponent extends Component
 {
     public Park $park;
+    public bool $showNotification = false;
 
     public function mount(Park $park)
     {
+        $generalCookieName = 'park_crowd_last_logged';
+        $specificCookieName = 'park_crowd_logged_' . $park->id;
+
+        $lastLoggedParkId = request()->cookie($generalCookieName);
+        $alreadyLoggedThisPark = request()->cookie($specificCookieName);
+
         $ip = request()->ip();
         if (in_array($ip, ['127.0.0.1', '::1'])) {
             $ip = '8.8.8.8';
         }
 
-        $exists = ParkCrowdReport::where('park_id', $park->id)
-            ->whereDate('created_at', today())
-            ->where('comment', null)
-            ->where('ip', $ip) // optional, falls du `ip` speicherst
-            ->exists();
-
-        if (! $exists) {
+        // Loggen wenn:
+        // 1. Es der erste Besuch überhaupt ist ODER
+        // 2. Ein anderer Park besucht wird ODER
+        // 3. Dieser Park noch nicht in den letzten 24h besucht wurde
+        if (!$lastLoggedParkId || $lastLoggedParkId != $park->id || !$alreadyLoggedThisPark) {
             $country = $city = null;
             $lat = $lon = null;
 
@@ -48,7 +53,15 @@ class ParkCrowdIntroComponent extends Component
                 'city'        => $city,
                 'latitude'    => $lat,
                 'longitude'   => $lon,
+                'ip'          => $ip,
             ]);
+
+            // Setze beide Cookies
+            cookie()->queue(cookie($generalCookieName, $park->id, 1440)); // Merke zuletzt besuchten Park
+            cookie()->queue(cookie($specificCookieName, true, 1440)); // Merke Besuch dieses Parks
+
+            // Nur dann Notification anzeigen
+            $this->showNotification = true;
         }
     }
 

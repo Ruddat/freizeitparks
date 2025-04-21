@@ -5,9 +5,12 @@
         <div class="hidden md:flex space-x-8 text-white">
             <a href="/" class="hover:text-gray-300 transition">Startseite</a>
             <a href="#park-liste" class="hover:text-gray-300 transition">Freizeitparks</a>
-            <a href="{{ route('parks.show', 1) }}" class="hover:text-gray-300 transition">Testpark</a>
-            <a href="#" class="hover:text-gray-300 transition">Suche</a>
-            <a href="#" class="hover:text-gray-300 transition">Über uns</a>
+            @foreach($navPages as $page)
+            <a href="{{ route('static.page', $page->slug) }}" class="hover:text-gray-300 transition">
+                {{ $page->title }}
+            </a>
+        @endforeach
+
         </div>
 
         <button id="menu-toggle" class="md:hidden text-white focus:outline-none">

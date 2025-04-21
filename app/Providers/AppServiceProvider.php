@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\StaticPage;
 use App\Services\GeocodeService;
 use Illuminate\Support\ServiceProvider;
 
@@ -22,6 +23,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        view()->composer('*', function ($view) {
+            $view->with('navPages', StaticPage::where('show_in_nav', true)->get());
+            $view->with('footerPages', StaticPage::where('show_in_footer', true)->get());
+        });
     }
 }

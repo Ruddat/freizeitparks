@@ -181,7 +181,9 @@ class ParkController extends Controller
             ]
         );
 
-        $showCrowdModal = !$hasTodayCrowdReport;
+        $cookieName = 'hideCrowdModal_' . $park->id;
+        $cookieBlock = request()->cookie($cookieName);
+        $showCrowdModal = !$hasTodayCrowdReport && !$cookieBlock;
 
         return view('frontend.pages.park_details', compact(
             'park',

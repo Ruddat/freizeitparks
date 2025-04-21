@@ -34,6 +34,7 @@
               </a>
               <ul class="collapse" id="apps">
                 <li><a href="{{ route('admin.parks') }}">Park Manager</a></li>
+                <li><a href="{{ route('admin.static-pages') }}">Park Manager</a></li>
                 <li class="another-level">
                   <a class="" data-bs-toggle="collapse" href="#Profile-page" aria-expanded="false">
                     Profile

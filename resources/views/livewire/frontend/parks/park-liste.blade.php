@@ -215,33 +215,53 @@
                            </div>
                        </div>
 
-                            <div class="back bg-gray-800 text-white p-6 flex flex-col justify-between rounded-xl">
-                                <div class="flex-grow">
-                                    <h4 class="text-lg font-semibold mb-3">{{ $park->name }}</h4>
-                                    @if($park->video_url)
-                                        <div class="aspect-w-16 aspect-h-9 mb-4">
-                                            @php $video = $park->video_url; @endphp
-                                            @if(Str::contains($video, 'youtube'))
-                                                <iframe src="https://www.youtube.com/embed/{{ Str::afterLast($video, 'v=') }}"
-                                                        frameborder="0" allowfullscreen class="w-full h-full rounded-lg" loading="lazy"></iframe>
-                                            @elseif(Str::contains($video, 'vimeo'))
-                                                <iframe src="https://player.vimeo.com/video/{{ Str::afterLast($video, '/') }}"
-                                                        frameborder="0" allowfullscreen class="w-full h-full rounded-lg" loading="lazy"></iframe>
-                                            @elseif(Str::endsWith($video, '.mp4'))
-                                                <video class="w-full rounded-lg" controls muted loop>
-                                                    <source src="{{ $video }}" type="video/mp4">
-                                                </video>
-                                            @endif
-                                        </div>
-                                    @else
-                                        <p class="text-sm text-gray-300 mb-4">{{ \Str::limit($park->description, 80) }}</p>
+                       <div class="back bg-gray-800 text-white p-6 flex flex-col justify-between rounded-xl">
+                        <div class="flex-grow">
+                            <h4 class="text-lg font-semibold mb-3">{{ $park->name }}</h4>
+
+                            {{-- Priorität: Embed > URL > Beschreibung --}}
+                            @if($park->video_embed_code)
+                                <div class="video-frame mb-4">
+                                    {!! $park->video_embed_code !!}
+                                </div>
+                            @elseif($park->video_url)
+                                <div class="video-frame mb-4">
+                                    @php $video = $park->video_url; @endphp
+
+                                    @if(Str::contains($video, 'youtube'))
+                                        <iframe
+                                            src="https://www.youtube.com/embed/{{ Str::afterLast($video, 'v=') }}?autoplay=1&mute=1&playsinline=1"
+                                            allow="autoplay; encrypted-media"
+                                            allowfullscreen
+                                            loading="lazy">
+                                        </iframe>
+                                    @elseif(Str::contains($video, 'vimeo'))
+                                        <iframe
+                                            src="https://player.vimeo.com/video/{{ Str::afterLast($video, '/') }}?autoplay=1&muted=1&playsinline=1"
+                                            allow="autoplay; fullscreen; picture-in-picture"
+                                            allowfullscreen
+                                            loading="lazy">
+                                        </iframe>
+                                    @elseif(Str::endsWith($video, '.mp4'))
+                                        <video autoplay muted loop playsinline controls>
+                                            <source src="{{ $video }}" type="video/mp4">
+                                        </video>
                                     @endif
                                 </div>
-                                <button @click="flipped = !flipped"
-                                        class="mt-4 w-full bg-white text-gray-900 font-semibold py-2 rounded-lg hover:bg-gray-100 transition-colors">
-                                    Zurück
-                                </button>
-                            </div>
+                            @else
+                                <p class="text-sm text-gray-300 mb-4">
+                                    {!! \Str::limit($park->description, 300) !!}
+                                </p>
+                            @endif
+                        </div>
+
+                        <button @click="flipped = !flipped"
+                                class="mt-4 w-full bg-white text-gray-900 font-semibold py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                            Zurück
+                        </button>
+                    </div>
+
+
                         </div>
                     </div>
                 @empty
@@ -254,6 +274,28 @@
             </div>
         </div>
     </section>
+
+
+    <style>
+        .video-frame {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 */
+            overflow: hidden;
+            border-radius: 0.5rem;
+        }
+
+        .video-frame iframe,
+        .video-frame video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+    </style>
+
 </div>
 @push('scripts')
 <script>

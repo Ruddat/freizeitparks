@@ -20,9 +20,9 @@
   <!--cleave js  -->
   <script src="{{ asset('assets/backend/vendor/cleavejs/cleave.min.js') }}">></script>
 
-  <!-- apexcharts-->
+  {{-- apexcharts
   <script src="{{ asset('assets/backend/vendor/apexcharts/apexcharts.min.js') }}">></script>
-
+--}}
   <!-- data table js-->
   <script src="{{ asset('assets/backend/vendor/datatable/jquery.dataTables.min.js') }}">></script>
 
@@ -32,7 +32,7 @@
   <!-- Customizer js-->
   <script src="{{ asset('assets/backend/js/customizer.js') }}">></script>
 
-  <!-- Ecommerce js-->
+  {{-- Ecommerce js --}}
   <script src="{{ asset('assets/backend/js/ecommerce_dashboard.js') }}">></script>
 
   <!-- prism js-->
