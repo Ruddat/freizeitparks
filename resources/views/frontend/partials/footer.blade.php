@@ -45,7 +45,7 @@
                     <span class="relative z-10">Links</span>
                     <span class="absolute bottom-0 left-0 w-full h-1 bg-yellow-400 z-0 transform scale-x-75 origin-left"></span>
                 </h4>
-                <ul class="space-y-2">
+                <ul class="space-y-1">
                     <li>
                         <a href="{{ route('home') }}" class="flex items-center text-gray-300 hover:text-white transition-all duration-300 group">
                             <span class="w-2 h-2 bg-yellow-400 rounded-full mr-2 transform group-hover:scale-150 transition-all duration-300"></span>
@@ -133,15 +133,13 @@
                 <!-- Newsletter Signup (optional) -->
                 <div class="mt-6">
                     <h5 class="text-sm font-medium mb-2 text-gray-300">Newsletter</h5>
-                    <form class="flex">
-                        <input type="email" placeholder="Deine Email" class="px-3 py-2 text-sm bg-gray-700 text-white rounded-l focus:outline-none focus:ring-1 focus:ring-yellow-400 w-full">
-                        <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-medium px-3 py-2 rounded-r text-sm transition-all duration-300 transform hover:scale-105">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                            </svg>
-                        </button>
-                    </form>
+
+                    <livewire:frontend.marketing.newsletter-form />
+
                 </div>
+
+
+
             </div>
         </div>
 

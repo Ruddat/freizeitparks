@@ -45,7 +45,6 @@
         @include('frontend.partials.header-nav')
 
 
-
         @if (Route::is('home'))
             <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-transparent to-gray-900 opacity-50"></div>
 

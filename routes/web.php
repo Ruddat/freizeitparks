@@ -25,4 +25,6 @@ Route::prefix('verwaltung')->group(function () {
     Route::get('/parks', \App\Livewire\Backend\Parks\ParkManager::class)->name('admin.parks');
     Route::get('/static-pages', \App\Livewire\Backend\StaticPages\StaticPageManager::class)->name('admin.static-pages');
     Route::get('/settings-manager', SettingsManager::class)->name('admin.settings-manager');
+    Route::get('/newsletter-signups', \App\Livewire\Backend\Marketing\NewsletterSignupManager::class)
+    ->name('admin.newsletter-signups');
 });

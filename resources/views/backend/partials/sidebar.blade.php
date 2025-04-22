@@ -41,7 +41,7 @@
                         <p>Einstellungen</p>
                     </a>
                 </li>
-
+                <li><a href="{{ route('admin.newsletter-signups') }}">Newsletter</a></li>
 
 
                 <li class="another-level">
