@@ -162,44 +162,43 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const el = document.getElementById('rotating-footer-text');
-        if (!el) return;
+        const wrapper = document.getElementById('rotating-footer-wrapper');
+
+        if (!el || !wrapper) return;
 
         const texts = JSON.parse(el.dataset.footerTexts || '[]');
         if (texts.length < 2) return;
 
         let index = 0;
-        const textContainer = el;
-        const height = textContainer.clientHeight;
+        const height = wrapper.clientHeight;
 
         function rotateText() {
             index = (index + 1) % texts.length;
 
-            // Create new element for animation
             const newText = document.createElement('div');
             newText.className = 'absolute inset-0 text-gray-200 text-sm italic';
             newText.textContent = texts[index];
             newText.style.top = `${height}px`;
             newText.style.opacity = '0';
 
-            textContainer.parentNode.appendChild(newText);
+            wrapper.appendChild(newText);
 
             // Animate
             setTimeout(() => {
-                textContainer.style.transition = 'all 0.5s ease-in-out';
-                textContainer.style.opacity = '0';
-                textContainer.style.transform = `translateY(-${height}px)`;
+                el.style.transition = 'all 0.5s ease-in-out';
+                el.style.opacity = '0';
+                el.style.transform = `translateY(-${height}px)`;
 
                 newText.style.transition = 'all 0.5s ease-in-out';
                 newText.style.opacity = '1';
                 newText.style.top = '0';
             }, 50);
 
-            // Clean up after animation
+            // Clean up
             setTimeout(() => {
-                textContainer.remove();
-                newText.style.position = 'relative';
+                wrapper.removeChild(el);
                 newText.id = 'rotating-footer-text';
-                newText.dataset.footerTexts = el.dataset.footerTexts;
+                newText.dataset.footerTexts = JSON.stringify(texts);
             }, 550);
         }
 

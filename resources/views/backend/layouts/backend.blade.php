@@ -34,6 +34,8 @@
 <!-- Livewire Styles -->
 @livewireStyles
 {{-- All CSS files end --}}
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<meta name="session-id" content="{{ Session::getId() }}">
 </head>
 <body>
     <div class="app-wrapper">

@@ -39,6 +39,8 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireStyles
         @stack('styles')
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+        <meta name="session-id" content="{{ Session::getId() }}">
     </head>
 <body class="bg-white text-gray-800 min-h-screen flex flex-col">
     <header class="relative">

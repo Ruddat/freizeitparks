@@ -1,60 +1,78 @@
-<div class="p-4">
-    <h1 class="text-2xl font-bold mb-4">📬 Newsletter-Anmeldungen</h1>
-
-    <div class="mb-4">
-        <input type="text" wire:model.debounce.500ms="search"
-               class="w-full md:w-1/3 p-2 border rounded shadow-sm"
-               placeholder="Suche nach E-Mail...">
+<div class="container-fluid">
+    <div class="page-titles">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item active"><a href="javascript:void(0)">Newsletter</a></li>
+        </ol>
     </div>
 
-    <div class="overflow-x-auto bg-white rounded shadow">
-        <table class="min-w-full text-sm text-gray-800">
-            <thead class="bg-gray-100 text-left">
-                <tr>
-                    <th class="px-4 py-2">📧 E-Mail</th>
-                    <th class="px-4 py-2">🧑 Name</th>
-                    <th class="px-4 py-2">🏡 Ort</th>
-                    <th class="px-4 py-2">🎯 Interessen</th>
-                    <th class="px-4 py-2">✅ Bestätigt</th>
-                    <th class="px-4 py-2">📅 Angemeldet am</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($signups as $signup)
-                    <tr class="border-t">
-                        <td class="px-4 py-2">{{ $signup->email }}</td>
-                        <td class="px-4 py-2">{{ $signup->name }}</td>
-                        <td class="px-4 py-2">{{ $signup->city }}</td>
-                        <td class="px-4 py-2">
-                            @if($signup->interests)
-                                <ul class="list-disc list-inside">
-                                    @foreach($signup->interests as $interest)
-                                        <li>{{ ucfirst($interest) }}</li>
-                                    @endforeach
-                                </ul>
-                            @endif
-                        </td>
-                        <td class="px-4 py-2">
-                            @if($signup->confirmed_at)
-                                <span class="text-green-600 font-semibold">Ja</span>
-                            @else
-                                <span class="text-red-500">Nein</span>
-                            @endif
-                        </td>
-                        <td class="px-4 py-2">{{ $signup->created_at->format('d.m.Y H:i') }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="px-4 py-4 text-center text-gray-500">
-                            Keine Einträge gefunden.
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="card-title">📬 Newsletter-Anmeldungen</h4>
+                    <div class="input-group search-area w-50">
+                        <input type="text" wire:model.debounce.500ms="search" class="form-control"
+                               placeholder="🔍 Suche nach E-Mail...">
+                        <span class="input-group-text"><i class="flaticon-381-search-2"></i></span>
+                    </div>
+                </div>
 
-    <div class="mt-4">
-        {{ $signups->links() }}
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered text-nowrap">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>📧 E-Mail</th>
+                                    <th>🧑 Name</th>
+                                    <th>🏡 Ort</th>
+                                    <th>🎯 Interessen</th>
+                                    <th>✅ Bestätigt</th>
+                                    <th>📅 Angemeldet am</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($signups as $signup)
+                                    <tr>
+                                        <td>{{ $signup->email }}</td>
+                                        <td>{{ $signup->name }}</td>
+                                        <td>{{ $signup->city }}</td>
+                                        <td>
+                                            @if($signup->interests)
+                                                <ul class="mb-0 ps-3">
+                                                    @foreach($signup->interests as $interest)
+                                                        <li>{{ ucfirst($interest) }}</li>
+                                                    @endforeach
+                                                </ul>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($signup->confirmed_at)
+                                                <span class="badge bg-success">Ja</span>
+                                            @else
+                                                <span class="badge bg-danger">Nein</span>
+                                            @endif
+                                        </td>
+                                        <td>{{ $signup->created_at->format('d.m.Y H:i') }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-4">
+                                            Keine Einträge gefunden.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div>
+                            Zeige {{ $signups->firstItem() }}–{{ $signups->lastItem() }} von {{ $signups->total() }} Einträgen
+                        </div>
+                        {{ $signups->links('vendor.pagination.app-pagination') }}
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

@@ -388,7 +388,7 @@
 <section class="py-12 px-4 bg-[#0d0f3f]">
     <h2 class="text-2xl font-bold text-center mb-6 text-white">📍 Lage des Parks</h2>
     <div class="max-w-4xl mx-auto">
-        <div class="rounded-2xl border-4 border-[#ff6600] bg-gray-900 shadow-xl overflow-hidden">
+        <div class="rounded-2xl border-4 border-[#ff6600] bg-gray-900 shadow-xl overflow-hidden relative z-10">
             <div id="parkMap" class="w-full h-[400px] rounded-xl"></div>
         </div>
     </div>
