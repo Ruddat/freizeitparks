@@ -65,7 +65,18 @@
                                     <tr>
                                         <td>{{ $park->name }}</td>
                                         <td>{{ $park->country }}</td>
-                                        <td>{{ $park->status }}</td>
+                                        <td>
+                                            <a href="javascript:void(0)" wire:click="toggleStatus({{ $park->id }})" class="badge text-white
+                                                @if($park->status === 'active') bg-success
+                                                @elseif($park->status === 'pending') bg-warning
+                                                @elseif($park->status === 'revive') bg-info
+                                                @elseif($park->status === 'inactive') bg-secondary
+                                                @else bg-dark
+                                                @endif
+                                                ">
+                                                {{ ucfirst($park->status) }}
+                                            </a>
+                                        </td>
                                         <td>{{ $park->continent }}</td>
                                         <td>{{ $park->type }}</td>
                                         <td class="text-center">

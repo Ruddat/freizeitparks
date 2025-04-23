@@ -172,98 +172,75 @@
                         $gradient = $gradients[$loop->index % count($gradients)];
                     @endphp
 
-                    <div class="flip-container relative w-full min-h-[28rem] shadow-lg hover:shadow-xl transition-shadow duration-300"
-                         x-data="{ flipped: false }" :class="{ 'flipped': flipped }">
-                        <div class="flipper w-full h-full">
+<div x-data="{ flipped: false }" class="flip-container relative w-full min-h-[28rem] shadow-lg transition-shadow duration-300" :class="{ 'flipped': flipped }">
+    <div class="flipper w-full h-full">
 
+        <!-- Vorderseite -->
+        <div class="front p-6 flex flex-col justify-between text-center rounded-xl relative overflow-hidden"
+             style="background: linear-gradient(to bottom right, {{ $gradient[0] }}, {{ $gradient[1] }});">
+            <a href="{{ route('parks.show', $park->id) }}" aria-label="Details zu {{ $park->name }}">
+                <div class="relative mb-4 w-full h-40">
+                    <div class="absolute top-2 left-2 w-full h-full bg-yellow-400 shadow-xl z-10 rounded-lg"></div>
+                    <img src="{{ $park->logo_url ?? $park->image }}"
+                         alt="{{ $park->name }}"
+                         class="absolute top-0 left-0 w-full h-full object-cover z-20 rounded-lg"
+                         loading="lazy" />
+                </div>
+            </a>
+            <div class="flex-grow flex flex-col justify-center z-30 relative">
+                <h2 class="text-white text-3xl font-bold" style="letter-spacing: 2px;">{{ \Str::words($park->name, 2, '') }}</h2>
+                <p class="text-white mt-1">{{ $park->country }}</p>
+                <p class="text-sm mt-2 font-semibold {{ $park->status_class }}">{{ $park->status_label }}</p>
+            </div>
+            <div class="relative mt-6 w-full">
+                <button @click.prevent="flipped = true"
+                        type="button"
+                        class="inline-block px-6 py-2 font-bold text-white bg-yellow-400 hover:bg-yellow-300 rounded shadow transition">
+                    Mehr erfahren
+                </button>
+            </div>
+        </div>
 
-                            <div class="front p-6 flex flex-col justify-between text-center rounded-xl relative overflow-hidden"
-                            style="background: linear-gradient(to bottom right, {{ $gradient[0] }}, {{ $gradient[1] }});">
+        <!-- Rückseite -->
+        <div class="back bg-gray-800 text-white p-6 flex flex-col justify-between rounded-xl">
+            <div class="flex-grow">
+                <h4 class="text-lg font-semibold mb-3">{{ $park->name }}</h4>
 
-                           <a href="{{ route('parks.show', $park->id) }}" aria-label="Details zu {{ $park->name }}">
-                               <div class="relative mb-4 w-full h-40">
-                                   <div class="absolute top-2 left-2 w-full h-full bg-yellow-400 shadow-xl z-10 rounded-lg"></div>
-                                   <img src="{{ $park->logo_url ?? $park->image }}"
-                                        alt="{{ $park->name }}"
-                                        class="absolute top-0 left-0 w-full h-full object-cover z-20 rounded-lg"
-                                        loading="lazy" />
-                               </div>
-                           </a>
-                           <div class="flex-grow flex flex-col justify-center z-30 relative">
-                               @php
-                                   $nameWords = collect(explode(' ', $park->name))->take(2)->implode(' ');
-                               @endphp
-                               <h2 class="text-white text-3xl leading-tight font-bold"
-                                   style="font-family: 'Bowlby One', sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); letter-spacing: 2px;">
-                                   {{ $nameWords }}
-                               </h2>
-                               <p class="text-white font-medium mt-1"
-                                  style="-webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3); letter-spacing: 1px;">
-                                   {{ $park->country }}
-                               </p>
-                               <p class="text-sm mt-2 font-semibold {{ $park->status_class }}"
-                                  style="-webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3); letter-spacing: 1px;">
-                                   {{ $park->status_label }}
-                               </p>
-                           </div>
-                           <div class="relative mt-6 w-full">
-                               <a href="#" @click.prevent="flipped = !flipped"
-                                  class="relative inline-block px-6 py-2 font-bold text-white bg-yellow-400 hover:bg-yellow-300 rounded shadow transition"
-                                  style="font-family: 'Bowlby One', sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; letter-spacing: 1.5px;">
-                                   Mehr erfahren
-                               </a>
-                           </div>
-                       </div>
-
-                       <div class="back bg-gray-800 text-white p-6 flex flex-col justify-between rounded-xl">
-                        <div class="flex-grow">
-                            <h4 class="text-lg font-semibold mb-3">{{ $park->name }}</h4>
-
-                            {{-- Priorität: Embed > URL > Beschreibung --}}
-                            @if($park->video_embed_code)
-                                <div class="video-frame mb-4">
-                                    {!! $park->video_embed_code !!}
-                                </div>
-                            @elseif($park->video_url)
-                                <div class="video-frame mb-4">
-                                    @php $video = $park->video_url; @endphp
-
-                                    @if(Str::contains($video, 'youtube'))
-                                        <iframe
-                                            src="https://www.youtube.com/embed/{{ Str::afterLast($video, 'v=') }}?autoplay=1&mute=1&playsinline=1"
-                                            allow="autoplay; encrypted-media"
-                                            allowfullscreen
-                                            loading="lazy">
-                                        </iframe>
-                                    @elseif(Str::contains($video, 'vimeo'))
-                                        <iframe
-                                            src="https://player.vimeo.com/video/{{ Str::afterLast($video, '/') }}?autoplay=1&muted=1&playsinline=1"
-                                            allow="autoplay; fullscreen; picture-in-picture"
-                                            allowfullscreen
-                                            loading="lazy">
-                                        </iframe>
-                                    @elseif(Str::endsWith($video, '.mp4'))
-                                        <video autoplay muted loop playsinline controls>
-                                            <source src="{{ $video }}" type="video/mp4">
-                                        </video>
-                                    @endif
-                                </div>
-                            @else
-                                <p class="text-sm text-gray-300 mb-4">
-                                    {!! \Str::limit($park->description, 300) !!}
-                                </p>
-                            @endif
-                        </div>
-
-                        <button @click="flipped = !flipped"
-                                class="mt-4 w-full bg-white text-gray-900 font-semibold py-2 rounded-lg hover:bg-gray-100 transition-colors">
-                            Zurück
-                        </button>
+                @if($park->video_embed_code)
+                    <div class="video-frame mb-4">{!! $park->video_embed_code !!}</div>
+                @elseif($park->video_url)
+                    <div class="video-frame mb-4">
+                        @php $video = $park->video_url; @endphp
+                        @if(Str::contains($video, 'youtube'))
+                            <iframe src="https://www.youtube.com/embed/{{ Str::afterLast($video, 'v=') }}?autoplay=1&mute=1"
+                                    allow="autoplay; encrypted-media"
+                                    allowfullscreen loading="lazy"></iframe>
+                        @elseif(Str::contains($video, 'vimeo'))
+                            <iframe src="https://player.vimeo.com/video/{{ Str::afterLast($video, '/') }}?autoplay=1&muted=1"
+                                    allow="autoplay; fullscreen" allowfullscreen loading="lazy"></iframe>
+                        @elseif(Str::endsWith($video, '.mp4'))
+                            <video autoplay muted loop playsinline controls>
+                                <source src="{{ $video }}" type="video/mp4">
+                            </video>
+                        @endif
                     </div>
+                @else
+                    <p class="text-sm text-gray-300 mb-4">
+                        {!! \Str::limit($park->description, 300) !!}
+                    </p>
+                @endif
+            </div>
 
+            <button @click="flipped = false"
+                    type="button"
+                    class="mt-4 w-full bg-white text-gray-900 font-semibold py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                Zurück
+            </button>
+        </div>
 
-                        </div>
-                    </div>
+    </div>
+</div>
+
                 @empty
                     <p class="col-span-full text-center text-gray-400 text-lg">Keine passenden Parks gefunden.</p>
                 @endforelse

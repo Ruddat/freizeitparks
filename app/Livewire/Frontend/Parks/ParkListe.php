@@ -123,7 +123,9 @@ class ParkListe extends Component
         }
 
         // Status-Filter
-        if ($this->status !== 'alle') {
+        if ($this->status === 'alle') {
+            $query->where('status', 'active');
+        } else {
             $query->where('status', $this->status);
         }
 
@@ -156,4 +158,6 @@ class ParkListe extends Component
             'laender' => $alleLaender,
         ]);
     }
+
+
 }

@@ -34,4 +34,6 @@ class ParkOpeningHour extends Model
     {
         return $this->close ? substr($this->close, 0, 5) : null;
     }
+
+    
 }

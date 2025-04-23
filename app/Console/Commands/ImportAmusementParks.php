@@ -7,7 +7,7 @@ use App\Services\AmusementParkService;
 
 class ImportAmusementParks extends Command
 {
-    protected $signature = 'parks:import';
+    protected $signature = 'parks:import {--nologo : Importiere Parks ohne Bilder}';
     protected $description = 'Import amusement parks from Queue-Times API';
 
     public function __construct()
@@ -19,7 +19,8 @@ class ImportAmusementParks extends Command
     {
         $this->info('Importing amusement parks...');
         try {
-            $service->importParksToDatabase();
+            $withImages = !$this->option('nologo');
+            $service->importParksToDatabase($withImages);
             $this->info('Amusement parks imported successfully!');
         } catch (\Exception $e) {
             $this->error("Failed to import parks: {$e->getMessage()}");

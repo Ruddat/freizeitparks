@@ -31,7 +31,7 @@ class AmusementParkService
         throw new \Exception("Failed to fetch parks from Queue-Times: " . $response->body());
     }
 
-    public function importParksToDatabase()
+    public function importParksToDatabase(bool $withImages = true)
     {
         $queueTimesParks = $this->getQueueTimesParks();
 
@@ -57,7 +57,10 @@ class AmusementParkService
                 $externalId = Str::slug($park['name'] . '-' . $park['id']);
 
                 // Bild von Wikimedia Commons abrufen und speichern
-                $imagePath = $this->downloadAndConvertParkImage($park['name']);
+                // $imagePath = $this->downloadAndConvertParkImage($park['name']);
+                $imagePath = $withImages ? $this->downloadAndConvertParkImage($park['name']) : null;
+
+                $slug = Str::slug($park['name']);
 
                 DB::table('parks')->updateOrInsert(
                     ['external_id' => $externalId],
@@ -65,14 +68,15 @@ class AmusementParkService
                         'queue_times_id' => $park['id'],
                         'group_id' => $group['id'],
                         'name' => $park['name'],
+                        'slug' => $slug,
                         'group_name' => $group['name'],
                         'location' => $location,
                         'country' => $park['country'] ?? null,
                         'continent' => $park['continent'] ?? null,
                         'timezone' => $park['timezone'] ?? null,
-                        'status' => 'unknown',
+                        'status' => 'pending', // <-- geändert!
                         'description' => 'unknown',
-                        'image' => $imagePath, // Lokaler Pfad zum WebP-Bild
+                        'image' => $imagePath,
                         'latitude' => $latitude,
                         'longitude' => $longitude,
                         'created_at' => now(),

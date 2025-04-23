@@ -18,7 +18,8 @@ class TrackReferral
         $userId = auth()->id();
 
         // Lokale Fake-IP für Tests
-        $ipAddress = app()->environment('local') ? '8.8.8.8' : $request->ip();
+        // $ipAddress = app()->environment('local') ? '8.8.8.8' : $request->ip();
+        $ipAddress = $request->ip();
 
         $source = 'direct';
         $keyword = null;

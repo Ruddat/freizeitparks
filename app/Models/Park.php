@@ -76,7 +76,11 @@ class Park extends Model
         return $this->hasMany(ParkOpeningHour::class);
     }
 
-
+    public function openingHoursToday()
+    {
+        return $this->hasOne(\App\Models\ParkOpeningHour::class)
+            ->where('date', now()->toDateString());
+    }
 
 
 }

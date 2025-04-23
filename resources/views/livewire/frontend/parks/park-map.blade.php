@@ -72,10 +72,14 @@
                     }
 
                     marker.bindPopup(`
-                        <strong>${name || 'Unbekannt'}</strong><br>
-                        ${location || 'Keine Adresse'}<br>
-                        <span class="${park.status_class}">${status_label}</span>
-                    `);
+    <div style="min-width: 180px; max-width: 240px;">
+        <strong>${name || 'Unbekannt'}</strong><br>
+        ${location || 'Keine Adresse'}<br>
+        <span class="${park.status_class}">${status_label}</span><br>
+        🕒 ${park.hours || '–'}<br>
+        ${park.logo || park.image ? `<img src="${park.logo || park.image}" alt="Parkbild" style="width: 100px; margin-top: 6px; border-radius: 4px;">` : ''}
+    </div>
+`);
 
                     markerLayer.addLayer(marker);
                 } else {

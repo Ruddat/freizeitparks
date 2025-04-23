@@ -39,6 +39,8 @@ class ParkMap extends Component
 
     public function loadFilteredParks()
     {
+        $heute = now()->toDateString();
+
         $query = Park::whereNotNull('latitude')
                      ->whereNotNull('longitude');
 
@@ -54,7 +56,9 @@ class ParkMap extends Component
             $query->where('country', 'like', '%' . $this->land . '%');
         }
 
-        if ($this->status !== 'alle') {
+        if ($this->status === 'alle') {
+            $query->where('status', 'active');
+        } else {
             $query->where('status', $this->status);
         }
 
@@ -68,14 +72,22 @@ class ParkMap extends Component
                        trim($park->location) !== '';
             })
             ->map(function ($park) {
+                $oeffnung = $park->openingHoursToday;
+                $heuteGeoeffnet = $oeffnung && $oeffnung->open && $oeffnung->close;
+
                 return [
                     'latitude' => floatval($park->latitude),
                     'longitude' => floatval($park->longitude),
                     'name' => addslashes(trim($park->name)),
                     'location' => addslashes(trim($park->country ?? $park->location)),
-                    'status' => $park->status,
-                    'status_label' => $park->status_label,
-                    'status_class' => $park->status_class,
+                    'status' => $heuteGeoeffnet ? 'open' : 'closed',
+                    'status_label' => $heuteGeoeffnet ? '🟢 Geöffnet' : '🔴 Geschlossen',
+                    'status_class' => $heuteGeoeffnet ? 'text-green-500' : 'text-red-500',
+                    'hours' => $heuteGeoeffnet
+                        ? \Carbon\Carbon::parse($oeffnung->open)->format('H:i') . ' – ' . \Carbon\Carbon::parse($oeffnung->close)->format('H:i')
+                        : 'Heute geschlossen',
+                    'logo' => $park->logo ? asset($park->logo) : null,
+                    'image' => $park->image ? asset($park->image) : null,
                 ];
             })
             ->values();

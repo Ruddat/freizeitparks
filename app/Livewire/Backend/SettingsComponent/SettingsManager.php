@@ -79,6 +79,23 @@ class SettingsManager extends Component
                 'group' => 'general',
                 'is_public' => true,
             ],
+
+            [
+                'key' => 'indexnow_enabled',
+                'value' => '0',
+                'type' => 'boolean',
+                'description' => 'IndexNow aktivieren',
+                'group' => 'general',
+                'is_public' => false,
+            ],
+            [
+                'key' => 'indexnow_key',
+                'value' => '',
+                'type' => 'string',
+                'description' => 'IndexNow Key',
+                'group' => 'general',
+                'is_public' => false,
+            ],
         ];
 
         foreach ($generalDefaults as $setting) {
@@ -190,6 +207,8 @@ class SettingsManager extends Component
                 'group' => 'parks',
                 'is_public' => true,
             ],
+
+
         ];
 
         foreach ($defaults as $setting) {
@@ -311,6 +330,44 @@ class SettingsManager extends Component
         } else {
             $setting->value = $value;
         }
+
+        if (in_array($key, ['indexnow_enabled', 'indexnow_key'])) {
+            $enabled = $this->settings['indexnow_enabled'] ?? false;
+            $keyValue = $this->settings['indexnow_key'] ?? '';
+
+            // ✅ Falls aktiviert, aber kein Key vorhanden → automatisch generieren
+            if ($enabled && empty($keyValue)) {
+                $keyValue = \Str::uuid()->toString();
+                $this->settings['indexnow_key'] = $keyValue;
+
+                ModSiteSettings::updateOrCreate(
+                    ['key' => 'indexnow_key'],
+                    [
+                        'value' => $keyValue,
+                        'type' => 'string',
+                        'description' => 'IndexNow Key',
+                        'group' => 'general',
+                        'is_public' => false,
+                    ]
+                );
+            }
+            $this->loadSettings();
+
+            // ✅ Datei erzeugen/löschen
+            if ($enabled && $keyValue) {
+                $filePath = public_path("{$keyValue}.txt");
+                if (!file_exists($filePath)) {
+                    file_put_contents($filePath, $keyValue);
+                }
+            } elseif (!$enabled && $keyValue) {
+                $filePath = public_path("{$keyValue}.txt");
+                if (file_exists($filePath)) {
+                    unlink($filePath);
+                }
+            }
+        }
+
+        // Speichern der Einstellung
         $setting->save();
 
         $this->loadSettings();

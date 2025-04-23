@@ -50,4 +50,8 @@ return [
         'key' => env('PIXABAY_API_KEY'),
     ],
 
+    'indexnow' => [
+        'key' => env('INDEXNOW_KEY'),
+    ],
+
 ];

@@ -2,14 +2,15 @@
 
 namespace App\Livewire\Backend\Parks;
 
+use Carbon\Carbon;
 use App\Models\Park;
 use Livewire\Component;
-use Livewire\WithFileUploads;
-use Livewire\WithPagination;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Http;
-use Carbon\Carbon;
 use Carbon\CarbonPeriod;
+use Livewire\WithPagination;
+use Livewire\WithFileUploads;
+use App\Services\IndexNowService;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 
 class ParkManager extends Component
 {
@@ -233,6 +234,11 @@ class ParkManager extends Component
             $park->update($data);
         }
 
+
+
+        // IndexNow Ping
+        //app(IndexNowService::class)->ping(route('parks.show', $park->id));
+
         session()->flash('success', 'Park gespeichert!');
         $this->resetEditingPark();
     }
@@ -286,4 +292,29 @@ class ParkManager extends Component
     public function closeModal() {
         $this->resetEditingPark();
     }
+
+    public function toggleStatus($parkId)
+{
+    $park = Park::find($parkId);
+
+    if (!$park) {
+        session()->flash('error', 'Park nicht gefunden.');
+        return;
+    }
+
+    // Zyklisches Umschalten der Statuswerte
+    $nextStatus = match ($park->status) {
+        'pending' => 'active',
+        'active' => 'inactive',
+        'inactive' => 'revive',
+        'revive' => 'pending',
+        default => 'pending',
+    };
+
+    $park->status = $nextStatus;
+    $park->save();
+
+    session()->flash('success', "Status geändert zu: {$nextStatus}");
+
+}
 }
