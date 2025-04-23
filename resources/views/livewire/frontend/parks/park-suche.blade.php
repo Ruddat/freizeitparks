@@ -48,13 +48,12 @@
     >
         <ul>
             @foreach($suggestions as $index => $suggestion)
-                <li
-                    wire:click="selectSuggestion({{ $index }})"
-                    class="px-4 py-2 hover:bg-gray-100 cursor-pointer text-gray-700"
-                >
+            <li class="px-4 py-2 hover:bg-gray-100 text-gray-700">
+                <a href="{{ route('parks.show', $suggestion['slug']) }}" class="block">
                     <strong>{{ $suggestion['name'] }}</strong>
                     <span class="text-sm text-gray-500">({{ $suggestion['location'] }}, {{ $suggestion['country'] }})</span>
-                </li>
+                </a>
+            </li>
             @endforeach
         </ul>
     </div>

@@ -52,12 +52,6 @@
                             Startseite
                         </a>
                     </li>
-                    <li>
-                        <a href="#park-liste" class="flex items-center text-gray-300 hover:text-white transition-all duration-300 group">
-                            <span class="w-2 h-2 bg-yellow-400 rounded-full mr-2 transform group-hover:scale-150 transition-all duration-300"></span>
-                            Freizeitparks
-                        </a>
-                    </li>
                     @foreach($footerPages as $page)
                         <li>
                             <a href="{{ route('static.page', $page->slug) }}" class="flex items-center text-gray-300 hover:text-white transition-all duration-300 group">
@@ -76,12 +70,15 @@
                     <span class="absolute bottom-0 left-0 w-full h-1 bg-yellow-400 z-0 transform scale-x-75 origin-left"></span>
                 </h4>
                 <ul class="space-y-2 text-gray-300">
+                    @if (setting('contact_email'))
                     <li class="flex items-start">
                         <svg class="w-5 h-5 text-yellow-400 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                         </svg>
-                        <a href="mailto:info@freizeitparks.eu" class="hover:text-white transition-all duration-300 hover:underline">info@freizeitparks.eu</a>
+                        <a href="mailto:{{ setting('contact_email') }}" class="hover:text-white transition-all duration-300 hover:underline">{{ setting('contact_email') }}</a>
                     </li>
+                    @endif
+                    {{--
                     <li class="flex items-start">
                         <svg class="w-5 h-5 text-yellow-400 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
@@ -95,16 +92,17 @@
                         </svg>
                         <span>Parkstraße 1, 12345 Freizeitstadt</span>
                     </li>
-                </ul>
-                <div>
-                    <a href="https://www.paypal.com/donate?business=ingo.ruddat@gmail.com&currency_code=EUR"
-                       target="_blank"
-                       class="inline-flex items-center gap-2 px-4 py-1.5 bg-yellow-500 text-[#080e3c] font-semibold rounded-full hover:bg-yellow-600 transition"
-                    >
+                    --}}
+                    <li>
+                        <a href="https://www.paypal.com/donate?business=ingo.ruddat@gmail.com&currency_code=EUR"
+                        target="_blank"
+                        class="inline-flex items-center gap-2 px-4 py-1.5 bg-yellow-500 text-[#080e3c] font-semibold rounded-full hover:bg-yellow-600 transition"
+                        >
                         ❤️ Unterstützen via PayPal
                     </a>
-                </div>
+                </li>
 
+                </ul>
             </div>
 
             <!-- Social Media Column -->

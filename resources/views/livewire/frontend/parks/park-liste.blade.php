@@ -161,7 +161,7 @@
         }
     </style>
 
-    <section id="park-cards" class="max-w-7xl mx-auto px-6 lg:px-12 py-8">
+    <section id="park-liste-anchor" class="max-w-7xl mx-auto px-6 lg:px-12 py-8">
         <h2 class="text-3xl font-bold mb-8 text-center text-yellow-400 animate-slideIn">
             Top Freizeitparks entdecken
         </h2>

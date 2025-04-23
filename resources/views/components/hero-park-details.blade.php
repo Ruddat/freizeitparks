@@ -32,15 +32,15 @@
         @elseif($park->video_url)
             <video autoplay muted loop playsinline class="absolute inset-0 w-full h-full object-cover object-center">
                 <source src="{{ $park->video_url }}" type="video/mp4">
-                <img src="{{ $park->image_url ?? asset('images/fallback_park.jpg') }}"
-                     alt="{{ $park->title }}"
+                <img src="{{ Str::startsWith($park->image, 'storage/') ? asset($park->image) : Storage::url($park->image) }}"
+                     alt="{{ $park->name }}"
                      class="absolute inset-0 w-full h-full object-cover brightness-75">
             </video>
         @else
-            <img src="{{ $park->image_url ?? asset('images/fallback_park.jpg') }}"
-                 alt="{{ $park->title }}"
-                 class="absolute inset-0 w-full h-full object-cover brightness-75"
-                 loading="lazy">
+        <img src="{{ Str::startsWith($park->image, 'storage/') ? asset($park->image) : Storage::url($park->image) }}"
+        alt="{{ $park->name }}"
+        class="absolute inset-0 w-full h-full object-cover brightness-75"
+        loading="lazy">
         @endif
     </div>
 

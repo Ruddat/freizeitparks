@@ -54,4 +54,9 @@ return [
         'key' => env('INDEXNOW_KEY'),
     ],
 
+    'timezonedb' => [
+        'key' => env('TIMEZONEDB_KEY'),
+
+    ],
+
 ];

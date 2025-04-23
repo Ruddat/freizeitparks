@@ -25,7 +25,9 @@ class ParkSuche extends Component
                     return [
                         'name' => $park->name,
                         'location' => $park->location,
-                        'country' => $park->country
+                        'country' => $park->country,
+                        'slug' => $park->slug, // wichtig für Direkt-Link
+                        'id' => $park->id,
                     ];
                 })
                 ->toArray();

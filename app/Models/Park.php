@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Str;
 use App\Models\ParkQueueTime;
 use App\Models\ParkOpeningHour;
 use Illuminate\Database\Eloquent\Model;
@@ -15,6 +16,10 @@ class Park extends Model
         'name',
         'group_name',
         'location',
+        'street',
+        'zip',
+        'city',
+        'slug',
         'country',
         'continent',
         'timezone',
@@ -82,5 +87,24 @@ class Park extends Model
             ->where('date', now()->toDateString());
     }
 
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($park) {
+            if (empty($park->slug) && !empty($park->name)) {
+                $baseSlug = Str::slug($park->name);
+                $slug = $baseSlug;
+                $counter = 1;
+
+                while (Park::where('slug', $slug)->where('id', '!=', $park->id)->exists()) {
+                    $slug = $baseSlug . '-' . $counter++;
+                }
+
+                $park->slug = $slug;
+            }
+        });
+    }
 
 }

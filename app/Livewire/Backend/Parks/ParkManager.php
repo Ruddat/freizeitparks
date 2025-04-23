@@ -60,6 +60,9 @@ class ParkManager extends Component
             'type' => '',
             'created_at' => null,
             'updated_at' => null,
+            'street' => '',
+            'zip' => '',
+            'city' => '',
         ];
 
         $this->isModalOpen = false;
@@ -136,6 +139,9 @@ class ParkManager extends Component
                 'name' => $park->name,
                 'group_name' => $park->group_name,
                 'location' => $park->location,
+                'street' => $park->street,
+                'zip' => $park->zip,
+                'city' => $park->city,
                 'country' => $park->country,
                 'continent' => $park->continent,
                 'timezone' => $park->timezone,
@@ -197,6 +203,9 @@ class ParkManager extends Component
             'name' => $this->editingPark['name'],
             'group_name' => $this->editingPark['group_name'],
             'location' => $this->editingPark['location'],
+            'street' => $this->editingPark['street'],
+            'zip' => $this->editingPark['zip'],
+            'city' => $this->editingPark['city'],
             'country' => $this->editingPark['country'],
             'continent' => $this->editingPark['continent'],
             'timezone' => $this->editingPark['timezone'],
@@ -252,26 +261,77 @@ class ParkManager extends Component
             'Schweiz' => 'ch',
             'France' => 'fr',
             'Italy' => 'it',
+            'United Kingdom' => 'gb',
+            'USA' => 'us',
         ][$this->editingPark['country']] ?? '';
 
         try {
+            // 1. OSM Request mit Adressdetails
             $response = Http::withHeaders([
                 'User-Agent' => 'FreizeitparkMap/1.0 (kontakt@deinedomain.de)',
             ])->get('https://nominatim.openstreetmap.org/search', [
                 'q' => $location,
                 'format' => 'json',
                 'limit' => 1,
+                'addressdetails' => 1,
                 'countrycodes' => $countryCode,
             ]);
 
             $result = $response->json()[0] ?? null;
-            if ($result) {
+
+            if ($result && isset($result['address'])) {
+                $address = $result['address'];
+
                 $this->editingPark['latitude'] = $result['lat'];
                 $this->editingPark['longitude'] = $result['lon'];
-                session()->flash('success', 'Geodaten erfolgreich abgerufen.');
+                $this->editingPark['street'] = $address['road'] ?? '';
+                $this->editingPark['zip'] = $address['postcode'] ?? '';
+                $this->editingPark['city'] = $address['city'] ?? $address['town'] ?? $address['village'] ?? '';
+                $this->editingPark['country'] = $address['country'] ?? '';
+                $this->editingPark['location'] = $address['country'] ?? '';
+
+                // 2. Kontinent Mapping
+                $continentMap = [
+                    'Germany' => 'Europa',
+                    'Deutschland' => 'Europa',
+                    'France' => 'Europa',
+                    'United Kingdom' => 'Europa',
+                    'United States' => 'Nordamerika',
+                    'Austria' => 'Europa',
+                    'Switzerland' => 'Europa',
+                    'Italy' => 'Europa',
+                    'Japan' => 'Asien',
+                    'Australia' => 'Australien',
+                    'United Arab Emirates' => 'Asien',
+                    'China' => 'Asien',
+                    'Canada' => 'Nordamerika',
+                    'Mexico' => 'Nordamerika',
+                    'Brazil' => 'Südamerika',
+                ];
+                $this->editingPark['continent'] = $continentMap[$this->editingPark['country']] ?? '';
+
+                // 3. Zeitzone per TimeZoneDB
+                $tzApiKey = config('services.timezonedb.key');
+                if ($tzApiKey && $this->editingPark['latitude'] && $this->editingPark['longitude']) {
+                    $tzResponse = Http::get('http://api.timezonedb.com/v2.1/get-time-zone', [
+                        'key' => $tzApiKey,
+                        'format' => 'json',
+                        'by' => 'position',
+                        'lat' => $this->editingPark['latitude'],
+                        'lng' => $this->editingPark['longitude'],
+                    ]);
+
+                    $tzData = $tzResponse->json();
+                    if (!empty($tzData['zoneName'])) {
+                        $this->editingPark['timezone'] = $tzData['zoneName']; // z. B. Europe/Berlin
+                    }
+                }
+
+                session()->flash('success', 'Geodaten, Kontinent und Zeitzone erfolgreich abgerufen.');
             } else {
                 session()->flash('error', 'Keine Geodaten gefunden.');
             }
+
         } catch (\Exception $e) {
             \Log::error('Fehler beim Abrufen der Geodaten', [
                 'message' => $e->getMessage(),
@@ -279,6 +339,8 @@ class ParkManager extends Component
             session()->flash('error', 'Fehler beim Abrufen der Geodaten.');
         }
     }
+
+
 
     public function delete(Park $park)
     {

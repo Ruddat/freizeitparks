@@ -52,8 +52,8 @@
         </div>
     </section>
 
-{{-- Park-Liste --}}
-<div id="park-liste-anchor">
+{{-- Park-Liste  park-liste-anchor --}}
+<div id="park-liste">
     <livewire:frontend.parks.park-liste />
 </div>
 

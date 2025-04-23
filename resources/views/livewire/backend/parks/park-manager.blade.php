@@ -124,31 +124,31 @@
                         <!-- Read-only fields -->
                         <div class="col-md-6 mb-3">
                             <label class="form-label">ID</label>
-                            <input type="text" class="form-control" value="{{ $editingPark['id'] }}" readonly>
+                            <input type="text" class="form-control" value="{{ $editingPark['id'] }}" disabled>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Erstellt am</label>
-                            <input type="text" class="form-control" value="{{ $editingPark['created_at'] }}" readonly>
+                            <input type="text" class="form-control" value="{{ $editingPark['created_at'] }}" disabled>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Aktualisiert am</label>
-                            <input type="text" class="form-control" value="{{ $editingPark['updated_at'] }}" readonly>
+                            <input type="text" class="form-control input-disabled" value="{{ $editingPark['updated_at'] }}" disabled>
                         </div>
 
                         <!-- Editable fields -->
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Externe ID</label>
-                            <input type="text" wire:model="editingPark.external_id" class="form-control">
+                            <input type="text" wire:model="editingPark.external_id" class="form-control" disabled>
                             @error('editingPark.external_id') <span class="text-danger">{{ $message }}</span> @enderror
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Queue Times ID</label>
-                            <input type="number" wire:model="editingPark.queue_times_id" class="form-control">
+                            <input type="number" wire:model="editingPark.queue_times_id" class="form-control" disabled>
                             @error('editingPark.queue_times_id') <span class="text-danger">{{ $message }}</span> @enderror
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Gruppen-ID</label>
-                            <input type="number" wire:model="editingPark.group_id" class="form-control">
+                            <input type="number" wire:model="editingPark.group_id" class="form-control" disabled>
                             @error('editingPark.group_id') <span class="text-danger">{{ $message }}</span> @enderror
                         </div>
                         <div class="col-md-6 mb-3">
@@ -167,6 +167,21 @@
                             @error('editingPark.location') <span class="text-danger">{{ $message }}</span> @enderror
                         </div>
                         <div class="col-md-6 mb-3">
+                            <label class="form-label">Straße</label>
+                            <input type="text" wire:model="editingPark.street" class="form-control">
+                            @error('editingPark.street') <span class="text-danger">{{ $message }}</span> @enderror
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">PLZ</label>
+                            <input type="text" wire:model="editingPark.zip" class="form-control">
+                            @error('editingPark.zip') <span class="text-danger">{{ $message }}</span> @enderror
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Stadt</label>
+                            <input type="text" wire:model="editingPark.city" class="form-control">
+                            @error('editingPark.city') <span class="text-danger">{{ $message }}</span> @enderror
+                        </div>
+                        <div class="col-md-6 mb-3">
                             <label class="form-label">Land</label>
                             <input type="text" wire:model="editingPark.country" class="form-control">
                             @error('editingPark.country') <span class="text-danger">{{ $message }}</span> @enderror
@@ -183,7 +198,13 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Status *</label>
-                            <input type="text" wire:model="editingPark.status" class="form-control">
+                            <select wire:model="editingPark.status" class="form-select">
+                                <option value="">-- Status auswählen --</option>
+                                <option value="pending">⏳ Wartend</option>
+                                <option value="active">✅ Aktiv</option>
+                                <option value="inactive">⛔ Inaktiv</option>
+                                <option value="revive">♻️ Wiederbeleben</option>
+                            </select>
                             @error('editingPark.status') <span class="text-danger">{{ $message }}</span> @enderror
                         </div>
                         <div class="col-md-6 mb-3">
@@ -194,9 +215,13 @@
                                 <div class="mt-2">
                                     <img src="{{ $imageUpload->temporaryUrl() }}" alt="Bild Vorschau" style="max-width: 100px;">
                                 </div>
-                            @elseif ($editingPark['image'])
+                                @elseif ($editingPark['image'] && file_exists(public_path($editingPark['image'])))
                                 <div class="mt-2">
-                                    <img src="{{ Storage::url($editingPark['image']) }}" alt="Aktuelles Bild" style="max-width: 100px;">
+                                    <img src="{{ asset($editingPark['image']) }}" alt="Aktuelles Bild" style="max-width: 100px;">
+                                </div>
+                            @else
+                                <div class="mt-2">
+                                    <img src="{{ asset('images/no-image.png') }}" alt="Kein Bild vorhanden" style="max-width: 100px;">
                                 </div>
                             @endif
                         </div>
@@ -235,14 +260,16 @@
                             <input type="file" wire:model="logoUpload" class="form-control" accept="image/*">
                             @error('logoUpload') <span class="text-danger">{{ $message }}</span> @enderror
                             @if ($logoUpload)
-                                <div class="mt-2">
-                                    <img src="{{ $logoUpload->temporaryUrl() }}" alt="Logo Vorschau" style="max-width: 100px;">
-                                </div>
-                            @elseif ($editingPark['logo'])
-                                <div class="mt-2">
-                                    <img src="{{ Storage::url($editingPark['logo']) }}" alt="Aktuelles Logo" style="max-width: 100px;">
-                                </div>
-                            @endif
+                            <div class="mt-2">
+                                <img src="{{ $logoUpload->temporaryUrl() }}" alt="Logo Vorschau" style="max-width: 100px;">
+                            </div>
+                        @elseif (!empty($editingPark['logo']))
+                            <div class="mt-2">
+                                <img src="{{ Str::startsWith($editingPark['logo'], 'storage/') ? asset($editingPark['logo']) : Storage::url($editingPark['logo']) }}"
+                                     alt="Aktuelles Logo"
+                                     style="max-width: 100px;">
+                            </div>
+                        @endif
                         </div>
 <!-- Beschreibung mit Jodit -->
 <div class="col-md-12 mb-3">
@@ -296,6 +323,17 @@
         </div>
     </div>
 </div>
+
+@push('styles')
+<style>
+    .input-disabled {
+    background-color: #f8f9fa !important;
+    color: #6c757d !important;
+    cursor: not-allowed;
+}
+</style>
+@endpush
+
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/jodit@4.0.0-beta.178/build/jodit.min.js"></script>

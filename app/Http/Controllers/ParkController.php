@@ -25,7 +25,7 @@ class ParkController extends Controller
             if (is_numeric($identifier) && $park->slug) {
                 return redirect()->route('parks.show', $park->slug);
             }
-            
+
 
 
         // Öffnungszeiten & Queue aktualisieren
@@ -37,16 +37,17 @@ class ParkController extends Controller
 
         // Nearby Parks
         $nearbyParks = Park::select('*')
-            ->selectRaw('(6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) AS distance', [
-                $park->latitude,
-                $park->longitude,
-                $park->latitude,
-            ])
-            ->where('id', '!=', $park->id)
-            ->having('distance', '<=', 300)
-            ->orderBy('distance')
-            ->limit(12)
-            ->get();
+        ->selectRaw('(6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) AS distance', [
+            $park->latitude,
+            $park->longitude,
+            $park->latitude,
+        ])
+        ->where('id', '!=', $park->id)
+        ->where('status', 'active') // ✅ hier der Status-Filter
+        ->having('distance', '<=', 300)
+        ->orderBy('distance')
+        ->limit(12)
+        ->get();
 
         // Wetter holen
         $rawForecast = $weatherService->getForecastForCoordinates($park->latitude, $park->longitude);
