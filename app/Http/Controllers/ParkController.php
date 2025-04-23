@@ -10,6 +10,7 @@ use App\Models\ParkDailyStats;
 use App\Models\ParkCrowdReport;
 use App\Models\ParkCrowdForecas;
 use App\Services\WeatherService;
+use App\Models\ModVisitorSession;
 use Illuminate\Support\Facades\Http;
 
 class ParkController extends Controller
@@ -185,11 +186,18 @@ class ParkController extends Controller
         $cookieBlock = request()->cookie($cookieName);
         $showCrowdModal = !$hasTodayCrowdReport && !$cookieBlock;
 
+
+        $visits24h = ModVisitorSession::where('page_url', 'LIKE', '%/parks/' . $park->id . '%')
+        ->where('last_activity_at', '>=', now()->subHours(24))
+        ->count();
+//dd($visits24h);
+
         return view('frontend.pages.park_details', compact(
             'park',
             'nearbyParks',
             'forecast',
-            'showCrowdModal'
+            'showCrowdModal',
+            'visits24h'
         ));
 
     }

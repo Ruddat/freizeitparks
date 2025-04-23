@@ -232,7 +232,7 @@ class SettingsManager extends Component
 
 
     protected array $settingImageSizes = [
-        'logo' => [40, 40],       // max 300px Breite
+        'logo' => [180, 180],       // max 300px Breite
         'favicon' => [32, 32],       // exakt 32x32
         'site_icon_180' => [180, 180],  // Apple Touch Icon
         'site_icon_192' => [192, 192],  // Android Icon
@@ -322,7 +322,16 @@ class SettingsManager extends Component
         $this->settings = ModSiteSettings::where('group', $this->group)
             ->get()
             ->mapWithKeys(function ($setting) {
-                return [$setting->key => $setting->type === 'json' ? json_decode($setting->value, true) : $setting->value];
+                $value = $setting->value;
+
+                if ($setting->type === 'json') {
+                    $value = json_decode($value, true);
+                } elseif ($setting->type === 'boolean') {
+                    // Wandelt "1", 1, true zu true und alles andere zu false
+                    $value = in_array($value, [1, '1', true], true);
+                }
+
+                return [$setting->key => $value];
             })
             ->toArray();
     }

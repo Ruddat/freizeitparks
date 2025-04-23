@@ -3,6 +3,7 @@
 use App\Http\Middleware\TrackReferral;
 use Illuminate\Foundation\Application;
 use App\Http\Middleware\TrackVisitorSession;
+use App\Http\Middleware\CheckMaintenanceMode;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 
@@ -17,13 +18,13 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->group(base_path('routes/backend.php'));
             // API-Routen registrieren
             // Standard Web-Routen registrieren
-            Route::middleware('web', 'track-referral', 'track-visitor')
+            Route::middleware('web', 'track-referral', 'track-visitor', 'maintenance')
             ->group(base_path('routes/web.php'));
             },
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-           // 'maintenance' => CheckMaintenanceMode::class, // Alias korrekt definiert
+            'maintenance' => CheckMaintenanceMode::class, // Alias korrekt definiert
             'track-referral' => TrackReferral::class,
             'track-visitor' => TrackVisitorSession::class,
         ]);

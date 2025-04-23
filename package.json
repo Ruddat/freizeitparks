@@ -22,6 +22,7 @@
     "dependencies": {
         "@tailwindcss/postcss": "^4.1.4",
         "alpinejs": "^3.14.9",
+        "animate.css": "^4.1.1",
         "jodit": "^4.6.2",
         "leaflet": "^1.9.4",
         "puppeteer": "^24.6.1",

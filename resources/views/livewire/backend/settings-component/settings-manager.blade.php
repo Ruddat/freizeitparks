@@ -287,3 +287,11 @@
         </div>
     </div>
 </div>
+@push('styles')
+<style>
+    .form-check-input:checked {
+        background-color: #198754 !important;
+        border-color: #198754 !important;
+    }
+</style>
+@endpush

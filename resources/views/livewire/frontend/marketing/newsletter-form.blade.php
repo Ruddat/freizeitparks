@@ -33,6 +33,7 @@
     @endif
 
     <!-- Modal -->
+
     <div x-data="{ open: @entangle('showModal') }">
         <div x-show="open" x-cloak
              x-transition.opacity.scale
@@ -95,4 +96,5 @@
             </div>
         </div>
     </div>
+
 </div>

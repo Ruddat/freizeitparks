@@ -59,6 +59,7 @@
         <x-hero-park-details :park="$park" />
         @endif
 
+
         </header>
 
 {{-- 🟡 KLICKBARER TICKET-STYLE BUTTON: PARKS ENTDECKEN
@@ -98,6 +99,8 @@
 </div>
 
 
+
+
     @if (session()->has('success'))
         <div class="fixed top-0 left-0 right-0 bg-green-500 text-white text-center p-4 z-50">
             {{ session('success') }}
@@ -117,40 +120,60 @@
 
 
 <!-- Mobile Bottom Navigation -->
-<nav class="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-300 shadow-lg md:hidden">
-    <div class="flex justify-around items-center text-sm text-gray-600">
-        <a href="/" class="flex flex-col items-center justify-center py-2 px-3 hover:text-yellow-500">
+<nav class="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-r from-purple-800 via-indigo-900 to-purple-800 shadow-[0_0_25px_rgba(128,90,213,0.4)] border-t border-indigo-600 md:hidden">
+    <div class="flex justify-around items-center text-xs text-white font-medium">
+        <!-- Home -->
+        <a href="/" class="flex flex-col items-center justify-center py-3 px-2 hover:text-yellow-400 transition">
             <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2"
-                 viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round"
-                 d="M3 12l2-2m0 0l7-7 7 7M13 5v6h6"></path></svg>
+                 viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M3 12l2-2m0 0l7-7 7 7M13 5v6h6"/>
+            </svg>
             <span>Home</span>
         </a>
-        <a href="#park-liste" class="flex flex-col items-center justify-center py-2 px-3 hover:text-yellow-500">
+
+        <!-- Liste -->
+        <a href="#park-liste" class="flex flex-col items-center justify-center py-3 px-2 hover:text-yellow-400 transition">
             <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2"
-                 viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round"
-                 d="M3 5h18M3 12h18M3 19h18"></path></svg>
+                 viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M3 5h18M3 12h18M3 19h18"/>
+            </svg>
             <span>Liste</span>
         </a>
-        <a href="#map" class="flex flex-col items-center justify-center py-2 px-3 hover:text-yellow-500">
+
+        <!-- Wartezeiten LIVE -->
+        <a href="#wartezeiten" class="flex flex-col items-center justify-center py-3 px-2 text-red-400 hover:text-red-300 animate-pulse transition">
             <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2"
-                 viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round"
-                 d="M9 20l-5.447-2.724A2 2 0 013 15.382V5a2 2 0 012-2h14a2 2 0 012 2v10.382a2 2 0 01-1.553 1.894L15 20l-3-2-3 2z"></path></svg>
-            <span>Karte</span>
+                 viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M13 16h-1v-4h-1m1-4h.01M12 20c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8z"/>
+            </svg>
+            <span class="tracking-wide">LIVE</span>
         </a>
-        <a href="/suche" class="flex flex-col items-center justify-center py-2 px-3 hover:text-yellow-500">
+
+        <!-- Suche -->
+        <a href="/suche" class="flex flex-col items-center justify-center py-3 px-2 hover:text-yellow-400 transition">
             <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2"
-                 viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round"
-                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                 viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
             <span>Suche</span>
         </a>
-        <a href="/mehr" class="flex flex-col items-center justify-center py-2 px-3 hover:text-yellow-500">
+
+        <!-- Mehr -->
+        <a href="/mehr" class="flex flex-col items-center justify-center py-3 px-2 hover:text-yellow-400 transition">
             <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2"
-                 viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round"
-                 d="M12 6v.01M12 12v.01M12 18v.01"></path></svg>
+                 viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M12 6v.01M12 12v.01M12 18v.01"/>
+            </svg>
             <span>Mehr</span>
         </a>
     </div>
 </nav>
+
 
 
 
@@ -226,5 +249,27 @@
         }
     </style>
 
+
+
+<!-- Back to Top Button -->
+<button id="backToTop"
+    onclick="window.scrollTo({ top: 0, behavior: 'smooth' })"
+    class="fixed bottom-6 right-6 z-50 hidden lg:flex items-center justify-center w-14 h-14 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 text-white rounded-full shadow-2xl border-2 border-white/20 backdrop-blur-md transition-all duration-300 ease-in-out opacity-0 hover:scale-110 hover:shadow-[0_0_25px_rgba(255,255,255,0.3)]">
+
+    <!-- Icon -->
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+    </svg>
+</button>
+
+<!-- JavaScript für Scroll-Detektion -->
+<script>
+    window.addEventListener('scroll', function () {
+        const btn = document.getElementById('backToTop');
+        const isVisible = window.scrollY > 300;
+        btn.classList.toggle('opacity-100', isVisible);
+        btn.classList.toggle('opacity-0', !isVisible);
+    });
+</script>
 </body>
 </html>

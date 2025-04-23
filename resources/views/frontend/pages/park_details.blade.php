@@ -75,7 +75,67 @@
 
 
 
+    <nav class="w-full sticky top-0 z-50 bg-gradient-to-r from-purple-800 via-indigo-800 to-purple-900 text-white px-4 py-2 shadow-lg">
+        <div class="max-w-screen-xl mx-auto flex flex-wrap justify-center items-center gap-3 text-sm font-medium">
+            <!-- Parkname mit Icon -->
+            <span class="inline-flex items-center gap-2 bg-purple-700/80 px-4 py-2 rounded-full backdrop-blur-sm border border-purple-500/30">
+                <span class="text-purple-200">🏰</span>
+                <span>{{ $park->title }}</span>
+            </span>
 
+            <!-- Webseite -->
+            <a href="{{ $park->website_url }}" target="_blank" class="flex items-center gap-2 px-4 py-2 bg-indigo-600/80 hover:bg-indigo-500 rounded-full transition-all duration-300 ease-in-out backdrop-blur-sm border border-indigo-400/30">
+                <span class="text-indigo-200">🌐</span>
+                <span>Website</span>
+            </a>
+
+            <!-- Anfahrt -->
+            <a href="https://maps.google.com/?q={{ $park->latitude }},{{ $park->longitude }}" target="_blank" class="flex items-center gap-2 px-4 py-2 bg-green-600/80 hover:bg-green-500 rounded-full transition-all duration-300 ease-in-out backdrop-blur-sm border border-green-400/30">
+                <span class="text-green-200">📍</span>
+                <span>Anfahrt</span>
+            </a>
+
+            <!-- Öffnungszeiten (Anker) -->
+            <a href="#oeffnungszeiten" class="flex items-center gap-2 px-4 py-2 bg-yellow-500/80 hover:bg-yellow-400 text-gray-900 rounded-full transition-all duration-300 ease-in-out backdrop-blur-sm border border-yellow-300/30">
+                <span class="text-yellow-200">🕒</span>
+                <span>Info</span>
+            </a>
+
+            <!-- Live Wartezeiten (Anker) -->
+            <a href="#wartezeiten" class="flex items-center gap-2 px-4 py-2 bg-cyan-500/80 hover:bg-cyan-400 rounded-full transition-all duration-300 ease-in-out backdrop-blur-sm border border-cyan-300/30 animate-pulse-glow">
+                <span class="text-cyan-200">⏳</span>
+                <span>Live Wartezeiten</span>
+            </a>
+
+            <!-- Besucherzahl (Anker) -->
+            @if($visits24h > 0)
+                <a href="#besucher" class="flex items-center gap-2 px-4 py-2 bg-red-600/80 hover:bg-red-500 rounded-full transition-all duration-300 ease-in-out backdrop-blur-sm border border-red-400/30">
+                    <span class="text-red-200">🔥</span>
+                    <span>{{ $visits24h }}x besucht</span>
+                </a>
+            @endif
+
+            <!-- Bewertung (Anker) -->
+            <a href="#bewertungen" class="flex items-center gap-2 px-4 py-2 bg-pink-600/80 hover:bg-pink-500 rounded-full transition-all duration-300 ease-in-out backdrop-blur-sm border border-pink-400/30">
+                <span class="text-pink-200">⭐</span>
+                <span>Jetzt bewerten</span>
+            </a>
+        </div>
+    </nav>
+
+    <style>
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px rgba(34, 211, 238, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(34, 211, 238, 0.8), 0 0 30px rgba(34, 211, 238, 0.5); }
+            100% { box-shadow: 0 0 5px rgba(34, 211, 238, 0.5); }
+        }
+
+        .animate-pulse-glow {
+            animation: glow 2s infinite ease-in-out;
+        }
+    </style>
+
+    {{-- Park Details --}}
 
 
 
@@ -83,17 +143,54 @@
 <section class="py-12 px-4 bg-[#0d0f3f]">
     <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-      <!-- Linke Spalte: Beschreibung -->
-      <div class="border border-gray-500 p-4 rounded-lg">
-        <h2 class="text-2xl font-bold mb-4">Über den Freizeitpark</h2>
-        <div class="text-base leading-relaxed text-gray-100 space-y-4 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:mt-6 [&_ul]:list-disc [&_ul]:pl-6 [&_a]:text-pink-400 [&_a:hover]:underline [&_strong]:font-semibold">
-            {!! $park->description !!}
-          </div>
+<!-- Linke Spalte: Beschreibung -->
+<div class="border border-gray-500 p-4 rounded-lg" id="park-description">
+    <h2 class="text-2xl font-bold mb-4">Über den Freizeitpark</h2>
+
+    <div class="text-base leading-relaxed text-gray-100 space-y-4
+      [&_h3]:text-xl [&_h3]:font-bold [&_h3]:mt-6
+      [&_ul]:list-disc [&_ul]:pl-6 [&_a]:text-pink-400 [&_a:hover]:underline [&_strong]:font-semibold">
+
+      <!-- Sichtbarer Text -->
+      <div id="short-text">
+        {!! Str::words($park->description, 300, '...') !!}
       </div>
 
+      <!-- Vollständiger Text -->
+      <div id="full-text" class="hidden">
+        {!! $park->description !!}
+      </div>
 
+      <!-- Button -->
+      <button id="read-more-btn" class="text-pink-400 hover:underline focus:outline-none transition font-medium">
+        Mehr lesen
+      </button>
+    </div>
+  </div>
+  <script>
+    document.getElementById('read-more-btn').addEventListener('click', function () {
+      const shortText = document.getElementById('short-text');
+      const fullText = document.getElementById('full-text');
+      const button = this;
+      const container = document.getElementById('park-description');
 
+      if (fullText.classList.contains('hidden')) {
+        fullText.classList.remove('hidden');
+        shortText.classList.add('hidden');
+        button.textContent = 'Weniger anzeigen';
 
+        // Nach unten scrollen – smooth zur Description-Box
+        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        fullText.classList.add('hidden');
+        shortText.classList.remove('hidden');
+        button.textContent = 'Mehr lesen';
+
+        // Scroll zurück zum Anfang der Beschreibung
+        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+    </script>
       <!-- Rechte Spalte: Bewertungen, Öffnungszeiten, Karte -->
       <div class="space-y-6">
 
@@ -158,13 +255,40 @@
         @endif
     </div>
 
+    @if($visits24h > 0)
+    <div
+        class="inline-block bg-gradient-to-r from-red-600 to-yellow-500 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg animate__animated animate__bounceIn mb-4"
+        style="box-shadow: 0 0 15px rgba(255, 100, 100, 0.6);"
+    >
+        🔥 {{ $visits24h }}x besucht in den letzten 24h
+    </div>
+@endif
 
+<div class="mt-2 flex flex-wrap gap-2">
+    {{-- Webseite --}}
+    <a href="{{ $park->website_url }}" target="_blank" class="btn btn-sm bg-indigo-600 text-white hover:bg-indigo-500 rounded-full px-3 py-1">
+        🌐 Zur offiziellen Seite
+    </a>
 
+    {{-- Anfahrt --}}
+    <a href="https://maps.google.com/?q={{ $park->latitude }},{{ $park->longitude }}" target="_blank" class="btn btn-sm bg-green-600 text-white hover:bg-green-500 rounded-full px-3 py-1">
+        📍 Anfahrt
+    </a>
 
+    {{-- Socials --}}
+    @if ($park->facebook_url)
+        <a href="{{ $park->facebook_url }}" target="_blank" class="btn btn-sm bg-blue-700 hover:bg-blue-600 text-white rounded-full px-3 py-1">
+            👍 Facebook
+        </a>
+    @endif
+</div>
 
 
         <!-- Bewertungen -->
-        <livewire:frontend.park-bewertungen-component :park="$park" />
+        <section id="bewertungen">
+            <livewire:frontend.park-bewertungen-component :park="$park" />
+        </section>
+
 
 
         @php
@@ -204,8 +328,8 @@
 
 
 {{-- Attraktionen --}}
-<section
-    class="py-12 bg-gradient-to-br from-purple-900 via-indigo-800 to-blue-900 text-white"
+<section id="wartezeiten"
+    class="scroll-mt-15 py-12 bg-gradient-to-br from-purple-900 via-indigo-800 to-blue-900 text-white"
     x-data="{ status: 'all', search: '', wait: 'all' }"
 >
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
@@ -430,54 +554,51 @@
 
 
 
-    <!-- Modal für Bewertung -->
-@if($showCrowdModal)
-<div
-  x-data="{ open: true }"
-  x-init="
-      window.addEventListener('bewertungGestartet', () => open = false);
-  "
-  x-show="open"
-  class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm"
-  x-transition:enter="transition ease-out duration-300"
-  x-transition:leave="transition ease-in duration-200"
-  x-cloak>
-
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 relative animate-fade-in"
-       @click.outside="open = false">
-
+  @if($showCrowdModal)
+  <div
+    x-data="{ open: true }"
+    x-init="window.addEventListener('bewertungGestartet', () => open = false)"
+    x-show="open"
+    class="fixed inset-0 z-50 flex items-center justify-center
+           bg-white/10 backdrop-blur-lg transition-all duration-300"
+    x-transition:enter="transition ease-out duration-300"
+    x-transition:leave="transition ease-in duration-200"
+    x-cloak
+  >
+    <div
+      class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl
+             w-full max-w-md p-8 relative border border-white/20
+             animate-fade-in"
+      @click.outside="open = false"
+    >
       <button @click="open = false"
-              class="absolute top-3 right-4 text-gray-400 hover:text-gray-700 text-2xl leading-none">
-          &times;
+        class="absolute top-3 right-4 text-gray-400 hover:text-gray-700 text-2xl leading-none">
+        &times;
       </button>
 
       <div class="text-center">
-          <h2 class="text-2xl font-bold text-[#1c1e5c] mb-2">🎢 Bist du gerade im Park?</h2>
-          <p class="text-gray-600 text-sm mb-6">Hilf anderen Besuchern mit deiner Einschätzung zur aktuellen Lage im Park!</p>
+        <h2 class="text-2xl font-bold text-[#1c1e5c] mb-2">🎢 Bist du gerade im Park?</h2>
+        <p class="text-gray-600 text-sm mb-6">Hilf anderen Besuchern mit deiner Einschätzung zur aktuellen Lage im Park!</p>
 
-          <div class="flex flex-col sm:flex-row justify-center items-center gap-3">
-              <!-- Livewire-Komponente mit Event -->
-              <div wire:ignore>
-                  <livewire:frontend.park-andrang-component
-                      :park="$park"
-                      onBewertungGestartet="bewertungGestartet"
-                  />
-              </div>
-
-              <!-- Später vielleicht -->
-              <button
-              @click="
-                  open = false;
-                  document.cookie = 'hideCrowdModal_{{ $park->id }}=1; max-age=' + (60 * 60 * 24) + '; path=/';
-              "
-              class="inline-flex justify-center items-center px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md font-medium shadow">
-              Später vielleicht
-          </button>
+        <div class="flex flex-col sm:flex-row justify-center items-center gap-3">
+          <div wire:ignore>
+            <livewire:frontend.park-andrang-component
+                :park="$park"
+                onBewertungGestartet="bewertungGestartet"
+            />
           </div>
+
+          <button
+            @click="open = false; document.cookie = 'hideCrowdModal_{{ $park->id }}=1; max-age=' + (60 * 60 * 24) + '; path=/';"
+            class="inline-flex justify-center items-center px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md font-medium shadow">
+            Später vielleicht
+          </button>
+        </div>
       </div>
+    </div>
   </div>
-</div>
-@endif
+  @endif
+
 
 
 
