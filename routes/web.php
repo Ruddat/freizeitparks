@@ -16,7 +16,8 @@ Route::get('/', [IndexController::class, 'index'])->name('home');
 Route::get('/scrapper', [IndexController::class, 'testScraper'])->name('testScraper');
 
 
-Route::get('/parks/{id}', [ParkController::class, 'show'])->name('parks.show');
+// Route::get('/parks/{id}', [ParkController::class, 'show'])->name('parks.show');
+Route::get('/parks/{identifier}', [ParkController::class, 'show'])->name('parks.show');
 
 Route::get('/seite/{slug}', [StaticPageController::class, 'show'])
     ->name('static.page');

@@ -178,7 +178,7 @@
         <!-- Vorderseite -->
         <div class="front p-6 flex flex-col justify-between text-center rounded-xl relative overflow-hidden"
              style="background: linear-gradient(to bottom right, {{ $gradient[0] }}, {{ $gradient[1] }});">
-            <a href="{{ route('parks.show', $park->id) }}" aria-label="Details zu {{ $park->name }}">
+            <a href="{{ route('parks.show', $park->slug ?: $park->id) }}" aria-label="Details zu {{ $park->name }}">
                 <div class="relative mb-4 w-full h-40">
                     <div class="absolute top-2 left-2 w-full h-full bg-yellow-400 shadow-xl z-10 rounded-lg"></div>
                     <img src="{{ $park->logo_url ?? $park->image }}"

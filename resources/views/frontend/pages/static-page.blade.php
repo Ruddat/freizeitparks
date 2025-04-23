@@ -25,11 +25,34 @@
                         </path>
                     </svg>
                 </h1>
+
+
             </div>
 
-            <article class="prose lg:prose-lg max-w-none prose-headings:text-[#080e3c] prose-a:text-purple-600 prose-a:underline-offset-2 prose-img:rounded-md prose-pre:bg-gray-800 prose-pre:text-white text-gray-700">
-                {!! $page->content !!}
+            <article class="space-y-6 text-gray-700 text-base leading-relaxed">
+                {{-- Inhalte mit zusätzlichen Formatierungen --}}
+                {!! str_replace(
+                    ['<h2>', '<h3>', '<p>', '<ul>', '<li>', '<pre>', '<code>', '<a>'],
+                    [
+                        '<h2 class="text-2xl font-bold text-[#080e3c] mt-8 mb-2">',
+                        '<h3 class="text-xl font-semibold text-[#080e3c] mt-6 mb-2">',
+                        '<p class="mb-4">',
+                        '<ul class="list-disc list-inside space-y-2">',
+                        '<li class="ml-4">',
+                        '<pre class="bg-gray-900 text-white p-4 rounded overflow-auto text-sm">',
+                        '<code class="bg-gray-100 text-purple-700 px-1 py-0.5 rounded">',
+                        '<a class="text-purple-600 underline underline-offset-2 hover:text-purple-800"'
+                    ],
+                    $page->content
+                ) !!}
             </article>
         </div>
     </section>
-@endsection
+
+    {{-- Kontakt Overlay --}}
+
+    <livewire:frontend.office.contact-overlay />
+
+
+
+    @endsection

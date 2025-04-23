@@ -96,6 +96,15 @@
                         <span>Parkstraße 1, 12345 Freizeitstadt</span>
                     </li>
                 </ul>
+                <div>
+                    <a href="https://www.paypal.com/donate?business=ingo.ruddat@gmail.com&currency_code=EUR"
+                       target="_blank"
+                       class="inline-flex items-center gap-2 px-4 py-1.5 bg-yellow-500 text-[#080e3c] font-semibold rounded-full hover:bg-yellow-600 transition"
+                    >
+                        ❤️ Unterstützen via PayPal
+                    </a>
+                </div>
+
             </div>
 
             <!-- Social Media Column -->
@@ -137,7 +146,6 @@
                     <livewire:frontend.marketing.newsletter-form />
 
                 </div>
-
 
 
             </div>

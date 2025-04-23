@@ -58,7 +58,7 @@
 </div>
 
 
-
+{{--
     <div class="py-8 bg-gradient-to-r from-purple-900 to-pink-600">
         <div class="container mx-auto px-4">
           <h2 class="text-3xl md:text-4xl font-bold text-white text-center mb-6">
@@ -96,7 +96,7 @@
         </div>
       </div>
 
-
+--}}
     {{-- Wettervorhersage --}}
 
 
@@ -109,7 +109,7 @@
           background-size: cover;
         }
       </style>
-
+{{--
       <div class="py-12 relative">
         <!-- Parallax Hintergrund -->
         <div class="parallax absolute inset-0" style="background-image: url('https://images.unsplash.com/photo-1505751172876-fa1923c5c7a2?q=80&w=2070&auto=format&fit=crop'); opacity: 0.7;"></div>
@@ -254,10 +254,10 @@
         showContent('gastronomie');
       </script>
 
+--}}
 
 
-
-    {{-- Vorteile / Kategorien --}}
+    {{-- Vorteile / Kategorien
     <section class="bg-yellow-100 py-12">
         <div class="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             <div>
@@ -277,5 +277,5 @@
             </div>
         </div>
     </section>
-
+--}}
 @endsection

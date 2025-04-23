@@ -15,9 +15,18 @@ use Illuminate\Support\Facades\Http;
 
 class ParkController extends Controller
 {
-    public function show($id, WeatherService $weatherService)
+    public function show(string $identifier, WeatherService $weatherService)
     {
-        $park = Park::with(['queueTimes', 'openingHours'])->findOrFail($id);
+        $park = Park::with(['queueTimes', 'openingHours'])
+            ->where('slug', $identifier)
+            ->orWhere('id', $identifier)
+            ->firstOrFail();
+
+            if (is_numeric($identifier) && $park->slug) {
+                return redirect()->route('parks.show', $park->slug);
+            }
+            
+
 
         // Öffnungszeiten & Queue aktualisieren
         $letzterEintrag = $park->queueTimes()->orderByDesc('fetched_at')->first();
