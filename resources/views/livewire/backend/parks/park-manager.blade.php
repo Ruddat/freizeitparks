@@ -251,43 +251,20 @@
     <textarea wire:model="editingPark.description" id="descriptionEditor" class="form-control"></textarea>
     @error('editingPark.description') <span class="text-danger">{{ $message }}</span> @enderror
 </div>
-                        <!-- Öffnungszeiten -->
-                        <div class="col-md-12 mb-4">
-                            <label class="form-label">Öffnungszeiten</label>
-                            <div class="mb-3">
-                                <div class="row align-items-center">
-                                    <div class="col-md-4">
-                                        <input type="time" class="form-control" wire:model.live="defaultOpen" placeholder="Öffnet">
-                                        @error('defaultOpen') <span class="text-danger small">{{ $message }}</span> @enderror
-                                    </div>
-                                    <div class="col-md-4">
-                                        <input type="time" class="form-control" wire:model.live="defaultClose" placeholder="Schließt">
-                                        @error('defaultClose') <span class="text-danger small">{{ $message }}</span> @enderror
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="form-check">
-                                            <input type="checkbox" class="form-check-input" wire:model.live="applyToAll" id="applyToAll">
-                                            <label class="form-check-label" for="applyToAll">Für alle Tage übernehmen</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            @foreach (['monday' => 'Montag', 'tuesday' => 'Dienstag', 'wednesday' => 'Mittwoch', 'thursday' => 'Donnerstag', 'friday' => 'Freitag', 'saturday' => 'Samstag', 'sunday' => 'Sonntag'] as $day => $label)
-                                <div class="row mb-3 align-items-center">
-                                    <div class="col-md-2">
-                                        <label class="form-label mb-0">{{ $label }}</label>
-                                    </div>
-                                    <div class="col-md-5">
-                                        <input type="time" class="form-control" wire:model.live="opening_hours.{{ $day }}.open" placeholder="Öffnet" {{ $applyToAll ? 'disabled' : '' }}>
-                                        @error("opening_hours.{$day}.open") <span class="text-danger small">{{ $message }}</span> @enderror
-                                    </div>
-                                    <div class="col-md-5">
-                                        <input type="time" class="form-control" wire:model.live="opening_hours.{{ $day }}.close" placeholder="Schließt" {{ $applyToAll ? 'disabled' : '' }}>
-                                        @error("opening_hours.{$day}.close") <span class="text-danger small">{{ $message }}</span> @enderror
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
+
+<!-- Öffnungszeiten-Bereich im Modal -->
+<div class="col-md-12 mb-4">
+    <label class="form-label">Öffnungszeiten</label>
+
+    @if ($editingPark['id'])
+        <livewire:backend.parks.opening-times-editor :park-id="$editingPark['id']" wire:key="opening-times-{{ $editingPark['id'] }}" />
+    @else
+        <div class="alert alert-warning">Bitte speichere den Park zuerst, bevor Öffnungszeiten bearbeitet werden können.</div>
+    @endif
+</div>
+
+
+
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Kategorie</label>
                             <select wire:model="editingPark.type" class="form-select">

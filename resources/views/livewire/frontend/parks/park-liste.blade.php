@@ -12,7 +12,7 @@
     />
     </div>
 
-<!-- Aktive Filter-Chips -->
+
 <!-- Aktive Filter-Chips -->
 @if($suche || $land || $status !== 'alle')
     <div class="hidden md:block max-w-6xl mx-auto px-4 flex flex-wrap items-center gap-2 mb-4 animate-slideIn">
@@ -295,6 +295,49 @@
             border: 0;
         }
     </style>
+
+<style>
+    .flip-container {
+        perspective: 1000px;
+        transform-style: preserve-3d;
+        position: relative;
+    }
+
+    .flipper {
+        transform-style: preserve-3d;
+        transition: transform 0.8s ease-in-out;
+        position: relative;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+    }
+
+    .flipped .flipper {
+        transform: rotateY(180deg);
+    }
+
+    .front, .back {
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        border-radius: 1rem;
+        display: block;
+        overflow: hidden;
+    }
+
+    .front {
+        z-index: 2;
+    }
+
+    .back {
+        transform: rotateY(180deg);
+        z-index: 3;
+    }
+</style>
+
 
 </div>
 @push('scripts')

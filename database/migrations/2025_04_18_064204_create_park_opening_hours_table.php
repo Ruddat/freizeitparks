@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('park_opening_hours', function (Blueprint $table) {
             $table->id();
             $table->foreignId('park_id')->constrained()->onDelete('cascade');
-            $table->string('day'); // z. B. monday, tuesday
+            $table->string('day')->nullable(); // z. B. monday, tuesday
             $table->time('open')->nullable();
             $table->time('close')->nullable();
             $table->timestamps();

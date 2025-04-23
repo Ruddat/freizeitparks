@@ -12,6 +12,8 @@ class ParkOpeningHour extends Model
         'day',
         'open',
         'close',
+        'date',
+
     ];
 
     // Entferne den Cast, da wir die Uhrzeiten manuell formatieren
