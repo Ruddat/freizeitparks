@@ -122,14 +122,10 @@ class ParkListe extends Component
             $query->where('country', 'like', '%' . $this->land . '%');
         }
 
-        // Status-Filter
-        if ($this->status === 'alle') {
-            $query->where('status', 'active');
-        } else {
-            $query->where('status', $this->status);
-        }
+        // Nur aktive Parks
+        $query->where('status', 'active');
 
-        // Entfernungsfilter direkt in der Abfrage
+        // Entfernungsfilter
         if ($this->userLat && $this->userLng) {
             $query->select('*')
                   ->selectRaw(
@@ -148,16 +144,34 @@ class ParkListe extends Component
             ->sort()
             ->values();
 
-        // Paginierte Abfrage
-        $parks = $query->paginate(9);
+        // Paginierte Abfrage (zuerst ohne Status-Filter)
+        $parks = $query->get();
 
-        logger('📍 Finale Parks:', ['count' => $parks->count()]);
+        // Dynamischer Öffnungsstatus-Filter in PHP
+        if (in_array($this->status, ['open', 'closed', 'unknown'])) {
+            $parks = $parks->filter(fn($park) => $park->opening_status === $this->status);
+        }
+
+        // Paginieren manuell, da es jetzt eine Collection ist
+        $perPage = 9;
+        $currentPage = request()->get('page', 1);
+        $paged = $parks->forPage($currentPage, $perPage);
+        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
+            $paged,
+            $parks->count(),
+            $perPage,
+            $currentPage,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
+
+        logger('📍 Gefilterte Parks:', ['count' => $paginator->count(), 'status' => $this->status]);
 
         return view('livewire.frontend.parks.park-liste', [
-            'parks' => $parks,
+            'parks' => $paginator,
             'laender' => $alleLaender,
         ]);
     }
+
 
 
 }

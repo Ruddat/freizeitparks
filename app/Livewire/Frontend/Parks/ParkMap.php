@@ -39,10 +39,9 @@ class ParkMap extends Component
 
     public function loadFilteredParks()
     {
-        $heute = now()->toDateString();
-
         $query = Park::whereNotNull('latitude')
-                     ->whereNotNull('longitude');
+                     ->whereNotNull('longitude')
+                     ->where('status', 'active');
 
         if ($this->suche) {
             $query->where(function ($q) {
@@ -56,12 +55,6 @@ class ParkMap extends Component
             $query->where('country', 'like', '%' . $this->land . '%');
         }
 
-        if ($this->status === 'alle') {
-            $query->where('status', 'active');
-        } else {
-            $query->where('status', $this->status);
-        }
-
         $parks = $query->get()
             ->filter(function ($park) {
                 return is_numeric($park->latitude) &&
@@ -70,28 +63,34 @@ class ParkMap extends Component
                        !is_null($park->location) &&
                        trim($park->name) !== '' &&
                        trim($park->location) !== '';
-            })
-            ->map(function ($park) {
-                $oeffnung = $park->openingHoursToday;
-                $heuteGeoeffnet = $oeffnung && $oeffnung->open && $oeffnung->close;
+            });
 
-                return [
-                    'latitude' => floatval($park->latitude),
-                    'longitude' => floatval($park->longitude),
-                    'name' => addslashes(trim($park->name)),
-                    'location' => addslashes(trim($park->country ?? $park->location)),
-                    'status' => $heuteGeoeffnet ? 'open' : 'closed',
-                    'status_label' => $heuteGeoeffnet ? '🟢 Geöffnet' : '🔴 Geschlossen',
-                    'status_class' => $heuteGeoeffnet ? 'text-green-500' : 'text-red-500',
-                    'hours' => $heuteGeoeffnet
-                        ? \Carbon\Carbon::parse($oeffnung->open)->format('H:i') . ' – ' . \Carbon\Carbon::parse($oeffnung->close)->format('H:i')
-                        : 'Heute geschlossen',
-                    'logo' => $park->logo ? asset($park->logo) : null,
-                    'image' => $park->image ? asset($park->image) : null,
-                ];
-            })
-            ->values();
+        // Dynamischer Öffnungsstatus-Filter nachträglich in PHP
+        if (in_array($this->status, ['open', 'closed', 'unknown'])) {
+            $parks = $parks->filter(fn($park) => $park->opening_status === $this->status);
+        }
 
+        $parks = $parks->map(function ($park) {
+            $oeffnung = $park->openingHoursToday;
+            $geoeffnet = $park->opening_status === 'open';
+
+            return [
+                'latitude' => floatval($park->latitude),
+                'longitude' => floatval($park->longitude),
+                'name' => addslashes(trim($park->name)),
+                'location' => addslashes(trim($park->country ?? $park->location)),
+                'status' => $park->opening_status,
+                'status_label' => $park->status_label,
+                'status_class' => $park->status_class,
+                'hours' => $oeffnung && $oeffnung->open && $oeffnung->close
+                    ? \Carbon\Carbon::parse($oeffnung->open)->format('H:i') . ' – ' . \Carbon\Carbon::parse($oeffnung->close)->format('H:i')
+                    : 'Heute geschlossen',
+                'logo' => $park->logo ? asset($park->logo) : null,
+                'image' => $park->image ? asset($park->image) : null,
+            ];
+        })->values();
+
+        // Kartenbereich berechnen
         $this->bounds = [];
         if ($parks->count() > 0) {
             $parkArray = $parks->toArray();
@@ -107,17 +106,9 @@ class ParkMap extends Component
 
         $this->parks = $parks->toArray();
 
-       // \Log::info('Gefilterte Parks für Karte:', [
-       //     'suche' => $this->suche,
-       //     'land' => $this->land,
-       //     'status' => $this->status,
-       //     'parks' => $this->parks,
-       //     'count' => count($this->parks),
-       //     'bounds' => $this->bounds,
-       // ]);
-
         $this->dispatch('karteAktualisieren', parks: $this->parks, bounds: $this->bounds);
     }
+
 
     public function render()
     {

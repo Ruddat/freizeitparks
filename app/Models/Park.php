@@ -3,9 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Model;
 use App\Models\ParkQueueTime;
 use App\Models\ParkOpeningHour;
-use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Park extends Model
 {
@@ -41,35 +42,7 @@ class Park extends Model
         'longitude' => 'float',
     ];
 
-    public function getRouteKeyName()
-    {
-        return 'name';
-    }
-    public function getStatusLabelAttribute()
-    {
-        return match ($this->status) {
-            'open' => 'Geöffnet',
-            'closed' => 'Geschlossen',
-            default => 'Unbekannt',
-        };
-    }
-    public function getStatusClassAttribute()
-    {
-        return match ($this->status) {
-            'open' => 'text-green-500',
-            'closed' => 'text-red-500',
-            default => 'text-gray-500',
-        };
-    }
-    public function getStatusIconAttribute()
-    {
-        return match ($this->status) {
-            'open' => 'check-circle',
-            'closed' => 'x-circle',
-            default => 'question-mark-circle',
-        };
-    }
-
+    // ================= Relationships =================
 
     public function queueTimes()
     {
@@ -81,12 +54,7 @@ class Park extends Model
         return $this->hasMany(ParkOpeningHour::class);
     }
 
-    public function openingHoursToday()
-    {
-        return $this->hasOne(\App\Models\ParkOpeningHour::class)
-            ->where('date', now()->toDateString());
-    }
-
+    // ================= Slug Boot =================
 
     protected static function boot()
     {
@@ -107,4 +75,84 @@ class Park extends Model
         });
     }
 
+    // ================= Öffnungszeiten: Heute =================
+
+    public function getOpeningHoursTodayAttribute()
+    {
+        $timezone = in_array($this->timezone, \DateTimeZone::listIdentifiers())
+            ? $this->timezone
+            : config('app.timezone');
+
+        $heute = Carbon::now($timezone)->toDateString();
+
+        $oeffnung = $this->openingHours()
+            ->where('date', $heute)
+            ->first();
+
+        \Log::debug('Öffnungszeiten geprüft', [
+            'park' => $this->name,
+            'timezone' => $timezone,
+            'date' => $heute,
+            'open' => $oeffnung->open ?? null,
+            'close' => $oeffnung->close ?? null,
+        ]);
+
+        return $oeffnung;
+    }
+
+    // ================= Optional: Dynamisch berechneter Status =================
+
+    public function getOpeningStatusAttribute(): string
+    {
+        $oeffnung = $this->openingHoursToday;
+
+        if (!$oeffnung || !$oeffnung->open || !$oeffnung->close) {
+            return 'unknown';
+        }
+
+        // Aktuelle Uhrzeit im Park (Zeitzone)
+        $now = \Carbon\Carbon::now($this->timezone ?? config('app.timezone'));
+        $start = \Carbon\Carbon::createFromFormat('H:i:s', $oeffnung->open, $this->timezone)->setDateFrom($now);
+        $end = \Carbon\Carbon::createFromFormat('H:i:s', $oeffnung->close, $this->timezone)->setDateFrom($now);
+
+        if ($now->between($start, $end)) {
+            return 'open';
+        }
+
+        return 'closed';
+    }
+
+    public function getStatusLabelAttribute()
+    {
+        return match ($this->opening_status ?? $this->status) {
+            'open' => 'Geöffnet',
+            'closed' => 'Geschlossen',
+            default => 'Unbekannt',
+        };
+    }
+
+    public function getStatusClassAttribute()
+    {
+        return match ($this->opening_status ?? $this->status) {
+            'open' => 'text-green-500',
+            'closed' => 'text-red-500',
+            default => 'text-gray-500',
+        };
+    }
+
+    public function getStatusIconAttribute()
+    {
+        return match ($this->opening_status ?? $this->status) {
+            'open' => 'check-circle',
+            'closed' => 'x-circle',
+            default => 'question-mark-circle',
+        };
+    }
+
+    // ================= Sonstiges =================
+
+    public function getRouteKeyName()
+    {
+        return 'name';
+    }
 }

@@ -70,6 +70,7 @@
 </div>
 
 <!-- Status-Filter -->
+<!-- Status-Filter -->
 <div class="hidden md:block max-w-6xl mx-auto px-6 mb-6">
     <div class="flex items-center gap-3 mb-3">
         <span class="text-sm font-semibold text-white">Status:</span>
@@ -79,7 +80,7 @@
             'closed' => '🔴 Geschlossen',
             'unknown' => '⚪ Unbekannt'
         ] as $key => $label)
-            <button wire:click="$set('status', '{{ $key }}')"
+            <button wire:click="$set('status', @js($key))"
                     class="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200
                            {{ $status === $key ? 'bg-emerald-600 text-white shadow-md' : 'bg-emerald-800/30 text-emerald-200 hover:bg-emerald-800/50 hover:shadow-sm border border-emerald-500/30' }}">
                 {{ $label }}
@@ -240,6 +241,39 @@
 
     </div>
 </div>
+
+<div class="rounded-xl p-4 bg-gradient-to-b from-blue-600 to-blue-800 text-white shadow-lg">
+    <div class="text-sm font-semibold text-white mb-1">
+        {{ $park->name }}
+    </div>
+
+    <div class="text-xs text-white/70 mb-2">
+        {{ $park->country }}
+    </div>
+
+    {{-- Öffnungsstatus --}}
+    <div class="text-sm font-medium {{ $park->status_class }}">
+        {{ $park->status_label }}
+    </div>
+
+    {{-- Uhrzeit nur anzeigen, wenn vorhanden --}}
+    @if($park->opening_hours_today && $park->opening_hours_today->open && $park->opening_hours_today->close)
+        <div class="text-xs mt-1 text-white/80">
+            {{ \Carbon\Carbon::parse($park->opening_hours_today->open)->format('H:i') }}
+            –
+            {{ \Carbon\Carbon::parse($park->opening_hours_today->close)->format('H:i') }}
+        </div>
+    @else
+        <div class="text-xs mt-1 text-white/50 italic">
+            Keine Zeiten verfügbar
+        </div>
+    @endif
+
+
+</div>
+
+
+
 
                 @empty
                     <p class="col-span-full text-center text-gray-400 text-lg">Keine passenden Parks gefunden.</p>

@@ -26,7 +26,8 @@
 
     {{-- Wettervorhersage --}}
     @if($forecast->isNotEmpty())
-    <section class="relative py-16 px-4 bg-gradient-to-b from-[#1c1e5c] via-[#1f236b] to-[#22286f] overflow-hidden">
+    <section class="relative py-16 px-4 bg-gradient-to-br from-purple-900/50 to-black/60 overflow-hidden">
+
 
         {{-- 🌥️ Linke große Deko-Wolke --}}
         <div class="absolute top-[-40px] left-[-60px] w-[260px] h-[260px] opacity-10 bg-no-repeat bg-contain pointer-events-none"
@@ -72,7 +73,9 @@
     @endif
 
 
-
+@php
+//    dd($park->queueTimes);
+@endphp
 
 
     <nav class="w-full sticky top-0 z-50 bg-gradient-to-r from-purple-800 via-indigo-800 to-purple-900 text-white px-4 py-2 shadow-lg">
@@ -83,11 +86,30 @@
                 <span>{{ $park->title }}</span>
             </span>
 
-            <!-- Webseite -->
+            {{-- Webseite
             <a href="{{ $park->website_url }}" target="_blank" class="flex items-center gap-2 px-4 py-2 bg-indigo-600/80 hover:bg-indigo-500 rounded-full transition-all duration-300 ease-in-out backdrop-blur-sm border border-indigo-400/30">
                 <span class="text-indigo-200">🌐</span>
                 <span>Website</span>
             </a>
+
+            --}}
+
+            <!-- Live Wartezeiten (Anker) -->
+            @if($park->queueTimes->isNotEmpty())
+            <a href="#wartezeiten" class="flex items-center gap-2 px-4 py-2 bg-cyan-500/80 hover:bg-cyan-400 rounded-full transition-all duration-300 ease-in-out backdrop-blur-sm border border-cyan-300/30 animate-pulse-glow">
+                <span class="text-cyan-200">⏳</span>
+                <span>Live Wartezeiten</span>
+            </a>
+            @endif
+
+
+            <!-- Besucherzahl (Anker) -->
+            @if($visits24h > 0)
+                <a href="#besucher" class="flex items-center gap-2 px-4 py-2 bg-red-600/80 hover:bg-red-500 rounded-full transition-all duration-300 ease-in-out backdrop-blur-sm border border-red-400/30">
+                    <span class="text-red-200">🔥</span>
+                    <span>{{ $visits24h }}x besucht</span>
+                </a>
+            @endif
 
             <!-- Anfahrt -->
             <a href="https://maps.google.com/?q={{ $park->latitude }},{{ $park->longitude }}" target="_blank" class="flex items-center gap-2 px-4 py-2 bg-green-600/80 hover:bg-green-500 rounded-full transition-all duration-300 ease-in-out backdrop-blur-sm border border-green-400/30">
@@ -101,19 +123,7 @@
                 <span>Info</span>
             </a>
 
-            <!-- Live Wartezeiten (Anker) -->
-            <a href="#wartezeiten" class="flex items-center gap-2 px-4 py-2 bg-cyan-500/80 hover:bg-cyan-400 rounded-full transition-all duration-300 ease-in-out backdrop-blur-sm border border-cyan-300/30 animate-pulse-glow">
-                <span class="text-cyan-200">⏳</span>
-                <span>Live Wartezeiten</span>
-            </a>
 
-            <!-- Besucherzahl (Anker) -->
-            @if($visits24h > 0)
-                <a href="#besucher" class="flex items-center gap-2 px-4 py-2 bg-red-600/80 hover:bg-red-500 rounded-full transition-all duration-300 ease-in-out backdrop-blur-sm border border-red-400/30">
-                    <span class="text-red-200">🔥</span>
-                    <span>{{ $visits24h }}x besucht</span>
-                </a>
-            @endif
 
             <!-- Bewertung (Anker) -->
             <a href="#bewertungen" class="flex items-center gap-2 px-4 py-2 bg-pink-600/80 hover:bg-pink-500 rounded-full transition-all duration-300 ease-in-out backdrop-blur-sm border border-pink-400/30">
@@ -195,65 +205,115 @@
       <div class="space-y-6">
 
 
-        <!-- Öffnungszeiten -->
         @php
         use Carbon\Carbon;
 
-        // Lokalisierung setzen
         Carbon::setLocale(app()->getLocale());
 
-        // Wochentag & Zeitzone bestimmen
         $timezone = $park->timezone && in_array($park->timezone, timezone_identifiers_list())
             ? $park->timezone
             : config('app.timezone');
 
         $now = Carbon::now($timezone);
-        $day = strtolower($now->englishDayOfWeek);       // für Datenbank-Vergleich
-        $dayLabel = $now->translatedFormat('l');          // für Anzeige z. B. 'Montag' / 'Monday'
+        $dayLabel = $now->translatedFormat('l');
 
-        // Öffnungszeiten des Tages
-        $todayHours = $park->openingHours->firstWhere('day', $day);
+        $oeffnung = $park->openingHoursToday;
+        $openTime = $oeffnung?->open ? Carbon::createFromFormat('H:i:s', $oeffnung->open, $timezone) : null;
+        $closeTime = $oeffnung?->close ? Carbon::createFromFormat('H:i:s', $oeffnung->close, $timezone) : null;
 
-        $isOpen = false;
-        $openTime = null;
-        $closeTime = null;
+        $isOpen = $openTime && $closeTime && $now->between($openTime, $closeTime);
 
-        if ($todayHours && $todayHours->open && $todayHours->close) {
-            $openTime = Carbon::createFromFormat('H:i:s', $todayHours->open, $timezone);
-            $closeTime = Carbon::createFromFormat('H:i:s', $todayHours->close, $timezone);
-            $isOpen = $now->between($openTime, $closeTime);
+        // ✅ Fix: Nur zukünftige Öffnungszeiten berücksichtigen
+        $nextOpening = $park->openingHours
+            ->filter(function ($h) use ($now, $timezone) {
+                if (!$h->open || !$h->close) return false;
+
+                $date = Carbon::createFromFormat('Y-m-d', $h->date, $timezone);
+                $start = Carbon::createFromFormat('H:i:s', $h->open, $timezone)->setDateFrom($date);
+
+                return $start->greaterThan($now);
+            })
+            ->sortBy('date')
+            ->first();
+
+        $nextOpeningLabel = null;
+        if ($nextOpening) {
+            $nextDate = Carbon::createFromFormat('Y-m-d', $nextOpening->date, $timezone);
+            $nextOpen = Carbon::createFromFormat('H:i:s', $nextOpening->open, $timezone);
+            $nextClose = Carbon::createFromFormat('H:i:s', $nextOpening->close, $timezone);
+
+            $nextOpeningLabel = $nextDate->translatedFormat('l') . ', ' . $nextOpen->format('H:i') . ' – ' . $nextClose->format('H:i');
         }
     @endphp
 
-    <div class="bg-[#1c1e5c] rounded-xl p-6 shadow">
+    <div class="bg-[#1c1e5c] rounded-xl p-6 shadow text-white">
         <h3 class="text-xl font-semibold mb-2">
-            🕒 {{ __('messages.opening_today') }} ({{ $dayLabel }})
+            🕒 Öffnungszeiten heute ({{ $dayLabel }})
         </h3>
 
-        @if ($todayHours && $openTime && $closeTime)
+        @if ($openTime && $closeTime)
             <p class="text-gray-300">
-                {{ __('messages.time_range', [
-                    'from' => $openTime->format('H:i'),
-                    'to' => $closeTime->format('H:i'),
-                ]) }}
+                Von {{ $openTime->format('H:i') }} bis {{ $closeTime->format('H:i') }} Uhr
             </p>
 
             @if ($isOpen)
                 <p class="text-green-400 mt-1 font-semibold">
-                    ✅ {{ __('messages.park_open') }}
+                    ✅ Der Park ist aktuell geöffnet.
                 </p>
             @else
                 <p class="text-red-400 mt-1 font-semibold">
-                    ❌ {{ __('messages.park_closed') }}
+                    ❌ Der Park ist derzeit geschlossen.
                 </p>
             @endif
-
         @else
             <p class="text-gray-400">
-                {{ __('messages.no_opening_hours_today') }}
+                Keine Öffnungszeiten für heute hinterlegt.
             </p>
         @endif
+
+        @if (!$isOpen && $nextOpeningLabel)
+            <div class="mt-4 text-sm text-blue-200 bg-blue-900 px-3 py-2 rounded inline-block">
+                ⏭️ <span class="font-semibold text-blue-100">Nächste Öffnung:</span> {{ $nextOpeningLabel }}
+            </div>
+        @endif
     </div>
+
+
+
+    <div class="bg-[#1c1e5c] rounded-xl p-6 shadow-md text-white">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-semibold">
+                📊 Besucherzahlen
+            </h3>
+            <a href="#" target="_blank" rel="noopener"
+               class="text-blue-300 hover:text-blue-400 transition"
+               title="Externe Statistikseite öffnen">
+                🌍
+            </a>
+        </div>
+
+        <div class="space-y-2 text-sm">
+            <div>
+                <a href="#"
+                   class="text-emerald-400 hover:underline hover:text-emerald-300 transition">
+                    📄 Übersicht (Summary)
+                </a>
+            </div>
+            <div>
+                <a href="#"
+                   class="text-emerald-400 hover:underline hover:text-emerald-300 transition">
+                    🗓️ Kalender (Crowd Calendar)
+                </a>
+            </div>
+            <div>
+                <a href="#"
+                   class="text-emerald-400 hover:underline hover:text-emerald-300 transition">
+                    📈 Statistik (Wartezeiten & Besucher)
+                </a>
+            </div>
+        </div>
+    </div>
+
 
     @if($visits24h > 0)
     <div
@@ -328,6 +388,7 @@
 
 
 {{-- Attraktionen --}}
+@if($park->queueTimes->isNotEmpty())
 <section id="wartezeiten"
     class="scroll-mt-15 py-12 bg-gradient-to-br from-purple-900 via-indigo-800 to-blue-900 text-white"
     x-data="{ status: 'all', search: '', wait: 'all' }"
@@ -423,7 +484,9 @@
         @endif
     </div>
 </section>
+@endif
 
+{{-- Besucherzahlen --}}
 
 {{-- Nearby Parks Section --}}
 {{-- Wenn Parks in der Nähe vorhanden sind --}}
