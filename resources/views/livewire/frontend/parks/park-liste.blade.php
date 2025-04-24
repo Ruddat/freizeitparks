@@ -242,39 +242,6 @@
     </div>
 </div>
 
-<div class="rounded-xl p-4 bg-gradient-to-b from-blue-600 to-blue-800 text-white shadow-lg">
-    <div class="text-sm font-semibold text-white mb-1">
-        {{ $park->name }}
-    </div>
-
-    <div class="text-xs text-white/70 mb-2">
-        {{ $park->country }}
-    </div>
-
-    {{-- Öffnungsstatus --}}
-    <div class="text-sm font-medium {{ $park->status_class }}">
-        {{ $park->status_label }}
-    </div>
-
-    {{-- Uhrzeit nur anzeigen, wenn vorhanden --}}
-    @if($park->opening_hours_today && $park->opening_hours_today->open && $park->opening_hours_today->close)
-        <div class="text-xs mt-1 text-white/80">
-            {{ \Carbon\Carbon::parse($park->opening_hours_today->open)->format('H:i') }}
-            –
-            {{ \Carbon\Carbon::parse($park->opening_hours_today->close)->format('H:i') }}
-        </div>
-    @else
-        <div class="text-xs mt-1 text-white/50 italic">
-            Keine Zeiten verfügbar
-        </div>
-    @endif
-
-
-</div>
-
-
-
-
                 @empty
                     <p class="col-span-full text-center text-gray-400 text-lg">Keine passenden Parks gefunden.</p>
                 @endforelse

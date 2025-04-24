@@ -89,13 +89,13 @@ class Park extends Model
             ->where('date', $heute)
             ->first();
 
-        \Log::debug('Öffnungszeiten geprüft', [
-            'park' => $this->name,
-            'timezone' => $timezone,
-            'date' => $heute,
-            'open' => $oeffnung->open ?? null,
-            'close' => $oeffnung->close ?? null,
-        ]);
+        // \Log::debug('Öffnungszeiten geprüft', [
+        //    'park' => $this->name,
+        //    'timezone' => $timezone,
+        //    'date' => $heute,
+        //    'open' => $oeffnung->open ?? null,
+        //    'close' => $oeffnung->close ?? null,
+        // ]);
 
         return $oeffnung;
     }
