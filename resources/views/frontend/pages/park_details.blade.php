@@ -355,28 +355,34 @@
         $latitude = $park->latitude;
         $longitude = $park->longitude;
         $coords = $latitude . ',' . $longitude;
+        $label = urlencode($park->name);
     @endphp
 
     <div class="bg-[#1c1e5c] rounded-xl p-4 shadow overflow-hidden">
         <h3 class="text-xl font-semibold mb-4">📍 Karte & Anfahrt</h3>
 
+        {{-- Eingebettete Karte mit Marker --}}
         <div class="rounded-lg overflow-hidden aspect-w-16 aspect-h-9">
             <iframe
-                src="https://www.google.com/maps?q={{ $coords }}&output=embed"
+                src="https://www.google.com/maps?q={{ $coords }}&hl=de&z=15&output=embed"
                 class="w-full h-full border-0"
                 loading="lazy"
                 allowfullscreen>
             </iframe>
         </div>
 
+        {{-- Button 1: Route berechnen mit Zielname --}}
         <a
-            href="https://www.google.com/maps/dir/?api=1&destination={{ $coords }}"
+            href="https://www.google.com/maps/dir/?api=1&destination={{ urlencode($park->name) }}"
             target="_blank"
             rel="noopener"
             class="block mt-4 text-center bg-yellow-400 text-black font-bold py-2 px-4 rounded hover:bg-yellow-300 transition">
-            🚗 Route berechnen mit Google Maps
+            🚗 Route zu „{{ $park->name }}“ in Google Maps öffnen
         </a>
     </div>
+
+
+
       </div>
 
 

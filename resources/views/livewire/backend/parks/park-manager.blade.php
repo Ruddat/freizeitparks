@@ -52,49 +52,61 @@
                         <table class="table table-bordered table-striped">
                             <thead>
                                 <tr>
-                                    <th>Name</th>
-                                    <th>Land</th>
-                                    <th>Status</th>
-                                    <th>Kontinent</th>
-                                    <th>Kategorie</th>
+                                    <th wire:click="sortBy('name')" style="cursor:pointer">Park</th>
+                                    <th>Logo</th>
+                                    <th wire:click="sortBy('country')" style="cursor:pointer">Land</th>
+                                    <th wire:click="sortBy('status')" style="cursor:pointer">Status</th>
+                                    <th wire:click="sortBy('continent')" style="cursor:pointer">Kontinent</th>
+                                    <th wire:click="sortBy('type')" style="cursor:pointer">Kategorie</th>
+                                    <th wire:click="sortBy('updated_at')" style="cursor:pointer">Aktualisiert</th>
                                     <th class="text-center">Aktionen</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($parks as $park)
-                                    <tr>
-                                        <td>{{ $park->name }}</td>
-                                        <td>{{ $park->country }}</td>
-                                        <td>
-                                            <a href="javascript:void(0)" wire:click="toggleStatus({{ $park->id }})" class="badge text-white
-                                                @if($park->status === 'active') bg-success
-                                                @elseif($park->status === 'pending') bg-warning
-                                                @elseif($park->status === 'revive') bg-info
-                                                @elseif($park->status === 'inactive') bg-secondary
-                                                @else bg-dark
-                                                @endif
-                                                ">
-                                                {{ ucfirst($park->status) }}
+                                <tr>
+                                    <td>{{ $park->name }}</td>
+                                    <td>
+                                        @if ($park->logo)
+                                            <img src="{{ asset($park->logo) }}" alt="Logo" style="width: 50px; height: auto;">
+                                        @else
+                                            <span class="text-muted">–</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ $park->country }}</td>
+                                    <td>
+                                        <a href="javascript:void(0)" wire:click="toggleStatus({{ $park->id }})" class="badge text-white
+                                            @if($park->status === 'active') bg-success
+                                            @elseif($park->status === 'pending') bg-warning
+                                            @elseif($park->status === 'revive') bg-info
+                                            @elseif($park->status === 'inactive') bg-secondary
+                                            @else bg-dark
+                                            @endif
+                                        ">
+                                            {{ ucfirst($park->status) }}
+                                        </a>
+                                    </td>
+                                    <td>{{ $park->continent }}</td>
+                                    <td>{{ $park->type }}</td>
+                                    <td>
+                                        {{ \Carbon\Carbon::parse($park->updated_at)->format('d.m.Y H:i') }}
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center">
+                                            <a href="javascript:void(0)"
+                                               wire:click="edit({{ $park->id }})"
+                                               class="btn btn-warning btn-sm mx-1">
+                                                <i class="flaticon-381-edit"></i>
                                             </a>
-                                        </td>
-                                        <td>{{ $park->continent }}</td>
-                                        <td>{{ $park->type }}</td>
-                                        <td class="text-center">
-                                            <div class="d-flex justify-content-center">
-                                                <a href="javascript:void(0)"
-                                                   wire:click="edit({{ $park->id }})"
-                                                   class="btn btn-warning btn-sm mx-1">
-                                                    <i class="flaticon-381-edit"></i>
-                                                </a>
-                                                <a href="javascript:void(0)"
-                                                   wire:click="delete({{ $park->id }})"
-                                                   class="btn btn-danger btn-sm mx-1"
-                                                   onclick="return confirm('Wirklich löschen?')">
-                                                    <i class="flaticon-381-trash"></i>
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                            <a href="javascript:void(0)"
+                                               wire:click="delete({{ $park->id }})"
+                                               class="btn btn-danger btn-sm mx-1"
+                                               onclick="return confirm('Wirklich löschen?')">
+                                                <i class="flaticon-381-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
                                 @endforeach
                             </tbody>
                         </table>

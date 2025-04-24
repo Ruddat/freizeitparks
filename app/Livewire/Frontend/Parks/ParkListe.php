@@ -7,6 +7,7 @@ use Livewire\Component;
 use Livewire\Attributes\On;
 use Livewire\WithPagination;
 use Livewire\WithoutUrlPagination;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ParkListe extends Component
 {
@@ -19,6 +20,7 @@ class ParkListe extends Component
     public ?float $userLat = null;
     public ?float $userLng = null;
     public int $radiusKm = 250;
+
 
     protected $listeners = [
         'sucheAktualisiert' => 'setSuche'
@@ -44,7 +46,7 @@ class ParkListe extends Component
         if ($this->userLat === null || $this->userLng === null) {
             $this->dispatch('alert', ['message' => 'Standort konnte nicht gesetzt werden.', 'type' => 'error']);
         } else {
-            $this->resetPage(); // Pagination zurücksetzen, wenn der Standort gesetzt wird
+            $this->resetPage();
             $this->dispatch('filterAktualisiert', [
                 'suche' => $this->suche,
                 'land' => $this->land,
@@ -75,7 +77,7 @@ class ParkListe extends Component
     public function setSuche($wert)
     {
         $this->suche = trim($wert);
-        $this->resetPage(); // Pagination zurücksetzen, wenn die Suche geändert wird
+        $this->resetPage();
     }
 
     public function resetFilter()
@@ -83,10 +85,9 @@ class ParkListe extends Component
         $this->suche = '';
         $this->land = '';
         $this->status = 'alle';
-        // Optional: Standort zurücksetzen
         $this->userLat = null;
         $this->userLng = null;
-        $this->resetPage(); // Pagination zurücksetzen, wenn die Filter zurückgesetzt werden
+        $this->resetPage();
         $this->dispatch('filterAktualisiert', [
             'suche' => $this->suche,
             'land' => $this->land,
@@ -96,7 +97,7 @@ class ParkListe extends Component
 
     public function updated($property)
     {
-        $this->resetPage(); // Pagination zurücksetzen, wenn ein Filter geändert wird
+        $this->resetPage();
         $this->dispatch('filterAktualisiert', [
             'suche' => $this->suche,
             'land' => $this->land,
@@ -108,7 +109,6 @@ class ParkListe extends Component
     {
         $query = Park::query();
 
-        // Suche
         if ($this->suche) {
             $query->where(function ($q) {
                 $q->where('name', 'like', '%' . $this->suche . '%')
@@ -117,15 +117,12 @@ class ParkListe extends Component
             });
         }
 
-        // Land-Filter
         if ($this->land) {
             $query->where('country', 'like', '%' . $this->land . '%');
         }
 
-        // Nur aktive Parks
         $query->where('status', 'active');
 
-        // Entfernungsfilter
         if ($this->userLat && $this->userLng) {
             $query->select('*')
                   ->selectRaw(
@@ -136,7 +133,6 @@ class ParkListe extends Component
                   ->orderBy('distance');
         }
 
-        // Länder für Dropdown
         $alleLaender = Park::whereNotNull('country')
             ->distinct()
             ->pluck('country')
@@ -144,34 +140,20 @@ class ParkListe extends Component
             ->sort()
             ->values();
 
-        // Paginierte Abfrage (zuerst ohne Status-Filter)
-        $parks = $query->get();
+        // Nutze Livewire's eingebaute Pagination
+        $parks = $query->paginate(9);
 
-        // Dynamischer Öffnungsstatus-Filter in PHP
+        // Dynamische Öffnungsstatus-Filter nach der Pagination
         if (in_array($this->status, ['open', 'closed', 'unknown'])) {
-            $parks = $parks->filter(fn($park) => $park->opening_status === $this->status);
+            $items = $parks->getCollection()->filter(fn($park) => $park->opening_status === $this->status);
+            $parks->setCollection($items);
         }
 
-        // Paginieren manuell, da es jetzt eine Collection ist
-        $perPage = 9;
-        $currentPage = request()->get('page', 1);
-        $paged = $parks->forPage($currentPage, $perPage);
-        $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
-            $paged,
-            $parks->count(),
-            $perPage,
-            $currentPage,
-            ['path' => request()->url(), 'query' => request()->query()]
-        );
-
-        logger('📍 Gefilterte Parks:', ['count' => $paginator->count(), 'status' => $this->status]);
+        logger('📍 Gefilterte Parks:', ['count' => $parks->count(), 'status' => $this->status]);
 
         return view('livewire.frontend.parks.park-liste', [
-            'parks' => $paginator,
+            'parks' => $parks,
             'laender' => $alleLaender,
         ]);
     }
-
-
-
 }

@@ -25,6 +25,9 @@ class ParkManager extends Component
     public $imageUpload;
     public $imageUploadPath = 'images/parks/';
 
+    public $sortField = 'name';
+    public $sortDirection = 'asc';
+
     protected $queryString = [
         'search' => ['except' => ''],
         'perPage' => ['except' => 10],
@@ -118,8 +121,8 @@ class ParkManager extends Component
     public function render()
     {
         $parks = Park::where('name', 'like', '%' . $this->search . '%')
-            ->orderBy('name')
-            ->paginate($this->perPage);
+        ->orderBy($this->sortField, $this->sortDirection)
+        ->paginate($this->perPage);
 
         return view('livewire.backend.parks.park-manager', [
             'parks' => $parks,
@@ -359,7 +362,7 @@ class ParkManager extends Component
     }
 
     public function toggleStatus($parkId)
-{
+    {
     $park = Park::find($parkId);
 
     if (!$park) {
@@ -382,4 +385,15 @@ class ParkManager extends Component
     session()->flash('success', "Status geändert zu: {$nextStatus}");
 
 }
+
+public function sortBy($field)
+{
+    if ($this->sortField === $field) {
+        $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+        $this->sortField = $field;
+        $this->sortDirection = 'asc';
+    }
+}
+
 }
