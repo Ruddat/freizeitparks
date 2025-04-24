@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use App\Models\Park;
 use App\Models\ParkWeather;
+use App\Services\SeoService;
 use Illuminate\Http\Request;
 use App\Models\ParkDailyStats;
 use App\Models\ParkCrowdReport;
@@ -200,14 +201,17 @@ class ParkController extends Controller
         $visits24h = ModVisitorSession::where('page_url', 'LIKE', '%/parks/' . $park->id . '%')
         ->where('last_activity_at', '>=', now()->subHours(24))
         ->count();
-//dd($visits24h);
+        //dd($visits24h);
+
+        $seo = app(SeoService::class)->getSeoData($park);
 
         return view('frontend.pages.park_details', compact(
             'park',
             'nearbyParks',
             'forecast',
             'showCrowdModal',
-            'visits24h'
+            'visits24h',
+            'seo'
         ));
 
     }

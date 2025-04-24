@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Frontend;
 
 use Carbon\Carbon;
 use App\Models\Park;
+use App\Services\SeoService;
 use Illuminate\Http\Request;
 use App\Services\WeatherService;
 use App\Http\Controllers\Controller;
@@ -19,8 +20,15 @@ class IndexController extends Controller
         $this->weatherService = $weatherService;
     }
 
-    public function index()
+    public function index(SeoService $seoService)
     {
+
+
+           // 🧠 SEO für Startseite manuell erstellen
+           $seo = $seoService->getDefaultSeoForStartpage();
+
+
+
         $rawForecast = $this->weatherService->getSevenDayForecast();
 
         $weatherIcons = [
@@ -99,7 +107,7 @@ class IndexController extends Controller
             ];
         });
 
-        return view('frontend.pages.startseite', compact('forecast'));
+        return view('frontend.pages.startseite', compact('forecast', 'seo'));
     }
 
 

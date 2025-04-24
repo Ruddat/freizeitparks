@@ -157,7 +157,7 @@
             <div class="flex justify-center space-x-4 mt-2 text-xs text-gray-500">
                 <a href="#" class="hover:text-gray-300 transition">Impressum</a>
                 <span>•</span>
-                <a href="#" class="hover:text-gray-300 transition">Datenschutz</a>
+                <a href="{{ route('sitemap.xml') }}" class="hover:text-gray-300 transition">Sitemap</a>
                 <span>•</span>
                 <a href="#" class="hover:text-gray-300 transition">AGB</a>
             </div>

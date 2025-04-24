@@ -12,7 +12,8 @@
             $icon512 = setting('site_icon_512');
         @endphp
 
-        <title>{{ $title ?? $siteName }}</title>
+        {{-- Dynamischer SEO-Block --}}
+        @include('frontend.partials.seo')
 
         {{-- Favicon & Icons --}}
         @if ($siteFavicon)
