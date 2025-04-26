@@ -73,15 +73,6 @@
     @endif
 
 
-@php
-//    dd($park->queueTimes);
-@endphp
-
-
-<livewire:frontend.statistic.crowd-calendar :park="$park" />
-
-<livewire:frontend.statistic.crowd-chart :park="$park" :year="now()->year" :month="now()->month" />
-
 
     {{-- Navigation --}}
     <nav class="w-full sticky top-0 z-50 bg-gradient-to-r from-purple-800 via-indigo-800 to-purple-900 text-white px-4 py-2 shadow-lg">
@@ -286,12 +277,13 @@
 
 
 
+    {{-- Besucherzahlen --}}
     <div class="bg-[#1c1e5c] rounded-xl p-6 shadow-md text-white">
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-xl font-semibold">
                 📊 Besucherzahlen
             </h3>
-            <a href="#" target="_blank" rel="noopener"
+            <a href="{{ route('parks.statistics', ['parkSlug' => $park->slug]) }}" target="_blank" rel="noopener"
                class="text-blue-300 hover:text-blue-400 transition"
                title="Externe Statistikseite öffnen">
                 🌍
@@ -299,56 +291,47 @@
         </div>
 
         <div class="space-y-2 text-sm">
+            {{--
             <div>
-                <a href="#"
+                <a href="{{ route('parks.summary', ['parkSlug' => $park->slug]) }}"
                    class="text-emerald-400 hover:underline hover:text-emerald-300 transition">
                     📄 Übersicht (Summary)
                 </a>
             </div>
+            --}}
             <div>
-                <a href="#"
+                <a href="{{ route('parks.calendar', ['parkSlug' => $park->slug]) }}"
                    class="text-emerald-400 hover:underline hover:text-emerald-300 transition">
                     🗓️ Kalender (Crowd Calendar)
                 </a>
             </div>
+            {{--
             <div>
-                <a href="#"
+                <a href="{{ route('parks.statistics', ['parkSlug' => $park->slug]) }}"
                    class="text-emerald-400 hover:underline hover:text-emerald-300 transition">
                     📈 Statistik (Wartezeiten & Besucher)
                 </a>
             </div>
+--}}
+
+            @if($visits24h > 0)
+            <div
+                class="inline-block bg-gradient-to-r from-red-600 to-yellow-500 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg animate__animated animate__bounceIn mb-4"
+                style="box-shadow: 0 0 15px rgba(255, 100, 100, 0.6);"
+            >
+                🔥 {{ $visits24h }}x besucht in den letzten 24h
+            </div>
+            @endif
+            @if($park->website_url)
+            <div class="mt-2 flex flex-wrap gap-2">
+                {{-- Webseite --}}
+                <a href="{{ $park->website_url }}" target="_blank" class="btn btn-sm bg-indigo-600 text-white hover:bg-indigo-500 rounded-full px-3 py-1">
+                    🌐 Zur offiziellen Seite
+                </a>
+            </div>
+            @endif
         </div>
     </div>
-
-
-    @if($visits24h > 0)
-    <div
-        class="inline-block bg-gradient-to-r from-red-600 to-yellow-500 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg animate__animated animate__bounceIn mb-4"
-        style="box-shadow: 0 0 15px rgba(255, 100, 100, 0.6);"
-    >
-        🔥 {{ $visits24h }}x besucht in den letzten 24h
-    </div>
-@endif
-
-<div class="mt-2 flex flex-wrap gap-2">
-    {{-- Webseite --}}
-    <a href="{{ $park->website_url }}" target="_blank" class="btn btn-sm bg-indigo-600 text-white hover:bg-indigo-500 rounded-full px-3 py-1">
-        🌐 Zur offiziellen Seite
-    </a>
-
-    {{-- Anfahrt --}}
-    <a href="https://maps.google.com/?q={{ $park->latitude }},{{ $park->longitude }}" target="_blank" class="btn btn-sm bg-green-600 text-white hover:bg-green-500 rounded-full px-3 py-1">
-        📍 Anfahrt
-    </a>
-
-    {{-- Socials --}}
-    @if ($park->facebook_url)
-        <a href="{{ $park->facebook_url }}" target="_blank" class="btn btn-sm bg-blue-700 hover:bg-blue-600 text-white rounded-full px-3 py-1">
-            👍 Facebook
-        </a>
-    @endif
-</div>
-
 
         <!-- Bewertungen -->
         <section id="bewertungen">

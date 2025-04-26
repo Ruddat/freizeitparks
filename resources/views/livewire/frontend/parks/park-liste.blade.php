@@ -229,7 +229,7 @@
                                          alt="{{ $park->name }}"
                                          class="absolute top-0 left-0 w-full h-full object-cover z-20 rounded-lg"
                                          loading="lazy"
-                                         onerror="this.src='/placeholder-image.jpg';" />
+                                         onerror="this.src='/images/park_placeholder.png';" />
                                 </div>
                             </a>
                             <div class="flex-grow flex flex-col justify-center z-30 relative">
