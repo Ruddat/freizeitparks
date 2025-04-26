@@ -1,15 +1,15 @@
 <div class="container mx-auto px-4 bg-[#010b3f] text-white">
     <!-- Suchfeld -->
     <div class="max-w-7xl mx-auto px-6 lg:px-12 py-8 mb-6">
-    <h2 class="text-3xl font-bold mb-4 text-center">Finde deinen perfekten Freizeitpark! 🎢</h2>
+        <h2 class="text-3xl font-bold mb-4 text-center">Finde deinen perfekten Freizeitpark! 🎢</h2>
         <input
-        type="search"
-        wire:model.live.debounce.500ms="suche"
-        placeholder="Suche nach Freizeitpark, Ort oder Land..."
-        class="w-full px-5 py-3 bg-[#010b3f] border border-gray-600 rounded-xl
-               focus:outline-none focus:ring-2 focus:ring-yellow-400
-               text-white placeholder-gray-400 shadow-sm"
-    />
+            type="search"
+            wire:model.live.debounce.500ms="suche"
+            placeholder="Suche nach Freizeitpark, Ort oder Land..."
+            class="w-full px-5 py-3 bg-[#010b3f] border border-gray-600 rounded-xl
+                   focus:outline-none focus:ring-2 focus:ring-yellow-400
+                   text-white placeholder-gray-400 shadow-sm"
+        />
     </div>
 
 
@@ -118,25 +118,27 @@
         </div>
     </div>
 
-    @php
-    $gradients = [
-        ['#6366f1', '#4f46e5'], // Indigo
-        ['#ec4899', '#db2777'], // Pink
-        ['#14b8a6', '#0d9488'], // Teal
-        ['#f97316', '#ea580c'], // Orange
-        ['#a855f7', '#9333ea'], // Purple
-        ['#ef4444', '#dc2626'], // Red
-    ];
-    @endphp
-
     <style>
+        /* Optimierte Flipcard-Styles */
         .flip-container {
             perspective: 1000px;
+            transform-style: preserve-3d;
+            position: relative;
+            min-height: 28rem;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .flip-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
         }
         .flipper {
             transform-style: preserve-3d;
-            transition: transform 0.8s ease-in-out;
+            transition: transform 0.8s cubic-bezier(0.4, 0.2, 0.2, 1);
             position: relative;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
         }
         .flipped .flipper {
             transform: rotateY(180deg);
@@ -149,120 +151,31 @@
             top: 0;
             left: 0;
             border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        .front {
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 1.5rem;
         }
         .back {
             transform: rotateY(180deg);
+            z-index: 3;
+            background-color: #1f2937;
+            padding: 1.5rem;
+            overflow-y: auto;
         }
-        .animate-slideIn {
-            animation: slideIn 0.3s ease-in;
-        }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    </style>
-
-    <section id="park-liste-anchor" class="max-w-7xl mx-auto px-6 lg:px-12 py-8">
-        <h2 class="text-3xl font-bold mb-8 text-center text-yellow-400 animate-slideIn">
-            Top Freizeitparks entdecken
-        </h2>
-        <div class="relative z-10 px-4 sm:px-6 lg:px-12">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                @forelse($parks as $park)
-                    @php
-                        $gradient = $gradients[$loop->index % count($gradients)];
-                    @endphp
-
-<div x-data="{ flipped: false }" class="flip-container relative w-full min-h-[28rem] shadow-lg transition-shadow duration-300" :class="{ 'flipped': flipped }">
-    <div class="flipper w-full h-full">
-
-        <!-- Vorderseite -->
-        <div class="front p-6 flex flex-col justify-between text-center rounded-xl relative overflow-hidden"
-             style="background: linear-gradient(to bottom right, {{ $gradient[0] }}, {{ $gradient[1] }});">
-            <a href="{{ route('parks.show', $park->slug ?: $park->id) }}" aria-label="Details zu {{ $park->name }}">
-                <div class="relative mb-4 w-full h-40">
-                    <div class="absolute top-2 left-2 w-full h-full bg-yellow-400 shadow-xl z-10 rounded-lg"></div>
-                    <img src="{{ $park->logo_url ?? $park->image }}"
-                         alt="{{ $park->name }}"
-                         class="absolute top-0 left-0 w-full h-full object-cover z-20 rounded-lg"
-                         loading="lazy" />
-                </div>
-            </a>
-            <div class="flex-grow flex flex-col justify-center z-30 relative">
-                <h2 class="text-white text-3xl font-bold" style="letter-spacing: 2px;">{{ \Str::words($park->name, 2, '') }}</h2>
-                <p class="text-white mt-1">{{ $park->country }}</p>
-                <p class="text-sm mt-2 font-semibold {{ $park->status_class }}">{{ $park->status_label }}</p>
-            </div>
-            <div class="relative mt-6 w-full">
-                <button @click.prevent="flipped = true"
-                        type="button"
-                        class="inline-block px-6 py-2 font-bold text-white bg-yellow-400 hover:bg-yellow-300 rounded shadow transition">
-                    Mehr erfahren
-                </button>
-            </div>
-        </div>
-
-        <!-- Rückseite -->
-        <div class="back bg-gray-800 text-white p-6 flex flex-col justify-between rounded-xl">
-            <div class="flex-grow">
-                <h4 class="text-lg font-semibold mb-3">{{ $park->name }}</h4>
-
-                @if($park->video_embed_code)
-                    <div class="video-frame mb-4">{!! $park->video_embed_code !!}</div>
-                @elseif($park->video_url)
-                    <div class="video-frame mb-4">
-                        @php $video = $park->video_url; @endphp
-                        @if(Str::contains($video, 'youtube'))
-                            <iframe src="https://www.youtube.com/embed/{{ Str::afterLast($video, 'v=') }}?autoplay=1&mute=1"
-                                    allow="autoplay; encrypted-media"
-                                    allowfullscreen loading="lazy"></iframe>
-                        @elseif(Str::contains($video, 'vimeo'))
-                            <iframe src="https://player.vimeo.com/video/{{ Str::afterLast($video, '/') }}?autoplay=1&muted=1"
-                                    allow="autoplay; fullscreen" allowfullscreen loading="lazy"></iframe>
-                        @elseif(Str::endsWith($video, '.mp4'))
-                            <video autoplay muted loop playsinline controls>
-                                <source src="{{ $video }}" type="video/mp4">
-                            </video>
-                        @endif
-                    </div>
-                @else
-                    <p class="text-sm text-gray-300 mb-4">
-                        {!! \Str::limit($park->description, 300) !!}
-                    </p>
-                @endif
-            </div>
-
-            <button @click="flipped = false"
-                    type="button"
-                    class="mt-4 w-full bg-white text-gray-900 font-semibold py-2 rounded-lg hover:bg-gray-100 transition-colors">
-                Zurück
-            </button>
-        </div>
-
-    </div>
-</div>
-
-                @empty
-                    <p class="col-span-full text-center text-gray-400 text-lg">Keine passenden Parks gefunden.</p>
-                @endforelse
-            </div>
-
-            <div class="mt-8 flex justify-center">
-                {{ $parks->links('vendor.pagination.custom') }}
-            </div>
-        </div>
-    </section>
-
-
-    <style>
         .video-frame {
             position: relative;
             width: 100%;
-            padding-top: 56.25%; /* 16:9 */
-            overflow: hidden;
+            padding-top: 56.25%;
+            margin-bottom: 1rem;
             border-radius: 0.5rem;
+            overflow: hidden;
         }
-
         .video-frame iframe,
         .video-frame video {
             position: absolute;
@@ -274,66 +187,132 @@
         }
     </style>
 
-<style>
-    .flip-container {
-        perspective: 1000px;
-        transform-style: preserve-3d;
-        position: relative;
-    }
+<section id="park-liste-anchor" class="max-w-7xl mx-auto px-6 lg:px-12 py-8">
+    <h2 class="text-3xl font-bold mb-8 text-center text-yellow-400 animate-slideIn">
+        Top Freizeitparks entdecken
+    </h2>
+    <div class="relative z-10 px-4 sm:px-6 lg:px-12">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            @forelse($parks as $park)
+                @php
+                    $gradients = [
+                        ['#6366f1', '#4f46e5'], // Indigo
+                        ['#ec4899', '#db2777'], // Pink
+                        ['#14b8a6', '#0d9488'], // Teal
+                        ['#f97316', '#ea580c'], // Orange
+                        ['#a855f7', '#9333ea'], // Purple
+                        ['#ef4444', '#dc2626'], // Red
+                    ];
+                    $gradient = $gradients[$loop->index % count($gradients)];
+                @endphp
 
-    .flipper {
-        transform-style: preserve-3d;
-        transition: transform 0.8s ease-in-out;
-        position: relative;
-        backface-visibility: hidden;
-        -webkit-backface-visibility: hidden;
-    }
+                <div x-data="{ flipped: false, videoLoaded: false }"
+                     class="flip-container relative w-full shadow-lg"
+                     :class="{ 'flipped': flipped }"
+                     @click="flipped = !flipped"
+                     @keydown.enter="flipped = !flipped"
+                     tabindex="0"
+                     role="button"
+                     aria-pressed="false"
+                     aria-label="Karte für {{ $park->name }} umdrehen">
 
-    .flipped .flipper {
-        transform: rotateY(180deg);
-    }
+                    <div class="flipper w-full h-full">
+                        <!-- Vorderseite -->
+                        <div class="front text-center"
+                             style="background: linear-gradient(to bottom right, {{ $gradient[0] }}, {{ $gradient[1] }});">
+                            <a href="{{ route('parks.show', $park->slug ?: $park->id) }}"
+                               aria-label="Details zu {{ $park->name }}"
+                               @click.stop>
+                                <div class="relative mb-4 w-full h-40">
+                                    <div class="absolute top-2 left-2 w-full h-full bg-yellow-400 shadow-xl z-10 rounded-lg"></div>
+                                    <img src="{{ $park->logo_url ?? $park->image }}"
+                                         alt="{{ $park->name }}"
+                                         class="absolute top-0 left-0 w-full h-full object-cover z-20 rounded-lg"
+                                         loading="lazy"
+                                         onerror="this.src='/placeholder-image.jpg';" />
+                                </div>
+                            </a>
+                            <div class="flex-grow flex flex-col justify-center z-30 relative">
+                                <h2 class="text-white text-3xl font-bold tracking-wide">{{ \Str::words($park->name, 2, '') }}</h2>
+                                <p class="text-white mt-1">{{ $park->country }}</p>
+                                <p class="text-sm mt-2 font-semibold {{ $park->status_class }}">{{ $park->status_label }}</p>
+                            </div>
+                            <div class="relative mt-6 w-full">
+                                <button @click.stop="flipped = true"
+                                        type="button"
+                                        class="inline-block px-6 py-2 font-bold text-white bg-yellow-400 hover:bg-yellow-300 rounded shadow transition"
+                                        aria-label="Mehr Informationen anzeigen">
+                                    Mehr erfahren
+                                </button>
+                            </div>
+                        </div>
 
-    .front, .back {
-        backface-visibility: hidden;
-        -webkit-backface-visibility: hidden;
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        top: 0;
-        left: 0;
-        border-radius: 1rem;
-        display: block;
-        overflow: hidden;
-    }
+                        <!-- Rückseite -->
+                        <div class="back">
+                            <h4 class="text-lg font-semibold mb-3">{{ $park->name }}</h4>
 
-    .front {
-        z-index: 2;
-    }
+                            @if($park->video_embed_code)
+                                <div class="video-frame" x-show="videoLoaded" x-transition>
+                                    {!! $park->video_embed_code !!}
+                                </div>
+                                <button x-show="!videoLoaded"
+                                        @click.stop="videoLoaded = true"
+                                        class="mb-4 w-full bg-blue-600 text-white py-2 rounded-lg">
+                                    Video laden
+                                </button>
+                            @elseif($park->video_url)
+                                <div class="video-frame" x-show="videoLoaded" x-transition>
+                                    @php $video = $park->video_url; @endphp
+                                    @if(Str::contains($video, 'youtube'))
+                                        <iframe src="https://www.youtube.com/embed/{{ Str::afterLast($video, 'v=') }}?autoplay=1&mute=1"
+                                                allow="autoplay; encrypted-media"
+                                                allowfullscreen></iframe>
+                                    @elseif(Str::contains($video, 'vimeo'))
+                                        <iframe src="https://player.vimeo.com/video/{{ Str::afterLast($video, '/') }}?autoplay=1&muted=1"
+                                                allow="autoplay; fullscreen" allowfullscreen></iframe>
+                                    @endif
+                                </div>
+                                <button x-show="!videoLoaded"
+                                        @click.stop="videoLoaded = true"
+                                        class="mb-4 w-full bg-blue-600 text-white py-2 rounded-lg">
+                                    Video laden
+                                </button>
+                            @else
+                                <p class="text-sm text-gray-300 mb-4">
+                                    {!! \Str::limit($park->description, 300) !!}
+                                </p>
+                            @endif
 
-    .back {
-        transform: rotateY(180deg);
-        z-index: 3;
-    }
-</style>
+                            <button @click.stop="flipped = false"
+                                    type="button"
+                                    class="mt-4 w-full bg-white text-gray-900 font-semibold py-2 rounded-lg hover:bg-gray-100 transition-colors"
+                                    aria-label="Zurück zur Vorderseite">
+                                Zurück
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            @empty
+                <p class="col-span-full text-center text-gray-400 text-lg">Keine passenden Parks gefunden.</p>
+            @endforelse
+        </div>
+
+        <div class="mt-8 flex justify-center">
+            {{ $parks->links('vendor.pagination.custom') }}
+        </div>
+    </div>
+</section>
 
 
 </div>
 @push('scripts')
 <script>
     document.addEventListener('livewire:load', function () {
-        // Nach dem Paginieren zum Anfang der Karten scrollen
+        // Scroll-Anker nach Paginierung
         Livewire.on('component.updated', () => {
-            const parkCards = document.getElementById('park-cards');
-            if (parkCards) {
-                parkCards.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        });
-
-        // Trigger-Event, wenn die Seite gewechselt wird
-        document.addEventListener('click', function (e) {
-            if (e.target.closest('[wire\\:click^="gotoPage"], [wire\\:click="previousPage"], [wire\\:click="nextPage"]')) {
-                // Optional: Du kannst hier ein Event auslösen, falls nötig
-            }
+            const anchor = document.getElementById('park-liste-anchor');
+            if (anchor) anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
     });
 </script>

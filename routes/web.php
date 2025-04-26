@@ -24,7 +24,7 @@ Route::get('/parks/{identifier}', [ParkController::class, 'show'])->name('parks.
 Route::get('/seite/{slug}', [StaticPageController::class, 'show'])
     ->name('static.page');
 
-Route::get('/robots.txt', [RobotsController::class, 'index']);
-Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.xml');
+    Route::get('/robots.txt', [\App\Http\Controllers\Frontend\Seo\RobotsController::class, 'index']);
+    Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.xml');
 
 

@@ -12,6 +12,13 @@ class TrackReferral
 {
     public function handle(Request $request, Closure $next)
     {
+
+
+        // WENN die Route "/track-dwell-time" ist → NICHT tracken
+        if ($request->is('track-dwell-time')) {
+            return $next($request);
+        }
+
         $referer = $request->header('referer');
         $landingPage = $request->fullUrl();
         $userAgent = $request->header('User-Agent') ?? '';

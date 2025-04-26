@@ -17,6 +17,7 @@
         "livewire/livewire": "^3.6",
         "spatie/browsershot": "^5.0",
         "spatie/crawler": "^8.4",
+        "spatie/laravel-backup": "^9.3",
         "symfony/css-selector": "^7.2",
         "symfony/dom-crawler": "^7.2",
         "whichbrowser/parser": "^2.1"

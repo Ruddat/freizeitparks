@@ -26,7 +26,7 @@
 
     {{-- Wettervorhersage --}}
     @if($forecast->isNotEmpty())
-    <section class="relative py-16 px-4 bg-gradient-to-br from-purple-900/50 to-black/60 overflow-hidden">
+    <section class="relative py-16 px-4 bg-gradient-to-br from-[#010b3f] to-black/60 overflow-hidden">
 
 
         {{-- 🌥️ Linke große Deko-Wolke --}}
@@ -78,6 +78,12 @@
 @endphp
 
 
+<livewire:frontend.statistic.crowd-calendar :park="$park" />
+
+<livewire:frontend.statistic.crowd-chart :park="$park" :year="now()->year" :month="now()->month" />
+
+
+    {{-- Navigation --}}
     <nav class="w-full sticky top-0 z-50 bg-gradient-to-r from-purple-800 via-indigo-800 to-purple-900 text-white px-4 py-2 shadow-lg">
         <div class="max-w-screen-xl mx-auto flex flex-wrap justify-center items-center gap-3 text-sm font-medium">
             <!-- Parkname mit Icon -->

@@ -3,9 +3,8 @@
 namespace App\Http\Controllers\Frontend\Seo;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\App;
+use Illuminate\Http\Response;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Response;
 
 class RobotsController extends Controller
 {
@@ -13,23 +12,26 @@ class RobotsController extends Controller
     {
         $lines = [];
 
-        $host = $request->getSchemeAndHttpHost(); // gibt z. B. https://freizeitparks.de
+        $host = $request->getSchemeAndHttpHost(); // z. B. https://parkverzeichnis.de
         $sitemapUrl = $host . '/sitemap.xml';
 
-        if (App::environment('production')) {
+        if (app()->environment('production')) {
+            // Korrekte Reihenfolge: Allow zuerst
             $lines[] = 'User-agent: *';
+            $lines[] = 'Allow: /';
+            $lines[] = 'Disallow: /verwaltung';
             $lines[] = 'Disallow: /admin';
             $lines[] = 'Disallow: /login';
-            $lines[] = 'Allow: /';
             $lines[] = 'Sitemap: ' . $sitemapUrl;
         } else {
+            // Entwicklungsumgebungen komplett blockieren
             $lines[] = 'User-agent: *';
             $lines[] = 'Disallow: /';
-            $lines[] = '# Diese Seite ist nicht für Indexierung freigegeben.';
-            $lines[] = '# Umgebung: ' . App::environment();
+            $lines[] = '# Nicht freigegeben für Indexierung – Umgebung: ' . app()->environment();
         }
 
-        return response(implode(PHP_EOL, $lines), 200)
-            ->header('Content-Type', 'text/plain');
+        return new Response(implode(PHP_EOL, $lines), 200, [
+            'Content-Type' => 'text/plain',
+        ]);
     }
 }
