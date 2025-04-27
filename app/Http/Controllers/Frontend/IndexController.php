@@ -29,7 +29,12 @@ class IndexController extends Controller
 
 
 
-        $rawForecast = $this->weatherService->getSevenDayForecast();
+        //$rawForecast = $this->weatherService->getSevenDayForecast();
+            
+        $rawForecast = cache()->remember('weather_forecast', 6 * 60, function () {
+            return $this->weatherService->getSevenDayForecast();
+        });
+
 
         $weatherIcons = [
             0 => ['day' => 'clear-day.svg', 'night' => 'clear-night.svg'],

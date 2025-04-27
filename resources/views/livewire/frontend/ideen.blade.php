@@ -316,3 +316,62 @@
 
 
 
+<!-- Floating Button to open sidebar -->
+<button onclick="openSidebar()" class="fixed bottom-26 right-6 z-50 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white w-16 h-16 rounded-full shadow-2xl flex items-center justify-center text-3xl transition duration-300">
+    📂
+</button>
+
+<!-- Overlay -->
+<div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-80 hidden z-40 transition-opacity duration-300" onclick="closeSidebar()"></div>
+
+<!-- Sidebar -->
+<div id="sidebar" class="fixed top-0 right-0 w-80 max-w-full h-full bg-white shadow-lg transform translate-x-full transition-transform duration-300 z-50">
+    <div class="p-6 h-full flex flex-col">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-gray-800">Navigation</h2>
+            <button onclick="closeSidebar()" class="text-gray-600 hover:text-gray-900 text-2xl">
+                ✖️
+            </button>
+        </div>
+        <nav class="flex flex-col gap-6 flex-1 overflow-y-auto">
+            <a href="#" class="text-blue-700 hover:text-blue-900 font-semibold text-lg">📅 Kalender</a>
+            <a href="#" class="text-green-700 hover:text-green-900 font-semibold text-lg">📈 Besuchertrend</a>
+            <a href="#" class="text-purple-700 hover:text-purple-900 font-semibold text-lg">🏰 Parkinfo</a>
+            <a href="#" class="text-yellow-600 hover:text-yellow-800 font-semibold text-lg">⭐ Bewertungen</a>
+        </nav>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script>
+    function openSidebar() {
+        document.getElementById('sidebar').classList.remove('translate-x-full');
+        document.getElementById('sidebarOverlay').classList.remove('hidden');
+    }
+
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.add('translate-x-full');
+        document.getElementById('sidebarOverlay').classList.add('hidden');
+    }
+</script>
+
+<!-- Hauptinhalt -->
+<div class="container mx-auto px-4 py-8">
+
+    {{-- Kalender --}}
+    <section id="calendar" class="mb-8">
+        <div class="bg-[#10163A] rounded-lg shadow p-6">
+            <h2 class="text-2xl font-bold text-white mb-4">📅 Kalender (Crowd Calendar)</h2>
+            <livewire:frontend.statistic.crowd-calendar :park="$park" />
+        </div>
+    </section>
+
+    {{-- Besucherzahlen --}}
+    <section id="chart" class="mb-8">
+        <div class="bg-[#10163A] rounded-lg shadow p-6">
+            <h2 class="text-2xl font-bold text-white mb-4">📈 Besuchertrend</h2>
+            <livewire:frontend.statistic.crowd-chart :park="$park" :year="now()->year" :month="now()->month" />
+        </div>
+    </section>
+
+</div>

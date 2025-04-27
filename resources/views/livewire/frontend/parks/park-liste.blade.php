@@ -235,7 +235,24 @@
                             <div class="flex-grow flex flex-col justify-center z-30 relative">
                                 <h2 class="text-white text-3xl font-bold tracking-wide">{{ \Str::words($park->name, 2, '') }}</h2>
                                 <p class="text-white mt-1">{{ $park->country }}</p>
-                                <p class="text-sm mt-2 font-semibold {{ $park->status_class }}">{{ $park->status_label }}</p>
+                                @if($userLat && $userLng && isset($park->distance))
+                                    <p class="text-sm mt-1 text-yellow-300 font-semibold">
+                                        {{ number_format($park->distance, 1, ',', '.') }} km entfernt
+                                    </p>
+                                @endif
+                                @if($park->opening_status === 'open')
+                                <span class="inline-block bg-green-600/20 text-green-300 px-3 py-1 rounded-full text-xs font-semibold mt-2">
+                                    🟢 Geöffnet
+                                </span>
+                            @elseif($park->opening_status === 'closed')
+                                <span class="inline-block bg-red-600/20 text-red-300 px-3 py-1 rounded-full text-xs font-semibold mt-2">
+                                    🔴 Geschlossen
+                                </span>
+                            @else
+                                <span class="inline-block bg-gray-600/20 text-gray-300 px-3 py-1 rounded-full text-xs font-semibold mt-2">
+                                    ⚪ Unbekannt
+                                </span>
+                            @endif
                             </div>
                             <div class="relative mt-6 w-full">
                                 <button @click.stop="flipped = true"

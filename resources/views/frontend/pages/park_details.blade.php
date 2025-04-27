@@ -248,6 +248,50 @@
             🕒 Öffnungszeiten heute ({{ $dayLabel }})
         </h3>
 
+
+        <div x-data="{
+            now: '{{ $now->format('H:i') }}',
+            updatedAt: Date.now(),
+            init() {
+                setInterval(() => {
+                    const date = new Date();
+                    const options = { timeZone: '{{ $timezone }}', hour: '2-digit', minute: '2-digit', hour12: false };
+                    this.now = date.toLocaleTimeString([], options).slice(0,5);
+                    this.updatedAt = Date.now(); // ➔ triggert Animation
+                }, 60000);
+            }
+        }" class="flex items-center gap-2 text-yellow-300 text-sm mb-4"
+    >
+        <!-- Uhr-Icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform transition-transform duration-500"
+             :class="{ 'rotate-360': updatedAt }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 6v6l4 2m4-2a8 8 0 11-16 0 8 8 0 0116 0z" />
+        </svg>
+
+        <!-- Uhrzeit mit leichtem Fading -->
+        <span x-text="now"
+              x-transition:enter="transition ease-out duration-500"
+              x-transition:enter-start="opacity-0"
+              x-transition:enter-end="opacity-100"
+              x-transition:leave="transition ease-in duration-500"
+              x-transition:leave-start="opacity-100"
+              x-transition:leave-end="opacity-0"
+        ></span> Uhr lokale Zeit
+    </div>
+
+    <style>
+        /* Dreh-Animation fürs Uhr-Icon */
+        .rotate-360 {
+            animation: rotate360 0.8s ease;
+        }
+        @keyframes rotate360 {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+
+
         @if ($openTime && $closeTime)
             <p class="text-gray-300">
                 Von {{ $openTime->format('H:i') }} bis {{ $closeTime->format('H:i') }} Uhr

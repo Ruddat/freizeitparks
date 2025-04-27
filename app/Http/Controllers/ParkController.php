@@ -51,8 +51,12 @@ class ParkController extends Controller
         ->get();
 
         // Wetter holen
-        $rawForecast = $weatherService->getForecastForCoordinates($park->latitude, $park->longitude);
+        // $rawForecast = $weatherService->getForecastForCoordinates($park->latitude, $park->longitude);
+        $rawForecast = cache()->remember('park_forecast_' . $park->id, 120, function () use ($weatherService, $park) {
+            return $weatherService->getForecastForCoordinates($park->latitude, $park->longitude);
+        });
 
+        
         // Forecast speichern
         $today = now()->toDateString();
         foreach ($rawForecast as $day) {

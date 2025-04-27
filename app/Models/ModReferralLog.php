@@ -26,6 +26,9 @@ class ModReferralLog extends Model
         'device_type',
         'os',
         'browser',
+        'browser_language',
+        'keyword_missing',
+
     ];
 
     public $timestamps = false; // Deaktiviert created_at und updated_at

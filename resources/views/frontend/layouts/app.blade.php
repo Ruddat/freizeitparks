@@ -54,7 +54,7 @@
             @include('frontend.partials.hero')
             @endif
 
-        @if (Route::is('parks.show'))
+        @if (Route::is('parks.show', 'parks.calendar'))
         {{-- 🏰 PARKDETAILS --}}
 
         <x-hero-park-details :park="$park" />
@@ -112,8 +112,6 @@
 
 
     <main class="flex-grow w-full overflow-x-hidden">
-
-
 
         @yield('content')
     </main>
@@ -207,6 +205,31 @@
             const parkListe = document.getElementById('park-liste');
             if (parkListe) {
                 parkListe.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+
+        // Neues Skript für dynamische Sidebar-Positionierung
+        document.addEventListener('DOMContentLoaded', () => {
+            const header = document.querySelector('#navbar');
+            const sidebar = document.querySelector('aside');
+            const mainContent = document.querySelector('main');
+
+            if (header) {
+                const updateLayout = () => {
+                    const headerHeight = header.offsetHeight;
+
+                    if (sidebar) {
+                        sidebar.style.top = `${headerHeight}px`;
+                        sidebar.style.maxHeight = `calc(100vh - ${headerHeight}px)`;
+                    }
+
+                    if (mainContent) {
+                        mainContent.style.paddingTop = `${headerHeight}px`;
+                    }
+                };
+
+                updateLayout();
+                window.addEventListener('resize', updateLayout);
             }
         });
     </script>

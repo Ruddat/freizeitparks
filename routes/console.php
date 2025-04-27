@@ -12,7 +12,10 @@ Artisan::command('inspire', function () {
 
 // Wartungsmodus-Check
 Schedule::command(CheckMaintenanceExpiration::class)->everyFiveMinutes();
+
 Schedule::command('app:calculate-monthly-stats')->dailyAt('00:10')->withoutOverlapping();
+Schedule::command('parks:refresh-weather')->dailyAt('01:10')->withoutOverlapping();
+
 
 // Backup-Check
 Schedule::command('backup:run')->dailyAt('02:00')->withoutOverlapping();
