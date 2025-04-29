@@ -21,8 +21,8 @@ class SeoServiceProvider extends ServiceProvider
     public function boot(): void
     {
         View::share('seo', [
-            'title' => 'ReiseAffe24.de - Deine Reiseplattform',
-            'description' => 'Finde die besten Reiseziele, Wetterdaten und Top-Locations für deinen nächsten Urlaub.',
+            'title' => 'Freizeitparks entdecken & vergleichen – Parkverzeichnis.de',
+            'description' => 'Finde Freizeitparks weltweit – mit Bewertungen, Öffnungszeiten, Besuchermeinungen & Parktipps. Jetzt entdecken auf Parkverzeichnis.de!',
             'canonical' => url('/'),
             'extra_meta' => [],
         ]);

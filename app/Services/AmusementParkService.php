@@ -172,7 +172,7 @@ class AmusementParkService
         }
     }
 
-    protected function downloadAndConvertParkImage($parkName): ?string
+    public function downloadAndConvertParkImage($parkName): ?string
     {
         $imageUrl = $this->getParkImageFromWikimedia($parkName);
         if (!$imageUrl) {

@@ -45,6 +45,7 @@
                 <li><a href="{{ route('admin.referral-stats') }}">Referral Stats</a></li>
                 <li><a href="{{ route('admin.seo-manager') }}">SEO</a></li>
                 <li><a href="{{ route('admin.backup-manager') }}">Backup</a></li>
+                <li><a href="{{ route('admin.blogposts') }}">Blogposts</a></li>
 
 
                 <li class="another-level">

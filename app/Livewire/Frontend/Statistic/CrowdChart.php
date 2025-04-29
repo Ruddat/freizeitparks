@@ -95,7 +95,7 @@ class CrowdChart extends Component
           //  ]);
 
             $this->chartLabels[] = $day->day;
-            $this->chartData[] = $avg !== null ? round($avg * 33) : 0;
+            $this->chartData[] = $avg !== null ? round($avg * 20) : 0;
         }
     }
 

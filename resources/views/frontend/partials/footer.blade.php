@@ -52,6 +52,12 @@
                             Startseite
                         </a>
                     </li>
+                    <li>
+                        <a href="{{ route('blog.index') }}" class="flex items-center text-gray-300 hover:text-white transition-all duration-300 group">
+                            <span class="w-2 h-2 bg-yellow-400 rounded-full mr-2 transform group-hover:scale-150 transition-all duration-300"></span>
+                            News - Blog
+                        </a>
+                    </li>
                     @foreach($footerPages as $page)
                         <li>
                             <a href="{{ route('static.page', $page->slug) }}" class="flex items-center text-gray-300 hover:text-white transition-all duration-300 group">

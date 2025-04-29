@@ -123,7 +123,7 @@ class SeoService
 
     private function getModelImage($model)
     {
-        $image = $model->logo ?? $model->image ?? null;
+        $image = $model->seo_image ?? $model->logo ?? $model->image ?? null;
 
         if ($image) {
             return $this->formatImageUrl($image);

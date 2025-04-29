@@ -53,4 +53,13 @@ Route::prefix('verwaltung')->group(function () {
         ->name('admin.backup-manager');
 
 
+
+        Route::get('/blogposts', \App\Livewire\Backend\Blog\BlogPostManager::class)->name('admin.blogposts');
+        Route::get('/blogposts/edit/{post}', \App\Livewire\Backend\Blog\BlogPostForm::class)->name('admin.blogposts.edit');
+        Route::get('/blogposts/create', \App\Livewire\Backend\Blog\BlogPostForm::class)->name('admin.blogposts.create');
+
+        Route::get('/categories', \App\Livewire\Backend\Blog\CategoryManager::class)->name('admin.categories');
+        Route::get('/tags', \App\Livewire\Backend\Blog\TagManager::class)->name('admin.tags');
+
+
 });

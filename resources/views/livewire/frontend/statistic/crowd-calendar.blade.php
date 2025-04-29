@@ -76,21 +76,31 @@
                         $waterparkHours = $open?->open && $open?->close ? '12:00–16:00' : '12:00–16:00';
                         $specialEvent = $isHoliday ? '09:00–21:00' : null;
 
-                        $bg = !$isCurrentMonth ? 'bg-gray-100 text-gray-400 border-gray-200' : (
-                            $isHoliday ? 'bg-yellow-400 text-black border-yellow-500' : (
-                                $avg === null ? 'bg-gray-50 text-gray-700 border-gray-200' : (
-                                    $avg < 1.5 ? 'bg-green-400 text-black border-green-500' : (
-                                        $avg < 2.5 ? 'bg-yellow-300 text-black border-yellow-400' : 'bg-red-400 text-white border-red-500'
-                                    )
-                                )
-                            )
-                        );
+                        if (!$isCurrentMonth) {
+    $bg = 'bg-gray-100 text-gray-400 border-gray-200';
+} elseif ($isHoliday) {
+    $bg = 'bg-yellow-400 text-black border-yellow-500';
+} elseif ($avg === null) {
+    $bg = 'bg-gray-50 text-gray-700 border-gray-200';
+} elseif ($avg < 1.5) {
+    $bg = 'bg-green-400 text-black border-green-500'; // Stufe 1
+} elseif ($avg < 2.5) {
+    $bg = 'bg-lime-300 text-black border-lime-400';   // Stufe 2
+} elseif ($avg < 3.5) {
+    $bg = 'bg-yellow-300 text-black border-yellow-400'; // Stufe 3
+} elseif ($avg < 4.5) {
+    $bg = 'bg-orange-400 text-black border-orange-500'; // Stufe 4
+} else {
+    $bg = 'bg-red-500 text-white border-red-600';       // Stufe 5
+}
+
+
 
                         $todayRing = $isToday ? 'ring-2 ring-pink-500' : '';
                         $weekendBg = $isWeekend && $isCurrentMonth && !$isHoliday && $avg === null ? 'bg-slate-100' : '';
 
-                        $tooltip = $holidayLabel ?: ($avg ? 'Andrang: ~' . round($avg * 33) . '%' : 'Keine Daten');
-                    @endphp
+                        $tooltip = $holidayLabel ?: ($avg ? 'Andrang: ~' . round($avg * 20) . '%' : 'Keine Daten');
+                        @endphp
 
                     <div class="group relative border rounded-xl p-2 text-center text-sm {{ $bg }} {{ $todayRing }} {{ $weekendBg }} hover:brightness-105 hover:shadow-md transition-all duration-150 cursor-pointer"
                          data-tooltip-target="tooltip-{{ $dateStr }}">
@@ -118,8 +128,8 @@
                                         </div>
                                     @endif
                                     @if ($avg !== null)
-                                        <div class="text-xs font-semibold mt-1">{{ round($avg * 33) }}%</div>
-                                    @endif
+                                    <div class="text-xs font-semibold mt-1">{{ round($avg * 20) }}%</div>
+                                @endif
                                 </div>
                             @endif
                         </div>

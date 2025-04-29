@@ -5,6 +5,7 @@ use App\Http\Controllers\ParkController;
 use App\Http\Controllers\VisitorController;
 use App\Http\Controllers\ParkPageController;
 use App\Http\Controllers\Frontend\IndexController;
+use App\Http\Controllers\Frontend\Blog\BlogController;
 use App\Http\Controllers\Frontend\Seo\RobotsController;
 use App\Http\Controllers\Frontend\StaticPageController;
 use App\Http\Controllers\Frontend\Seo\SitemapController;
@@ -34,3 +35,6 @@ Route::get('/seite/{slug}', [StaticPageController::class, 'show'])
         Route::get('/{parkSlug}/calendar', [ParkPageController::class, 'calendar'])->name('parks.calendar');
         Route::get('/{parkSlug}/statistics', [ParkPageController::class, 'statistics'])->name('parks.statistics');
     });
+
+    Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+    Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');

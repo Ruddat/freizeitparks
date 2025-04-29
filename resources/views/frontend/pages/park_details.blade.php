@@ -145,7 +145,6 @@
     {{-- Park Details --}}
 
 
-
 <!-- Info-Bereich mit Beschreibung, Bewertungen, Öffnungszeiten und Karte -->
 <section class="py-12 px-4 bg-[#0d0f3f]">
     <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">

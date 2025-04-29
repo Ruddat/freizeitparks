@@ -39,6 +39,7 @@ class WeatherService
             }
 
             $data = $response->json();
+            Log::info('Weather forecast raw data', $data);
             $dates = $data['daily']['time'] ?? [];
             $tempsMax = $data['daily']['temperature_2m_max'] ?? [];
             $tempsMin = $data['daily']['temperature_2m_min'] ?? [];
