@@ -119,207 +119,146 @@
     </div>
 
     <style>
-        /* Optimierte Flipcard-Styles */
-        .flip-container {
-            perspective: 1000px;
-            transform-style: preserve-3d;
-            position: relative;
-            min-height: 28rem;
-            cursor: pointer;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .flip-container:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
-        }
-        .flipper {
-            transform-style: preserve-3d;
-            transition: transform 0.8s cubic-bezier(0.4, 0.2, 0.2, 1);
-            position: relative;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-        }
-        .flipped .flipper {
-            transform: rotateY(180deg);
-        }
-        .front, .back {
-            backface-visibility: hidden;
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            border-radius: 1rem;
-            overflow: hidden;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        }
-        .front {
-            z-index: 2;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 1.5rem;
-        }
-        .back {
-            transform: rotateY(180deg);
-            z-index: 3;
-            background-color: #1f2937;
-            padding: 1.5rem;
-            overflow-y: auto;
-        }
-        .video-frame {
-            position: relative;
-            width: 100%;
-            padding-top: 56.25%;
-            margin-bottom: 1rem;
-            border-radius: 0.5rem;
-            overflow: hidden;
-        }
-        .video-frame iframe,
-        .video-frame video {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: 0;
-        }
+.flip-container {
+    perspective: 1000px;
+    position: relative;
+    min-height: 28rem;
+    cursor: pointer;
+}
+.flipper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.8s cubic-bezier(0.4, 0.2, 0.2, 1);
+    transform-style: preserve-3d;
+}
+.flip-container.flipped .flipper {
+    transform: rotateY(180deg);
+}
+.front, .back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    backface-visibility: hidden; /* Wichtig für beide Seiten */
+}
+.front {
+    transform: rotateY(0deg); /* Explizit auf 0 Grad setzen */
+    z-index: 2;
+}
+.back {
+    transform: rotateY(180deg); /* Rückseite um 180 Grad gedreht */
+    background-color: #1f2937;
+    padding: 1.5rem;
+    overflow-y: auto;
+}
     </style>
 
 <section id="park-liste-anchor" class="max-w-7xl mx-auto px-6 lg:px-12 py-8">
     <h2 class="text-3xl font-bold mb-8 text-center text-yellow-400 animate-slideIn">
         Top Freizeitparks entdecken
     </h2>
-    <div class="relative z-10 px-4 sm:px-6 lg:px-12">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            @forelse($parks as $park)
-                @php
-                    $gradients = [
-                        ['#6366f1', '#4f46e5'], // Indigo
-                        ['#ec4899', '#db2777'], // Pink
-                        ['#14b8a6', '#0d9488'], // Teal
-                        ['#f97316', '#ea580c'], // Orange
-                        ['#a855f7', '#9333ea'], // Purple
-                        ['#ef4444', '#dc2626'], // Red
-                    ];
-                    $gradient = $gradients[$loop->index % count($gradients)];
-                @endphp
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        @forelse($parks as $park)
+            @php
+                $gradients = [
+                    ['from-indigo-500', 'via-indigo-600', 'to-purple-700'],
+                    ['from-pink-500', 'via-pink-600', 'to-red-500'],
+                    ['from-teal-500', 'via-teal-600', 'to-emerald-600'],
+                    ['from-orange-500', 'via-orange-600', 'to-amber-500'],
+                    ['from-purple-500', 'via-purple-600', 'to-fuchsia-600'],
+                    ['from-red-500', 'via-red-600', 'to-rose-600'],
+                ];
+                $gradient = $gradients[$loop->index % count($gradients)];
+            @endphp
 
-                <div x-data="{ flipped: false, videoLoaded: false }"
-                     class="flip-container relative w-full shadow-lg"
-                     :class="{ 'flipped': flipped }"
-                     @click="flipped = !flipped"
-                     @keydown.enter="flipped = !flipped"
-                     tabindex="0"
-                     role="button"
-                     aria-pressed="false"
-                     aria-label="Karte für {{ $park->name }} umdrehen">
+            <div x-data="{ flipped: false, videoLoaded: false }"
+                 class="flip-container relative w-full shadow-lg"
+                 :class="{ 'flipped': flipped }"
+                 tabindex="0"
+                 role="region"
+                 aria-label="Karte für {{ $park->name }}">
 
-                    <div class="flipper w-full h-full">
-                        <!-- Vorderseite -->
-                        <div class="front text-center"
-                             style="background: linear-gradient(to bottom right, {{ $gradient[0] }}, {{ $gradient[1] }});">
-                            <a href="{{ route('parks.show', $park->slug ?: $park->id) }}"
-                               aria-label="Details zu {{ $park->name }}"
-                               @click.stop>
-                                <div class="relative mb-4 w-full h-40">
-                                    <div class="absolute top-2 left-2 w-full h-full bg-yellow-400 shadow-xl z-10 rounded-lg"></div>
-                                    <img src="{{ $park->logo_url ?? $park->image }}"
-                                         alt="{{ $park->name }}"
-                                         class="absolute top-0 left-0 w-full h-full object-cover z-20 rounded-lg"
-                                         loading="lazy"
-                                         onerror="this.src='/images/park_placeholder.png';" />
-                                </div>
-                            </a>
-                            <div class="flex-grow flex flex-col justify-center z-30 relative">
-                                <h2 class="text-white text-3xl font-bold tracking-wide">{{ \Str::words($park->name, 2, '') }}</h2>
-                                <p class="text-white mt-1">{{ $park->country }}</p>
-                                @if($userLat && $userLng && isset($park->distance))
-                                    <p class="text-sm mt-1 text-yellow-300 font-semibold">
-                                        {{ number_format($park->distance, 1, ',', '.') }} km entfernt
-                                    </p>
-                                @endif
-                                @if($park->opening_status === 'open')
-                                <span class="inline-block bg-green-600/20 text-green-300 px-3 py-1 rounded-full text-xs font-semibold mt-2">
-                                    🟢 Geöffnet
-                                </span>
-                            @elseif($park->opening_status === 'closed')
-                                <span class="inline-block bg-red-600/20 text-red-300 px-3 py-1 rounded-full text-xs font-semibold mt-2">
-                                    🔴 Geschlossen
-                                </span>
-                            @else
-                                <span class="inline-block bg-gray-600/20 text-gray-300 px-3 py-1 rounded-full text-xs font-semibold mt-2">
-                                    ⚪ Unbekannt
-                                </span>
-                            @endif
-                            </div>
-                            <div class="relative mt-6 w-full">
-                                <button @click.stop="flipped = true"
-                                        type="button"
-                                        class="inline-block px-6 py-2 font-bold text-white bg-yellow-400 hover:bg-yellow-300 rounded shadow transition"
-                                        aria-label="Mehr Informationen anzeigen">
-                                    Mehr erfahren
-                                </button>
-                            </div>
-                        </div>
+                <div class="flipper w-full h-full">
 
-                        <!-- Rückseite -->
-                        <div class="back">
-                            <h4 class="text-lg font-semibold mb-3">{{ $park->name }}</h4>
+                    <!-- Vorderseite -->
+                    <div class="front text-center bg-gradient-to-br {{ implode(' ', $gradient) }} p-4 rounded-xl">
+                        <div class="relative mb-4 w-full h-40">
+                            <img src="{{ $park->logo_url ?? $park->image }}"
+                                 alt="{{ $park->name }}"
+                                 class="absolute top-0 left-0 w-full h-full object-cover z-20 rounded-lg"
+                                 loading="lazy"
+                                 onerror="this.src='/images/park_placeholder.png';" />
 
-                            @if($park->video_embed_code)
-                                <div class="video-frame" x-show="videoLoaded" x-transition>
-                                    {!! $park->video_embed_code !!}
-                                </div>
-                                <button x-show="!videoLoaded"
-                                        @click.stop="videoLoaded = true"
-                                        class="mb-4 w-full bg-blue-600 text-white py-2 rounded-lg">
-                                    Video laden
-                                </button>
-                            @elseif($park->video_url)
-                                <div class="video-frame" x-show="videoLoaded" x-transition>
-                                    @php $video = $park->video_url; @endphp
-                                    @if(Str::contains($video, 'youtube'))
-                                        <iframe src="https://www.youtube.com/embed/{{ Str::afterLast($video, 'v=') }}?autoplay=1&mute=1"
-                                                allow="autoplay; encrypted-media"
-                                                allowfullscreen></iframe>
-                                    @elseif(Str::contains($video, 'vimeo'))
-                                        <iframe src="https://player.vimeo.com/video/{{ Str::afterLast($video, '/') }}?autoplay=1&muted=1"
-                                                allow="autoplay; fullscreen" allowfullscreen></iframe>
-                                    @endif
-                                </div>
-                                <button x-show="!videoLoaded"
-                                        @click.stop="videoLoaded = true"
-                                        class="mb-4 w-full bg-blue-600 text-white py-2 rounded-lg">
-                                    Video laden
-                                </button>
-                            @else
-                                <p class="text-sm text-gray-300 mb-4">
-                                    {!! \Str::limit($park->description, 300) !!}
-                                </p>
-                            @endif
-
-                            <button @click.stop="flipped = false"
-                                    type="button"
-                                    class="mt-4 w-full bg-white text-gray-900 font-semibold py-2 rounded-lg hover:bg-gray-100 transition-colors"
-                                    aria-label="Zurück zur Vorderseite">
-                                Zurück
+                            <!-- Flip Icon -->
+                            <button @click.prevent.stop="flipped = true"
+                                    class="absolute top-2 right-2 z-30 bg-white/30 hover:bg-white/50 text-white text-sm px-2 py-1 rounded-full shadow transition"
+                                    aria-label="Karte umdrehen">
+                                ↻
                             </button>
                         </div>
+
+                        <h2 class="text-white text-2xl font-bold">{{ \Str::words($park->name, 2, '') }}</h2>
+                        <p class="text-white text-sm mt-1">{{ $park->country }}</p>
+
+                        @if($userLat && $userLng && isset($park->distance))
+                            <p class="text-sm mt-1 text-yellow-300 font-semibold">
+                                {{ number_format($park->distance, 1, ',', '.') }} km entfernt
+                            </p>
+                        @endif
+
+                        <!-- Status-Badge -->
+                        <x-status-badge :status="$park->opening_status" class="mt-2" />
+
+                        <!-- Mehr erfahren Button -->
+                        <div class="mt-4">
+                            <a href="{{ route('parks.show', $park->slug ?: $park->id) }}"
+                               class="inline-block px-6 py-2 font-bold text-white bg-yellow-400 hover:bg-yellow-300 rounded shadow transition"
+                               aria-label="Mehr über {{ $park->name }} erfahren">
+                                Mehr erfahren
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Rückseite -->
+                    <div class="back bg-gray-800 p-4 text-white rounded-xl overflow-auto">
+                        <h4 class="text-lg font-semibold mb-3">{{ $park->name }}</h4>
+
+                        <x-park-video-or-description :park="$park" :video-loaded="'videoLoaded'" />
+
+                        <button @click.prevent.stop="flipped = false"
+                        class="absolute top-2 right-2 z-30 bg-white/30 hover:bg-white/50 text-white text-sm px-2 py-1 rounded-full shadow transition"
+                        aria-label="Karte umdrehen">
+                        ↻
+                    </button>
+                <button @click.prevent.stop="flipped = false"
+                        type="button"
+                        class="mt-4 w-full bg-white text-gray-900 font-semibold py-2 rounded-lg hover:bg-gray-100 transition-colors"
+                        aria-label="Zurück zur Vorderseite">
+                    Zurück
+                </button>
                     </div>
                 </div>
+            </div>
+        @empty
+            <p class="col-span-full text-center text-gray-400 text-lg">Keine passenden Parks gefunden.</p>
+        @endforelse
+    </div>
 
-            @empty
-                <p class="col-span-full text-center text-gray-400 text-lg">Keine passenden Parks gefunden.</p>
-            @endforelse
-        </div>
 
         <div class="mt-8 flex justify-center">
             {{ $parks->links('vendor.pagination.custom') }}
         </div>
+
     </div>
 </section>
+
+
+
 
 
 </div>

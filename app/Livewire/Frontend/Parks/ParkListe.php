@@ -20,7 +20,7 @@ class ParkListe extends Component
     public ?float $userLat = null;
     public ?float $userLng = null;
     public int $radiusKm = 250;
-
+    public $flippedStates = [];
 
     protected $listeners = [
         'sucheAktualisiert' => 'setSuche'
