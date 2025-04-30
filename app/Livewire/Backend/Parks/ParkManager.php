@@ -251,7 +251,7 @@ class ParkManager extends Component
         // IndexNow Ping
         //app(IndexNowService::class)->ping(route('parks.show', $park->id));
         if ($park->status === 'active') {
-            app(IndexNowService::class)->ping(route('parks.show', $park->id));
+            app(IndexNowService::class)->ping(route('parks.show', $park->slug));
         }
 
         session()->flash('success', 'Park gespeichert!');

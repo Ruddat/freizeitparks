@@ -1,3 +1,9 @@
+import defaultTheme from 'tailwindcss/defaultTheme';
+import forms from '@tailwindcss/forms';
+
+// Add this line
+import typography from '@tailwindcss/typography';
+
 content: [
     "./resources/**/*.blade.php",
     "./resources/**/*.js",
@@ -35,4 +41,6 @@ content: [
       },
     },
     plugins: [require('@tailwindcss/typography')],
+    plugins: [forms, typography],
+
   }

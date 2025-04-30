@@ -30,11 +30,14 @@ Route::get('/seite/{slug}', [StaticPageController::class, 'show'])
     Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.xml');
 
 
-    Route::prefix('parks')->group(function () {
-        Route::get('/{parkSlug}/summary', [ParkPageController::class, 'summary'])->name('parks.summary');
-        Route::get('/{parkSlug}/calendar', [ParkPageController::class, 'calendar'])->name('parks.calendar');
-        Route::get('/{parkSlug}/statistics', [ParkPageController::class, 'statistics'])->name('parks.statistics');
+    Route::prefix('parks')->name('parks.')->group(function () {
+        Route::get('/{park}/summary', [ParkController::class, 'summary'])->name('summary');
+        Route::get('/{park}/calendar', [ParkController::class, 'calendar'])->name('calendar');
+        Route::get('/{park}/statistics', [ParkController::class, 'statistics'])->name('statistics');
+        Route::get('/{park}', [ParkController::class, 'show'])->name('show'); // letzter!
     });
 
     Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
     Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
+
+

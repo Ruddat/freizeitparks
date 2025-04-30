@@ -15,11 +15,11 @@
     @endphp
 
     <div class="container max-w-6xl mx-auto px-4 py-6">
-        <!-- Kalender -->
+        <!-- Kalender-Box -->
         <div class="bg-white shadow-2xl rounded-2xl p-6 mb-8 transition-all duration-300 hover:shadow-3xl">
             <!-- Navigation -->
             <div class="flex items-center justify-between mb-6">
-                <button wire:click="prevMonth" class="p-2 rounded-full bg-pink-500 hover:bg-pink-600 text-white transition-all duration-200 transform hover:scale-105">
+                <button wire:click="prevMonth" class="p-2 rounded-full bg-pink-500 hover:bg-pink-600 text-white">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                     </svg>
@@ -27,44 +27,40 @@
                 <h2 class="text-2xl font-semibold text-gray-800">
                     {{ \Carbon\Carbon::create($year, $month)->translatedFormat('F Y') }}
                 </h2>
-                <button wire:click="nextMonth" class="p-2 rounded-full bg-pink-500 hover:bg-pink-600 text-white transition-all duration-200 transform hover:scale-105">
+                <button wire:click="nextMonth" class="p-2 rounded-full bg-pink-500 hover:bg-pink-600 text-white">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
                 </button>
             </div>
 
-            <!-- Legende -->
-            <div class="flex justify-center gap-4 mb-4 text-sm text-gray-600">
+            <!-- Legende (nur Desktop) -->
+            <div class="hidden sm:flex justify-center gap-4 mb-4 text-sm text-gray-600">
                 <div class="flex items-center gap-2">
-                    <span class="w-4 h-4 rounded-full bg-green-400"></span>
-                    <span>Park</span>
+                    <span class="w-4 h-4 rounded-full bg-green-400"></span><span>Park</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <span class="w-4 h-4 rounded-full bg-blue-400"></span>
-                    <span>Wasserpark</span>
+                    <span class="w-4 h-4 rounded-full bg-blue-400"></span><span>Wasserpark</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <span class="w-4 h-4 rounded-full bg-red-400"></span>
-                    <span>Special Event</span>
+                    <span class="w-4 h-4 rounded-full bg-red-400"></span><span>Special Event</span>
                 </div>
             </div>
 
-            <!-- Wochentage -->
-            <div class="grid grid-cols-7 gap-1 text-center text-sm font-medium text-gray-600 mb-2">
+            <!-- Wochentage (nur Desktop) -->
+            <div class="hidden sm:grid grid-cols-7 gap-1 text-center text-sm font-medium text-gray-600 mb-2">
                 @foreach (['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'] as $day)
                     <div class="py-1">{{ $day }}</div>
                 @endforeach
             </div>
 
-            <!-- Tage -->
-            <div class="grid grid-cols-7 gap-1">
+            <!-- Kalender-Ansicht (nur Desktop) -->
+            <div class="hidden sm:grid grid-cols-7 gap-1">
                 @foreach ($period as $date)
                     @php
                         $isCurrentMonth = $date->month === $month;
                         $isToday = $date->isToday();
                         $isWeekend = in_array($date->dayOfWeekIso, [6,7]);
-
                         $dateStr = $date->toDateString();
                         $open = $calendar['openings'][$dateStr] ?? null;
                         $reports = $calendar['crowdReports'][$dateStr] ?? collect();
@@ -73,92 +69,120 @@
                         $holidayLabel = $isHoliday ? '🎉 ' . $feiertage[$dateStr] : null;
 
                         $parkHours = $open?->open && $open?->close ? "{$open->open}–{$open->close}" : '10:00–18:00';
-                        $waterparkHours = $open?->open && $open?->close ? '12:00–16:00' : '12:00–16:00';
+                        $waterparkHours = '12:00–16:00';
                         $specialEvent = $isHoliday ? '09:00–21:00' : null;
 
-                        if (!$isCurrentMonth) {
-    $bg = 'bg-gray-100 text-gray-400 border-gray-200';
-} elseif ($isHoliday) {
-    $bg = 'bg-yellow-400 text-black border-yellow-500';
-} elseif ($avg === null) {
-    $bg = 'bg-gray-50 text-gray-700 border-gray-200';
-} elseif ($avg < 1.5) {
-    $bg = 'bg-green-400 text-black border-green-500'; // Stufe 1
-} elseif ($avg < 2.5) {
-    $bg = 'bg-lime-300 text-black border-lime-400';   // Stufe 2
-} elseif ($avg < 3.5) {
-    $bg = 'bg-yellow-300 text-black border-yellow-400'; // Stufe 3
-} elseif ($avg < 4.5) {
-    $bg = 'bg-orange-400 text-black border-orange-500'; // Stufe 4
-} else {
-    $bg = 'bg-red-500 text-white border-red-600';       // Stufe 5
-}
+                        $bg = 'bg-gray-100 text-gray-400';
+                        if ($isHoliday) $bg = 'bg-yellow-400 text-black';
+                        elseif ($avg !== null && $avg < 1.5) $bg = 'bg-green-400 text-black';
+                        elseif ($avg < 2.5) $bg = 'bg-lime-300 text-black';
+                        elseif ($avg < 3.5) $bg = 'bg-yellow-300 text-black';
+                        elseif ($avg < 4.5) $bg = 'bg-orange-400 text-black';
+                        elseif ($avg >= 4.5) $bg = 'bg-red-500 text-white';
+                        if (!$isCurrentMonth) $bg = 'bg-gray-100 text-gray-400';
 
-
-
-                        $todayRing = $isToday ? 'ring-2 ring-pink-500' : '';
-                        $weekendBg = $isWeekend && $isCurrentMonth && !$isHoliday && $avg === null ? 'bg-slate-100' : '';
-
+                        $ring = $isToday ? 'ring-2 ring-pink-500' : '';
                         $tooltip = $holidayLabel ?: ($avg ? 'Andrang: ~' . round($avg * 20) . '%' : 'Keine Daten');
-                        @endphp
+                    @endphp
 
-                    <div class="group relative border rounded-xl p-2 text-center text-sm {{ $bg }} {{ $todayRing }} {{ $weekendBg }} hover:brightness-105 hover:shadow-md transition-all duration-150 cursor-pointer"
-                         data-tooltip-target="tooltip-{{ $dateStr }}">
-                        <div class="flex flex-col items-center justify-between">
-                            <span class="font-bold text-lg">{{ $date->day }}</span>
-
-                            @if ($isToday)
-                                <div class="text-xs text-pink-600 font-semibold mt-1">Heute</div>
+                    <div class="group relative border rounded-xl p-2 text-center text-sm {{ $bg }} {{ $ring }} hover:brightness-105 hover:shadow-md transition-all duration-150 cursor-pointer min-h-[120px] flex flex-col justify-between">
+                        <div class="flex flex-col items-center space-y-1">
+                            <span class="font-bold text-lg leading-none" title="{{ $tooltip }}">{{ $date->day }}</span>
+                            @if ($holidayLabel)
+                                <div class="text-xs font-semibold mt-1">{{ $holidayLabel }}</div>
                             @endif
-
-                            @if ($isCurrentMonth)
-                                <div class="text-xs mt-1">
+                            @if ($isToday)
+                                <div class="text-xs text-pink-600 font-semibold">Heute</div>
+                            @endif
+                            <div class="text-[11px] mt-1 space-y-1 text-center">
+                                <div class="flex items-center gap-1 justify-center">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-green-400"></span>
+                                    <span>{{ $parkHours }}</span>
+                                </div>
+                                <div class="flex items-center gap-1 justify-center">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-blue-400"></span>
+                                    <span>{{ $waterparkHours }}</span>
+                                </div>
+                                @if ($specialEvent)
                                     <div class="flex items-center gap-1 justify-center">
-                                        <span class="w-3 h-3 rounded-full bg-green-400"></span>
-                                        <span>{{ $parkHours }}</span>
+                                        <span class="w-2.5 h-2.5 rounded-full bg-red-400"></span>
+                                        <span>{{ $specialEvent }}</span>
                                     </div>
-                                    <div class="flex items-center gap-1 justify-center">
-                                        <span class="w-3 h-3 rounded-full bg-blue-400"></span>
-                                        <span>{{ $waterparkHours }}</span>
-                                    </div>
-                                    @if ($specialEvent)
-                                        <div class="flex items-center gap-1 justify-center">
-                                            <span class="w-3 h-3 rounded-full bg-red-400"></span>
-                                            <span>{{ $specialEvent }}</span>
-                                        </div>
-                                    @endif
-                                    @if ($avg !== null)
-                                    <div class="text-xs font-semibold mt-1">{{ round($avg * 20) }}%</div>
                                 @endif
+                                @if ($avg !== null)
+                                    <div class="font-semibold mt-1">{{ round($avg * 20) }}%</div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            <!-- Listenansicht (nur Mobil) -->
+            <div class="block sm:hidden space-y-2 mt-4">
+                @foreach ($period as $date)
+                    @php
+                        $dateStr = $date->toDateString();
+                        $isToday = $date->isToday();
+                        $isCurrentMonth = $date->month === $month;
+                        $open = $calendar['openings'][$dateStr] ?? null;
+                        $reports = $calendar['crowdReports'][$dateStr] ?? collect();
+                        $avg = $reports->avg('crowd_level');
+                        $weekday = $date->translatedFormat('l');
+                        $holiday = $feiertage[$dateStr] ?? null;
+
+                        $parkHours = $open?->open && $open?->close ? "{$open->open} – {$open->close}" : '10:00 – 18:00';
+                        $waterparkHours = '12:00 – 16:00';
+                        $specialEvent = $holiday ? '09:00 – 21:00' : null;
+
+                        $bg = 'bg-white text-gray-800';
+                        if ($holiday) $bg = 'bg-yellow-400 text-black';
+                        elseif ($avg !== null && $avg < 1.5) $bg = 'bg-green-400 text-black';
+                        elseif ($avg < 2.5) $bg = 'bg-lime-300 text-black';
+                        elseif ($avg < 3.5) $bg = 'bg-yellow-300 text-black';
+                        elseif ($avg < 4.5) $bg = 'bg-orange-400 text-black';
+                        elseif ($avg >= 4.5) $bg = 'bg-red-500 text-white';
+                        if (!$isCurrentMonth) $bg = 'bg-gray-100 text-gray-400';
+                    @endphp
+
+                    <div class="rounded-lg shadow px-4 py-3 border border-gray-200 {{ $bg }}">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="font-bold text-base leading-tight">
+                                    {{ $date->translatedFormat('d. F') }} ({{ $weekday }})
+                                </div>
+                                @if ($holiday)
+                                    <div class="text-xs mt-1">🎉 {{ $holiday }}</div>
+                                @endif
+                                @if ($isToday)
+                                    <div class="text-pink-700 text-xs font-semibold">Heute</div>
+                                @endif
+                            </div>
+                            @if ($avg !== null)
+                                <div class="text-sm font-semibold text-right">
+                                    Andrang<br><span class="text-lg">{{ round($avg * 20) }}%</span>
                                 </div>
                             @endif
                         </div>
-                        <!-- Tooltip -->
-                        <div id="tooltip-{{ $dateStr }}"
-                             class="absolute invisible group-hover:visible z-20 bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 text-sm text-white bg-gray-900 rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                            {{ $tooltip }}
+                        <div class="mt-2 space-y-1 text-sm">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-green-600"></span>
+                                <span>Park: {{ $parkHours }}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                                <span>Wasserpark: {{ $waterparkHours }}</span>
+                            </div>
+                            @if ($specialEvent)
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                                    <span>Special Event: {{ $specialEvent }}</span>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 @endforeach
             </div>
         </div>
-
-        <style>
-            @media (max-width: 640px) {
-                .grid-cols-7 {
-                    display: flex;
-                    flex-wrap: nowrap;
-                    overflow-x-auto;
-                    gap: 0.25rem;
-                }
-                .grid-cols-7 > div {
-                    flex: 0 0 100px;
-                    min-height: 120px;
-                }
-                .grid-cols-7 > div > div {
-                    height: auto;
-                }
-            }
-        </style>
     </div>
 </div>

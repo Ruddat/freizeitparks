@@ -4,9 +4,9 @@
 
 @section('content')
 
-<div class="container mx-auto px-4 py-8 flex min-h-screen">
+<div class="container mx-auto px-4 py-8 sm:flex sm:min-h-screen">
     <!-- Sidebar Navigation -->
-    <aside class="w-64 flex-shrink-0 sticky top-0 max-h-screen overflow-y-auto z-10 md:block hidden">
+    <aside class="w-64 flex-shrink-0 sticky top-0 max-h-screen overflow-y-auto z-10 hidden sm:block">
         <nav class="bg-white p-4 rounded-lg shadow-md flex flex-col gap-4">
             <div class="text-gray-800 font-bold mb-2">{{ $park->title }}</div>
             <a href="#" class="text-gray-600 hover:text-blue-600 font-medium">Dieser Park</a>
@@ -18,7 +18,7 @@
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 ml-8">
+    <main class="flex-1 sm:ml-8">
         {{-- Kalender --}}
         <section id="calendar" class="mb-12">
             <div class="bg-[#10163A] rounded-lg shadow p-6">

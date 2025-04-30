@@ -78,7 +78,8 @@
     </div>
 
     <!-- Modal -->
-    <div x-show="open" x-transition class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50" style="display: none;">
+    <div x-show="open" x-transition class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-1500" style="display: none;">
+
         <div class="bg-[#0d0f3f] text-white rounded-xl shadow-xl w-[95%] sm:w-full max-w-3xl max-h-[90vh] overflow-y-auto p-4 sm:p-6 relative" @click.away="open = false">
             <button @click="open = false" class="absolute top-3 right-3 text-gray-400 hover:text-white text-2xl">&times;</button>
             <h2 class="text-xl sm:text-2xl font-bold mb-4 text-center">Alle Bewertungen</h2>

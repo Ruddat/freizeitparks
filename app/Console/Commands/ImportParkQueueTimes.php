@@ -7,17 +7,34 @@ use App\Models\Park;
 use App\Models\ParkQueueTime;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class ImportParkQueueTimes extends Command
 {
     protected $signature = 'parks:import-queue-times';
-    protected $description = 'Importiert aktuelle Wartezeiten von Queue-Times.com';
+    protected $description = 'Importiert aktuelle Wartezeiten von Queue-Times.com (nur für aktive und geöffnete Parks)';
 
     public function handle(): void
     {
-        $parks = Park::whereNotNull('queue_times_id')->get();
+        $parks = Park::whereNotNull('queue_times_id')
+            ->where('status', 'active')
+            ->get();
 
         foreach ($parks as $park) {
+            $now = Carbon::now($park->timezone ?? config('app.timezone'));
+            $today = $now->toDateString();
+
+            $opening = DB::table('park_opening_hours')
+                ->where('park_id', $park->id)
+                ->where('date', $today)
+                ->first();
+
+            // Park ist heute nicht geöffnet
+            if (!$opening || is_null($opening->open) || is_null($opening->close)) {
+                $this->info("⏳ {$park->name}: heute geschlossen ({$today})");
+                continue;
+            }
+
             $url = "https://queue-times.com/parks/{$park->queue_times_id}/queue_times.json";
             $this->info("Abruf für: {$park->name} ({$url})");
 
@@ -29,7 +46,6 @@ class ImportParkQueueTimes extends Command
                 }
 
                 $data = $response->json();
-                $now = now();
 
                 foreach ($data['lands'] ?? [] as $land) {
                     foreach ($land['rides'] ?? [] as $ride) {
@@ -45,7 +61,7 @@ class ImportParkQueueTimes extends Command
                                 'last_updated' => Carbon::parse($ride['last_updated'])
                                     ->timezone($park->timezone ?? config('app.timezone')),
                                 'land_name'    => $land['name'],
-                                'fetched_at'   => $now,
+                                'fetched_at'   => now(),
                             ]
                         );
                     }

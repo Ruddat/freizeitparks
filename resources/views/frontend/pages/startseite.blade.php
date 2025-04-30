@@ -29,6 +29,13 @@
         @endif
     @endisset
 
+
+
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+
+
+
+
     {{-- Park-Map --}}
     <section class="relative w-screen overflow-x-hidden">
         <!-- Übergang oben als schräge Fläche -->

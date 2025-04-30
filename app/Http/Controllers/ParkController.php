@@ -3,154 +3,84 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use App\Models\Park;
 use App\Models\ParkWeather;
-use App\Services\SeoService;
-use Illuminate\Http\Request;
 use App\Models\ParkDailyStats;
 use App\Models\ParkCrowdReport;
 use App\Models\ParkCrowdForecas;
-use App\Services\WeatherService;
 use App\Models\ModVisitorSession;
+use App\Services\SeoService;
+use App\Services\NewWeatherService;
 use Illuminate\Support\Facades\Http;
 
 class ParkController extends Controller
 {
-    public function show(string $identifier, WeatherService $weatherService)
+    public function show(string $identifier, NewWeatherService $weatherService)
     {
         $park = Park::with(['queueTimes', 'openingHours'])
             ->where('slug', $identifier)
             ->orWhere('id', $identifier)
             ->firstOrFail();
 
-            if (is_numeric($identifier) && $park->slug) {
-                return redirect()->route('parks.show', $park->slug);
-            }
+        if (is_numeric($identifier) && $park->slug) {
+            return redirect()->route('parks.show', $park->slug);
+        }
 
-
-
-        // Öffnungszeiten & Queue aktualisieren
         $letzterEintrag = $park->queueTimes()->orderByDesc('fetched_at')->first();
         if (!$letzterEintrag || $letzterEintrag->fetched_at->lt(now()->subMinutes(10))) {
             $this->updateQueueTimesFor($park);
             $park->load('queueTimes');
         }
 
-        // Nearby Parks
         $nearbyParks = Park::select('*')
-        ->selectRaw('(6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) AS distance', [
-            $park->latitude,
-            $park->longitude,
-            $park->latitude,
-        ])
-        ->where('id', '!=', $park->id)
-        ->where('status', 'active') // ✅ hier der Status-Filter
-        ->having('distance', '<=', 300)
-        ->orderBy('distance')
-        ->limit(12)
-        ->get();
+            ->selectRaw('(6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) AS distance', [
+                $park->latitude,
+                $park->longitude,
+                $park->latitude,
+            ])
+            ->where('id', '!=', $park->id)
+            ->where('status', 'active')
+            ->having('distance', '<=', 300)
+            ->orderBy('distance')
+            ->limit(12)
+            ->get();
 
-        // Wetter holen
-        // $rawForecast = $weatherService->getForecastForCoordinates($park->latitude, $park->longitude);
-        $rawForecast = cache()->remember('park_forecast_' . $park->id, 120, function () use ($weatherService, $park) {
-            return $weatherService->getForecastForCoordinates($park->latitude, $park->longitude);
+        $rawForecast = cache()->remember('park_forecast_' . $park->id, 3600, function () use ($weatherService, $park) {
+            return $weatherService->getSevenDayForecast($park->latitude, $park->longitude, $park->id);
         });
 
-        
-        // Forecast speichern
         $today = now()->toDateString();
+
         foreach ($rawForecast as $day) {
             ParkWeather::updateOrCreate(
-                ['park_id' => $park->id, 'date' => $day['date']],
+                ['park_id' => $park->id, 'date' => Carbon::createFromFormat('D, d.m.', $day['date'])->format('Y-m-d')],
                 [
-                    'temp_day' => round($day['temp_day'], 1),
-                    'temp_night' => round($day['temp_night'], 1),
+                    'temp_day'     => $day['temp_day'],
+                    'temp_night'   => $day['temp_night'],
                     'weather_code' => $day['weather_code'],
-                    'description' => $weatherDescriptions[$day['weather_code']] ?? null,
-                    'icon' => $weatherIcons[$day['weather_code']]['day'] ?? null,
-                    'fetched_at' => now(),
+                    'description'  => $day['description'],
+                    'icon'         => $day['icon'],
+                    'wind_speed'   => $day['wind_speed'],
+                    'uv_index'     => $day['uv_index'],
+                    'rain_chance'  => $day['rain_chance'],
+                    'fetched_at'   => now(),
                 ]
             );
         }
 
-        // Wetterdaten für die nächsten 7 Tage abrufen
-        $weatherIcons = [
-            0 => ['day' => 'clear-day.svg', 'night' => 'clear-night.svg'],
-            1 => ['day' => 'partly-cloudy-day.svg', 'night' => 'partly-cloudy-night.svg'],
-            2 => ['day' => 'partly-cloudy-day.svg', 'night' => 'partly-cloudy-night.svg'],
-            3 => ['day' => 'overcast-day.svg', 'night' => 'overcast-night.svg'],
-            45 => ['day' => 'fog-day.svg', 'night' => 'fog-night.svg'],
-            48 => ['day' => 'fog-day.svg', 'night' => 'fog-night.svg'],
-            51 => ['day' => 'drizzle.svg', 'night' => 'drizzle.svg'],
-            53 => ['day' => 'drizzle.svg', 'night' => 'drizzle.svg'],
-            55 => ['day' => 'drizzle.svg', 'night' => 'drizzle.svg'],
-            56 => ['day' => 'sleet.svg', 'night' => 'sleet.svg'],
-            57 => ['day' => 'sleet.svg', 'night' => 'sleet.svg'],
-            61 => ['day' => 'rain.svg', 'night' => 'rain.svg'],
-            63 => ['day' => 'rain.svg', 'night' => 'rain.svg'],
-            65 => ['day' => 'rain.svg', 'night' => 'rain.svg'],
-            66 => ['day' => 'sleet.svg', 'night' => 'sleet.svg'],
-            67 => ['day' => 'sleet.svg', 'night' => 'sleet.svg'],
-            71 => ['day' => 'snow.svg', 'night' => 'snow.svg'],
-            73 => ['day' => 'snow.svg', 'night' => 'snow.svg'],
-            75 => ['day' => 'snow.svg', 'night' => 'snow.svg'],
-            77 => ['day' => 'snow.svg', 'night' => 'snow.svg'],
-            80 => ['day' => 'rain.svg', 'night' => 'rain.svg'],
-            81 => ['day' => 'rain.svg', 'night' => 'rain.svg'],
-            82 => ['day' => 'rain.svg', 'night' => 'rain.svg'],
-            85 => ['day' => 'snow.svg', 'night' => 'snow.svg'],
-            86 => ['day' => 'snow.svg', 'night' => 'snow.svg'],
-            95 => ['day' => 'thunderstorms-day.svg', 'night' => 'thunderstorms-night.svg'],
-            96 => ['day' => 'thunderstorms-day-rain.svg', 'night' => 'thunderstorms-night-rain.svg'],
-            99 => ['day' => 'thunderstorms-day-rain.svg', 'night' => 'thunderstorms-night-rain.svg'],
-        ];
+        $forecast = collect($rawForecast)->map(fn($item) => [
+            'date'        => $item['date'],
+            'temp_day'    => $item['temp_day'],
+            'temp_night'  => $item['temp_night'],
+            'weather_code'=> $item['weather_code'],
+            'icon'        => asset('images/weather/lottie/' . $item['icon']),
+            'description' => $item['description'],
+            'wind_speed'  => $item['wind_speed'],
+            'uv_index'    => $item['uv_index'],
+            'rain_chance' => $item['rain_chance'],
+        ]);
 
-        $weatherDescriptions = [
-            0 => 'Sonnig klar',
-            1 => 'Teilweise bewölkt',
-            2 => 'Wolkig',
-            3 => 'Bedeckt',
-            45 => 'Nebel',
-            48 => 'Nebel mit Reif',
-            51 => 'Leichter Sprühregen',
-            53 => 'Mäßiger Sprühregen',
-            55 => 'Starker Sprühregen',
-            56 => 'Leichter gefrierender Sprühregen',
-            57 => 'Starker gefrierender Sprühregen',
-            61 => 'Leichter Regen',
-            63 => 'Mäßiger Regen',
-            65 => 'Starker Regen',
-            66 => 'Leichter gefrierender Regen',
-            67 => 'Starker gefrierender Regen',
-            71 => 'Leichter Schneefall',
-            73 => 'Mäßiger Schneefall',
-            75 => 'Starker Schneefall',
-            77 => 'Schneekristalle',
-            80 => 'Leichter Regenschauer',
-            81 => 'Regenschauer',
-            82 => 'Starke Regenschauer',
-            85 => 'Leichte Schneeschauer',
-            86 => 'Starke Schneeschauer',
-            95 => 'Gewitter',
-            96 => 'Gewitter mit leichtem Regen',
-            99 => 'Gewitter mit starkem Regen',
-        ];
-
-        $forecast = collect($rawForecast)->map(function ($item) use ($weatherIcons, $weatherDescriptions) {
-            $code = $item['weather_code'] ?? null;
-            $isDay = now()->format('H') >= 6 && now()->format('H') < 20;
-            $icon = $weatherIcons[$code][$isDay ? 'day' : 'night'] ?? 'not-available.svg';
-
-            return [
-                'date'        => \Carbon\Carbon::parse($item['date'])->translatedFormat('D d.m.'),
-                'temp_day'    => round($item['temp_day']),
-                'temp_night'  => round($item['temp_night']),
-                'icon'        => asset('images/weather/animated/' . $icon),
-                'description' => $weatherDescriptions[$code] ?? 'Unbekannt',
-            ];
-        });
-
-        // 🆕 Automatischer Crowd-Report, falls noch keine Bewertung abgegeben wurde
         $hasTodayCrowdReport = ParkCrowdReport::where('park_id', $park->id)
             ->whereDate('created_at', $today)
             ->exists();
@@ -158,27 +88,23 @@ class ParkController extends Controller
         if (!$hasTodayCrowdReport) {
             ParkCrowdReport::create([
                 'park_id' => $park->id,
-                'crowd_level' => 2, // niedriger Grundwert als Besucher-Anwesenheitsindikator
+                'crowd_level' => 2,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
         }
 
-        // Tageswerte aggregieren
         $avgTempDay = ParkWeather::where('park_id', $park->id)->where('date', $today)->avg('temp_day');
         $avgTempNight = ParkWeather::where('park_id', $park->id)->where('date', $today)->avg('temp_night');
         $forecastCrowd = ParkCrowdForecas::where('park_id', $park->id)->where('date', $today)->avg('crowd_level');
         $userReportedCrowd = ParkCrowdReport::where('park_id', $park->id)->whereDate('created_at', $today)->avg('crowd_level');
 
-        if ($forecastCrowd && $userReportedCrowd) {
-            $avgCrowd = round(($forecastCrowd + $userReportedCrowd) / 2);
-        } elseif ($forecastCrowd) {
-            $avgCrowd = round($forecastCrowd);
-        } elseif ($userReportedCrowd) {
-            $avgCrowd = round($userReportedCrowd);
-        } else {
-            $avgCrowd = null;
-        }
+        $avgCrowd = match (true) {
+            $forecastCrowd && $userReportedCrowd => round(($forecastCrowd + $userReportedCrowd) / 2),
+            $forecastCrowd                       => round($forecastCrowd),
+            $userReportedCrowd                   => round($userReportedCrowd),
+            default                              => null,
+        };
 
         $weatherCode = ParkWeather::where('park_id', $park->id)->where('date', $today)
             ->select('weather_code')
@@ -193,7 +119,7 @@ class ParkController extends Controller
                 'avg_temp_night' => $avgTempNight,
                 'avg_crowd_level' => $avgCrowd,
                 'weather_code' => $weatherCode,
-                'description' => $weatherDescriptions[$weatherCode] ?? null,
+                'description' => ParkWeather::where('park_id', $park->id)->where('date', $today)->value('description'),
             ]
         );
 
@@ -201,24 +127,116 @@ class ParkController extends Controller
         $cookieBlock = request()->cookie($cookieName);
         $showCrowdModal = !$hasTodayCrowdReport && !$cookieBlock;
 
-
         $visits24h = ModVisitorSession::where('page_url', 'LIKE', '%/parks/' . $park->id . '%')
-        ->where('last_activity_at', '>=', now()->subHours(24))
-        ->count();
-        //dd($visits24h);
+            ->where('last_activity_at', '>=', now()->subHours(24))
+            ->count();
 
         $seo = app(SeoService::class)->getSeoData($park);
 
         return view('frontend.pages.park_details', compact(
-            'park',
-            'nearbyParks',
-            'forecast',
-            'showCrowdModal',
-            'visits24h',
-            'seo'
+            'park', 'nearbyParks', 'forecast', 'showCrowdModal', 'visits24h', 'seo'
         ));
-
     }
+
+    public function summary(Park $park)
+    {
+        return view('parks.summary', compact('park'));
+    }
+
+    public function calendar(Park $park)
+    {
+
+        return view('frontend.pages.park-crowd-calender', compact('park'));
+    }
+
+    public function statistics(Request $request, Park $park)
+    {
+        // Zeitraum aus dem Request holen (Standard: "today")
+        $timeframe = $request->input('timeframe', 'today');
+
+        // Datum basierend auf dem Zeitraum berechnen
+        $startDate = now();
+        if ($timeframe === '7days') {
+            $startDate = now()->subDays(7);
+        } elseif ($timeframe === '1month') {
+            $startDate = now()->subMonth();
+        } elseif ($timeframe === '3months') {
+            $startDate = now()->subMonths(3);
+        } else {
+            $timeframe = 'today'; // Standard: Heute
+            $startDate = now()->startOfDay();
+        }
+
+        // Hole alle eindeutigen Attraktionen aus der park_queue_times-Tabelle für diesen Park
+        $allRides = $park->queueTimes()
+            ->distinct()
+            ->pluck('ride_name');
+
+        // ⏱️ Durchschnittliche Wartezeit pro Attraktion (alle Attraktionen, auch mit 0)
+        $waitTimesQuery = $park->queueTimes()
+            ->whereNotNull('wait_time')
+            ->where('fetched_at', '>=', $startDate)
+            ->select('ride_name')
+            ->selectRaw('ROUND(AVG(wait_time), 1) as avg_wait')
+            ->groupBy('ride_name')
+            ->orderByDesc('avg_wait');
+
+        $waitTimes = $waitTimesQuery->get()->keyBy('ride_name');
+
+        // Erstelle eine Liste mit allen Attraktionen, auch solchen ohne Wartezeit
+        $averageWaits = $allRides->map(function ($rideName) use ($waitTimes) {
+            return [
+                'ride_name' => $rideName,
+                'avg_wait' => $waitTimes->has($rideName) ? $waitTimes[$rideName]->avg_wait : 0,
+            ];
+        })->sortByDesc('avg_wait')->values();
+
+        // 📈 Verlauf der Wartezeiten
+        $waitTimelineRaw = $park->queueTimes()
+            ->where('fetched_at', '>=', $startDate)
+            ->whereNotNull('wait_time')
+            ->select('fetched_at', 'wait_time')
+            ->orderBy('fetched_at')
+            ->get();
+
+        // Gruppierung basierend auf dem Zeitraum
+        if ($timeframe === 'today') {
+            // Pro Stunde für "Heute"
+            $waitTimeline = $waitTimelineRaw
+                ->groupBy(fn($entry) => $entry->fetched_at->format('H:00'));
+
+            $allIntervals = collect();
+            for ($hour = 0; $hour < 24; $hour++) {
+                $hourLabel = sprintf('%02d:00', $hour);
+                $allIntervals[$hourLabel] = $waitTimeline->has($hourLabel)
+                    ? round($waitTimeline[$hourLabel]->avg('wait_time'), 1)
+                    : 0;
+            }
+        } else {
+            // Pro Tag für längere Zeiträume
+            $waitTimeline = $waitTimelineRaw
+                ->groupBy(fn($entry) => $entry->fetched_at->format('Y-m-d'));
+
+            $allIntervals = collect();
+            $currentDate = $startDate->copy();
+            while ($currentDate <= now()) {
+                $dateLabel = $currentDate->format('Y-m-d');
+                $allIntervals[$dateLabel] = $waitTimeline->has($dateLabel)
+                    ? round($waitTimeline[$dateLabel]->avg('wait_time'), 1)
+                    : 0;
+                $currentDate->addDay();
+            }
+        }
+
+        $chartLabels = $allIntervals->keys();
+        $chartData = $allIntervals->values();
+
+        // Debugging
+        // dd($averageWaits, $chartLabels, $chartData);
+
+        return view('frontend.pages.park.statistics', compact('park', 'averageWaits', 'chartLabels', 'chartData', 'timeframe'));
+    }
+
 
 
     protected function updateQueueTimesFor(Park $park): void
@@ -263,6 +281,4 @@ class ParkController extends Controller
             }
         }
     }
-
-
 }

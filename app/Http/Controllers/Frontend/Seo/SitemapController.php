@@ -3,11 +3,12 @@
 namespace App\Http\Controllers\Frontend\Seo;
 
 use App\Models\Park;
+use App\Models\BlogPost;
 use App\Models\StaticPage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Facades\Response;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Response;
 
 class SitemapController extends Controller
 {
@@ -39,6 +40,23 @@ class SitemapController extends Controller
                 'priority' => '0.8',
                 'changefreq' => 'weekly',
                 'lastmod' => optional($park->updated_at)->toW3cString(),
+            ];
+        }
+
+        // Blog-Übersichtsseite
+        $urls[] = [
+            'loc' => route('blog.index'),
+            'priority' => '0.7',
+            'changefreq' => 'weekly',
+        ];
+
+        // Einzelne Blog-Beiträge
+        foreach (\App\Models\BlogPost::where('status', 'published')->get() as $post) {
+            $urls[] = [
+                'loc' => route('blog.show', $post->slug),
+                'priority' => '0.5',
+                'changefreq' => 'monthly',
+                'lastmod' => optional($post->updated_at)->toW3cString(),
             ];
         }
 

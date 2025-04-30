@@ -24,22 +24,19 @@
     </section>
 --}}
 
-    {{-- Wettervorhersage --}}
-    @if($forecast->isNotEmpty())
+{{-- Wettervorhersage --}}
+@if($forecast->isNotEmpty())
     <section class="relative py-16 px-4 bg-gradient-to-br from-[#010b3f] to-black/60 overflow-hidden">
 
-
-        {{-- 🌥️ Linke große Deko-Wolke --}}
+        {{-- 🌥️ Dekoration --}}
         <div class="absolute top-[-40px] left-[-60px] w-[260px] h-[260px] opacity-10 bg-no-repeat bg-contain pointer-events-none"
              style="background-image: url('{{ asset('icons/weather/animated/cloudy.svg') }}')"></div>
-
-        {{-- ☀️ Rechte große Sonne --}}
         <div class="absolute bottom-[-60px] right-[-60px] w-[220px] h-[220px] opacity-25 bg-no-repeat bg-contain pointer-events-none"
              style="background-image: url('{{ asset('icons/weather/animated/clear-day.svg') }}')"></div>
 
-        {{-- 🏰 Watermark mit Parkname und Jahr --}}
+        {{-- 🏰 Watermark --}}
         <div class="absolute inset-0 flex justify-center items-end z-0 pointer-events-none select-none">
-            <p class="text-white/5 text-[80px] md:text-[140px] font-extrabold tracking-widest uppercase leading-none text-center whitespace-nowrap relative overflow-hidden shimmer">
+            <p class="text-white/5 text-[80px] md:text-[140px] font-extrabold tracking-widest uppercase leading-none text-center whitespace-nowrap shimmer">
                 {{ strtoupper($park->name) }} {{ now()->year }}
             </p>
         </div>
@@ -51,26 +48,151 @@
             <span class="text-sm mt-1 text-white/70 font-light">für {{ $park->name }} · {{ now()->year }}</span>
         </h2>
 
-        {{-- 🔮 Forecast Grid --}}
-        <div class="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center relative z-10">
-            @foreach($forecast as $day)
-                <div class="bg-[#2a2d7f] rounded-2xl p-5 shadow-xl text-white border border-white/10 hover:scale-105 transition duration-200">
-                    <div class="text-lg font-semibold tracking-wide uppercase text-white/80">{{ $day['date'] }}</div>
-                    <div class="my-3 h-16 flex justify-center items-center">
-                        <img src="{{ $day['icon'] }}" alt="Wetter" class="h-14 w-14 drop-shadow-md">
+        {{-- 🌈 Forecast Cards --}}
+        <div class="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-6 text-center relative z-10">
+            @foreach($forecast->take(5) as $day)
+                <div class="relative group bg-[#2a2d7f]/60 border border-white/10 rounded-2xl p-5 text-white shadow-lg backdrop-blur-xl transition-transform duration-300 hover:scale-105 overflow-hidden">
+
+                    {{-- Vorderseite --}}
+                    <div class="relative z-10 space-y-2 group-hover:opacity-30 transition-opacity duration-300">
+                        <div class="text-sm font-medium tracking-wide text-white/80">{{ $day['date'] }}</div>
+                        <div class="my-2 h-16 flex justify-center items-center">
+                            <lottie-player
+                                src="{{ $day['icon'] }}"
+                                background="transparent"
+                                speed="1"
+                                loop
+                                autoplay
+                                style="height: 56px; width: 56px"
+                                class="drop-shadow-md group-hover:animate-bounce"
+                            ></lottie-player>
+                        </div>
+                        <div class="text-red-300 font-extrabold text-2xl">{{ $day['temp_day'] }}°C</div>
+                        <div class="text-sm text-blue-200">{{ __('messages.at_night') ?? 'nachts' }} {{ $day['temp_night'] }}°C</div>
+                        <div class="text-xs mt-2 text-white/80 italic">{{ $day['description'] }}</div>
                     </div>
-                    <div class="text-red-300 font-extrabold text-2xl">{{ $day['temp_day'] }}°C</div>
-                    <div class="text-sm text-gray-300">{{ __('messages.at_night') ?? 'nachts' }} {{ $day['temp_night'] }}°C</div>
-                    <div class="text-sm mt-2 text-gray-200 italic">{{ $day['description'] }}</div>
+
+                    {{-- Hover-Details mit dynamischem Text --}}
+                    <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center bg-black/80 text-white text-xs md:text-sm p-4 rounded-2xl z-20 backdrop-blur-md">
+                        <p class="text-pink-400 font-semibold text-sm mb-2">{{ $day['description'] }}</p>
+                        <p class="text-yellow-300 text-xs italic mb-2">
+                            @php
+                                $weatherTip = match ($day['weather_code']) {
+                                    1000 => 'Perfekt für einen Ausflug!',
+                                    1003 => 'Das richtige Park-Wetter.',
+                                    1006, 1009 => 'Etwas bewölkt, aber machbar!',
+                                    1063, 1183, 1189, 1195, 1240, 1243 => 'Nimm die Regenjacke mit!',
+                                    1273, 1087 => 'Vorsicht, Gewitter möglich!',
+                                    1066, 1213, 1219, 1225 => 'Schnee? Warm anziehen!',
+                                    1030 => 'Nebel – vorsichtig fahren!',
+                                    default => 'Plane nach Gefühl!',
+                                };
+                                echo $weatherTip;
+                            @endphp
+                        </p>
+                        <ul class="space-y-1 text-white/90">
+                            <li>💨 Wind: <strong>{{ $day['wind_speed'] ?? '?' }} km/h</strong></li>
+                            <li>🌧️ Regen: <strong>{{ $day['rain_chance'] ?? '?' }}%</strong></li>
+                            <li>🔆 UV-Index: <strong>{{ $day['uv_index'] ?? '?' }}</strong></li>
+                        </ul>
+                    </div>
                 </div>
             @endforeach
         </div>
 
-        {{-- ⬆️ Verlauf nach oben für sanften Abschluss --}}
+        {{-- Sanfter Verlauf --}}
         <div class="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-[#1c1e5c] to-transparent z-0 pointer-events-none"></div>
 
+        {{-- Lottie Player CDN (nur einmal auf Seite laden) --}}
+        <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
     </section>
+@endif
+{{-- Wettervorhersage Ende --}}
+
+
+
+
+
+    @if($forecast->isNotEmpty())
+    <section class="relative py-16 px-4 bg-gradient-to-br from-[#010b3f] to-[#020826]">
+
+        {{-- Headline --}}
+        <h2 class="text-3xl font-extrabold text-white text-center mb-10 z-10 relative flex flex-col items-center">
+            <span class="text-yellow-300 text-4xl drop-shadow-lg">🌦️</span>
+            <span>Wettervorhersage</span>
+            <span class="text-sm mt-1 text-white/70 font-light">für {{ $park->name }} · {{ now()->year }}</span>
+        </h2>
+
+        {{-- Grid Container --}}
+        <div class="grid grid-flow-col auto-cols-[minmax(180px,1fr)] gap-4 px-1 relative z-10 mx-auto max-w-full overflow-x-auto snap-x snap-mandatory pb-4">
+            @foreach($forecast as $day)
+                @php
+                    $desc = strtolower($day['description']);
+                    $bg = match (true) {
+                        str_contains($desc, 'sonnig')     => 'bg-yellow-400/10 border-yellow-300',
+                        str_contains($desc, 'regen')      => 'bg-blue-500/10 border-blue-300',
+                        str_contains($desc, 'bewölkt')    => 'bg-slate-400/10 border-slate-300',
+                        str_contains($desc, 'gewitter')   => 'bg-purple-500/10 border-purple-300',
+                        default                           => 'bg-white/5 border-white/10',
+                    };
+
+                    $stimmung = match (true) {
+                        str_contains($desc, 'sonnig') && ($day['rain_chance'] ?? 100) < 30 => '🌞 Top Wetter für deinen Parktag!',
+                        str_contains($desc, 'regen') => '☔ Nimm lieber Regenjacke mit!',
+                        str_contains($desc, 'bewölkt') => '🌤️ Leicht bewölkt – ganz angenehm!',
+                        default => '',
+                    };
+                @endphp
+
+                <div class="snap-start rounded-xl p-4 text-white text-sm border {{ $bg }} hover:scale-105 transition-all duration-300 shadow-lg backdrop-blur-sm group">
+                    <div class="font-semibold text-sm text-white/90 mb-1 text-center">{{ $day['date'] }}</div>
+
+                    <div class="my-2 h-16 flex justify-center items-center">
+                        <lottie-player
+                            src="{{ $day['icon'] }}"
+                            background="transparent"
+                            speed="1"
+                            loop
+                            autoplay
+                            style="height: 56px; width: 56px"
+                            class="drop-shadow-md group-hover:animate-bounce"
+                        ></lottie-player>
+                    </div>
+
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-pink-400">{{ $day['temp_day'] }}°C</div>
+                        <div class="text-blue-200 text-xs">nachts {{ $day['temp_night'] }}°C</div>
+                        <div class="italic text-white/80 text-xs mt-1">{{ ucfirst($day['description']) }}</div>
+                    </div>
+
+                    @if($stimmung)
+                        <div class="mt-2 text-yellow-300 font-medium text-xs bg-yellow-300/10 px-2 py-1 rounded shadow-sm text-center">
+                            {{ $stimmung }}
+                        </div>
+                    @endif
+
+                    {{-- Zusatzinfos bei Hover --}}
+                    <div class="mt-4 text-[11px] text-white/70 leading-tight space-y-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center">
+                        <div>💨 <strong>{{ $day['wind_speed'] ?? '?' }} km/h</strong></div>
+                        <div>🌧️ <strong>{{ $day['rain_chance'] ?? '?' }}%</strong></div>
+                        <div>🔆 <strong>{{ $day['uv_index'] ?? '?' }}</strong></div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+
+        <div class="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-[#020826] to-transparent z-0 pointer-events-none"></div>
+    </section>
+
+    {{-- Lottie Player CDN --}}
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
     @endif
+
+
+
+
+
+    {{-- Hero-Bereich --}}
 
 
 
@@ -326,7 +448,7 @@
             <h3 class="text-xl font-semibold">
                 📊 Besucherzahlen
             </h3>
-            <a href="{{ route('parks.statistics', ['parkSlug' => $park->slug]) }}" target="_blank" rel="noopener"
+            <a href="{{ route('parks.statistics', $park) }}" target="_blank" rel="noopener"
                class="text-blue-300 hover:text-blue-400 transition"
                title="Externe Statistikseite öffnen">
                 🌍
@@ -343,19 +465,17 @@
             </div>
             --}}
             <div>
-                <a href="{{ route('parks.calendar', ['parkSlug' => $park->slug]) }}"
+                <a href="{{ route('parks.calendar', $park) }}"
                    class="text-emerald-400 hover:underline hover:text-emerald-300 transition">
                     🗓️ Kalender (Crowd Calendar)
                 </a>
             </div>
-            {{--
             <div>
-                <a href="{{ route('parks.statistics', ['parkSlug' => $park->slug]) }}"
+                <a href="{{ route('parks.statistics', $park) }}"
                    class="text-emerald-400 hover:underline hover:text-emerald-300 transition">
                     📈 Statistik (Wartezeiten & Besucher)
                 </a>
             </div>
---}}
 
             @if($visits24h > 0)
             <div

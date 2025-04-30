@@ -2,13 +2,22 @@
     <!-- Hero-Sektion -->
     <div class="relative bg-gradient-to-r from-pink-500 to-purple-600 rounded-2xl overflow-hidden mb-12">
         <div class="absolute inset-0 bg-black opacity-30"></div>
-        <div class="relative max-w-7xl mx-auto px-8 py-20 text-center">
-            <h1 class="text-5xl font-extrabold text-white mb-4 animate-bounce">🎢 Freizeitpark Entdecker</h1>
-            <p class="text-xl text-white mb-8">Die besten Tipps, News und Geheimnisse aus deutschen Freizeitparks</p>
-            <button class="bg-white text-pink-600 px-6 py-3 rounded-full font-bold hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg">
-                Jetzt entdecken
-            </button>
+
+        <div class="relative max-w-7xl mx-auto px-8 py-20 text-center mt-4">
+            <h1 class="text-5xl font-extrabold text-white mb-4 flex items-center justify-center gap-3">
+                🎢 Freizeitpark Entdecker <span class="animate-pulse">🎟️</span>
+            </h1>
+            <p class="text-xl text-white mb-2 italic">✨ Jetzt neu: Sommer-Angebote, Saisonstarts & Geheimtipps!</p>
+            <p class="text-lg text-white mb-8">Die besten Tipps, News und Geheimnisse aus deutschen Freizeitparks</p>
+
+            <div class="mt-8 mb-8">
+                <button class="bg-white text-pink-600 px-6 py-3 rounded-full font-bold hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg inline-flex items-center gap-2">
+                    Jetzt entdecken
+                    <svg class="w-5 h-5 text-pink-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10.293 15.707a1 1 0 001.414 0l5.657-5.657a1 1 0 000-1.414l-5.657-5.657a1 1 0 10-1.414 1.414L14.586 9H4a1 1 0 000 2h10.586l-4.293 4.293a1 1 0 000 1.414z" clip-rule="evenodd" /></svg>
+                </button>
+            </div>
         </div>
+
     </div>
 
     <!-- Such- und Filterbereich -->
@@ -92,22 +101,22 @@
                         {{ $post->excerpt }}
                     </p>
 
-                    <div class="flex justify-between items-center">
+                    <div class="mb-2">
                         <span class="text-pink-600 font-semibold flex items-center gap-1 group-hover:underline">
                             Mehr erfahren <span class="transition-transform group-hover:translate-x-1">→</span>
                         </span>
-                        <div class="flex flex-wrap gap-1 max-w-xs">
-                            @foreach($post->tags as $tag)
-                                <span
-                                    wire:click.stop="toggleTag('{{ $tag->slug }}')"
-                                    class="bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-pink-600
-                                           text-xs px-2 py-1 rounded-full cursor-pointer transition-all
-                                           {{ in_array($tag->slug, $selectedTags) ? 'ring-2 ring-pink-400' : '' }}"
-                                    title="{{ $tag->posts_count }} Beiträge">
-                                    #{{ $tag->name }}
-                                </span>
-                            @endforeach
-                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-1">
+                        @foreach($post->tags as $tag)
+                            <span
+                                wire:click.stop="toggleTag('{{ $tag->slug }}')"
+                                class="bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-pink-600
+                                       text-xs px-2 py-1 rounded-full cursor-pointer transition-all
+                                       {{ in_array($tag->slug, $selectedTags) ? 'ring-2 ring-pink-400' : '' }}"
+                                title="{{ $tag->posts_count }} Beiträge">
+                                #{{ $tag->name }}
+                            </span>
+                        @endforeach
                     </div>
                 </div>
             </a>

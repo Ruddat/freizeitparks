@@ -17,16 +17,27 @@ class ParkBewertungenComponent extends Component
 
     public function render()
     {
-        $reports = ParkCrowdReport::where('park_id', $this->park->id)->get();
-        $anzahl = $reports->count();
+        // Alle Berichte für den Park
+        $allReports = ParkCrowdReport::where('park_id', $this->park->id)->get();
 
-        // Durchschnittswerte je Metrik
-        $avgCrowd   = $reports->avg('crowd_level') ?: 0;
-        $avgTheming = $reports->avg('theming') ?: 0;
-        $avgClean   = $reports->avg('cleanliness') ?: 0;
-        $avgGastro  = $reports->avg('gastronomy') ?: 0;
-        $avgService = $reports->avg('service') ?: 0;
-        $avgAttra   = $reports->avg('attractiveness') ?: 0;
+        // Nur vollständige Bewertungen (außer crowd_level darf nichts null sein)
+        $completeReports = $allReports->filter(function ($r) {
+            return !is_null($r->theming) &&
+                   !is_null($r->cleanliness) &&
+                   !is_null($r->gastronomy) &&
+                   !is_null($r->service) &&
+                   !is_null($r->attractiveness);
+        });
+
+        $anzahl = $completeReports->count();
+
+        // Durchschnittswerte
+        $avgCrowd   = $allReports->avg('crowd_level') ?: 0; // Besucher-Dichte: alle Reports
+        $avgTheming = $completeReports->avg('theming') ?: 0;
+        $avgClean   = $completeReports->avg('cleanliness') ?: 0;
+        $avgGastro  = $completeReports->avg('gastronomy') ?: 0;
+        $avgService = $completeReports->avg('service') ?: 0;
+        $avgAttra   = $completeReports->avg('attractiveness') ?: 0;
 
         // Farbskala für Andrang
         if ($avgCrowd <= 2) {
@@ -40,7 +51,7 @@ class ParkBewertungenComponent extends Component
         // Formatierung Deutsch
         $fmt = fn($v) => number_format($v, 1, ',', '');
 
-        // Kategorien oben (nur 4)
+        // Kategorien (nur 4)
         $kategorien = [
             ['value' => $fmt($avgTheming), 'label' => 'Themenbereich', 'color' => '#4646e6'],
             ['value' => $fmt($avgClean),   'label' => 'Sauberkeit',     'color' => '#3d77f3'],
@@ -48,8 +59,8 @@ class ParkBewertungenComponent extends Component
             ['value' => $fmt($avgService), 'label' => 'Service',        'color' => '#f5c12b'],
         ];
 
-        // Neuste 3 Kommentare
-        $latestComments = $reports->whereNotNull('comment')
+        // Neuste 3 Kommentare aus vollständigen Bewertungen
+        $latestComments = $completeReports->whereNotNull('comment')
             ->sortByDesc('created_at')
             ->take(3);
 
@@ -59,10 +70,10 @@ class ParkBewertungenComponent extends Component
             'text'  => $r->comment,
         ])->values()->toArray();
 
-        // Alle Kommentare für Modal
-        $allComments = $reports->whereNotNull('comment')->sortByDesc('created_at');
+        // Alle Kommentare für Modal (vollständige Reports mit Kommentar)
+        $allComments = $completeReports->whereNotNull('comment')->sortByDesc('created_at');
 
-        // Gesamtdurchschnitt über alle 6 Metriken
+        // Gesamtdurchschnitt über 6 Metriken
         $gesamtAvg = $fmt(collect([$avgCrowd, $avgTheming, $avgClean, $avgGastro, $avgService, $avgAttra])->avg());
 
         return view('livewire.frontend.park-bewertungen-component', compact(

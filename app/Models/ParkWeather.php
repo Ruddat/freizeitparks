@@ -18,7 +18,10 @@ class ParkWeather extends Model
         'description',
         'icon',
         'fetched_at',
-        
+        'wind_speed',
+        'uv_index',
+        'rain_chance',
+
     ];
 
     public function park()

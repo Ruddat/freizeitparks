@@ -42,6 +42,7 @@
             </span>
         </div>
 
+
         <!-- Inhalt mit verbesserter Formatierung -->
         <div class="prose dark:prose-invert prose-lg max-w-none mb-8">
             @php
@@ -51,8 +52,18 @@
                 // Entferne <html>, <head>, <body> Tags falls vorhanden
                 $content = preg_replace('/<html[^>]*>|<head[^>]*>|<\/head>|<body[^>]*>|<\/body>|<\/html>/i', '', $content);
 
+
+                // h2 styling
+                $content = str_replace('<h2>', '<h2 class="text-2xl font-bold mt-8 mb-4 text-pink-500">', $content);
+
                 // Ersetze <p> Tags mit Tailwind-optimierten Klassen
                 $content = str_replace('<p>', '<p class="mb-6 leading-relaxed text-gray-400 dark:text-gray-300">', $content);
+
+
+                    // blockquotes
+                    $content = str_replace('<blockquote>', '<blockquote class="border-l-4 border-pink-400 pl-4 italic text-gray-500">', $content);
+
+
 
                 // Emojis etwas größer darstellen
                 $content = preg_replace_callback('/[^\x00-\x7F]/u', function($match) {

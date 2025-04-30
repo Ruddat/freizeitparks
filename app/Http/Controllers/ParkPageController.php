@@ -13,7 +13,7 @@ class ParkPageController extends Controller
         return view('parks.summary', compact('park'));
     }
 
-    public function calendar($parkSlug)
+    public function calendar1212($parkSlug)
     {
         $park = Park::where('slug', $parkSlug)->firstOrFail();
         return view('frontend.pages.park-crowd-calender', compact('park'));
