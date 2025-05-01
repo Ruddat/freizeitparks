@@ -3,16 +3,17 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 use App\Models\Park;
 use App\Models\ParkWeather;
+use App\Services\SeoService;
+use Illuminate\Http\Request;
 use App\Models\ParkDailyStats;
 use App\Models\ParkCrowdReport;
 use App\Models\ParkCrowdForecas;
 use App\Models\ModVisitorSession;
-use App\Services\SeoService;
 use App\Services\NewWeatherService;
 use Illuminate\Support\Facades\Http;
+use App\Models\ParkQueueTimeAverages;
 
 class ParkController extends Controller
 {
@@ -167,19 +168,15 @@ class ParkController extends Controller
             $startDate = now()->startOfDay();
         }
 
-        // Hole alle eindeutigen Attraktionen aus der park_queue_times-Tabelle für diesen Park
-        $allRides = $park->queueTimes()
+        // Hole alle eindeutigen Attraktionen aus der park_queue_time_averages-Tabelle für diesen Park
+        $allRides = ParkQueueTimeAverages::where('park_id', $park->id)
             ->distinct()
             ->pluck('ride_name');
 
-        // ⏱️ Durchschnittliche Wartezeit pro Attraktion (alle Attraktionen, auch mit 0)
-        $waitTimesQuery = $park->queueTimes()
-            ->whereNotNull('wait_time')
-            ->where('fetched_at', '>=', $startDate)
-            ->select('ride_name')
-            ->selectRaw('ROUND(AVG(wait_time), 1) as avg_wait')
-            ->groupBy('ride_name')
-            ->orderByDesc('avg_wait');
+        // ⏱️ Durchschnittliche Wartezeit pro Attraktion aus der neuen Tabelle
+        $waitTimesQuery = ParkQueueTimeAverages::where('park_id', $park->id)
+            ->select('ride_name', 'average_wait_time')
+            ->orderByDesc('average_wait_time');
 
         $waitTimes = $waitTimesQuery->get()->keyBy('ride_name');
 
@@ -187,11 +184,11 @@ class ParkController extends Controller
         $averageWaits = $allRides->map(function ($rideName) use ($waitTimes) {
             return [
                 'ride_name' => $rideName,
-                'avg_wait' => $waitTimes->has($rideName) ? $waitTimes[$rideName]->avg_wait : 0,
+                'avg_wait' => $waitTimes->has($rideName) ? round($waitTimes[$rideName]->average_wait_time, 1) : 0,
             ];
         })->sortByDesc('avg_wait')->values();
 
-        // 📈 Verlauf der Wartezeiten
+        // 📈 Verlauf der Wartezeiten (bleibt aus park_queue_times)
         $waitTimelineRaw = $park->queueTimes()
             ->where('fetched_at', '>=', $startDate)
             ->whereNotNull('wait_time')
