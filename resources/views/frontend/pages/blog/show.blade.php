@@ -74,15 +74,49 @@
             @endphp
         </div>
 
-        <!-- Tags -->
-        <div class="flex flex-wrap gap-2 mb-8">
-            @foreach ($post->tags as $tag)
-                <a href="{{ route('blog.index', ['tag' => $tag->slug]) }}"
-                   class="bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-200 text-sm px-3 py-1 rounded-full hover:bg-pink-200 dark:hover:bg-pink-800/50 transition">
-                    #{{ $tag->name }}
-                </a>
-            @endforeach
-        </div>
+<!-- Teilen -->
+<div class="mt-10">
+    <span class="block text-sm font-medium text-gray-400 dark:text-gray-300 mb-2">Diesen Beitrag teilen:</span>
+    <div class="flex flex-wrap gap-2 mb-6">
+        {{-- Facebook --}}
+        <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(Request::url()) }}"
+           target="_blank"
+           class="inline-flex items-center gap-2 px-4 py-1.5 text-sm rounded-full bg-[#1877F2] hover:bg-[#145fc2] text-white transition shadow">
+            @svg('lucide-facebook', 'w-4 h-4') Facebook
+        </a>
+
+        {{-- X (Twitter) --}}
+        <a href="https://twitter.com/intent/tweet?text={{ urlencode($post->title) }}&url={{ urlencode(Request::url()) }}"
+           target="_blank"
+           class="inline-flex items-center gap-2 px-4 py-1.5 text-sm rounded-full bg-black hover:bg-gray-800 text-white transition shadow">
+            @svg('lucide-x', 'w-4 h-4') X
+        </a>
+
+        {{-- WhatsApp --}}
+        <a href="https://wa.me/?text={{ urlencode($post->title . ' – mehr Infos hier: ' . Request::url()) }}"
+           target="_blank"
+           class="inline-flex items-center gap-2 px-4 py-1.5 text-sm rounded-full bg-[#25D366] hover:bg-[#1ebe57] text-white transition shadow">
+            @svg('lucide-message-circle', 'w-4 h-4') WhatsApp
+        </a>
+
+        {{-- Link kopieren --}}
+        <button onclick="navigator.clipboard.writeText('{{ Request::url() }}')"
+                class="inline-flex items-center gap-2 px-4 py-1.5 text-sm rounded-full bg-gray-600 hover:bg-gray-500 text-white transition shadow">
+            @svg('lucide-copy', 'w-4 h-4') Link kopieren
+        </button>
+    </div>
+
+    {{-- Tags --}}
+    <div class="flex flex-wrap gap-2">
+        @foreach ($post->tags as $tag)
+            <a href="{{ route('blog.index', ['tag' => $tag->slug]) }}"
+               class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full bg-pink-500/10 text-pink-400 hover:bg-pink-500/20 transition">
+                #{{ $tag->name }}
+            </a>
+        @endforeach
+    </div>
+</div>
+
 
         <!-- Zurück-Button -->
         <div class="mb-12">

@@ -53,6 +53,6 @@
 
     <livewire:frontend.office.contact-overlay />
 
-
+    @livewire('frontend.api-register.api-signup-form')
 
     @endsection

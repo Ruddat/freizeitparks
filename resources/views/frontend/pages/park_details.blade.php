@@ -31,9 +31,9 @@
 
         {{-- 🌥️ Dekoration --}}
         <div class="absolute top-[-40px] left-[-60px] w-[260px] h-[260px] opacity-10 bg-no-repeat bg-contain pointer-events-none"
-             style="background-image: url('{{ asset('icons/weather/animated/cloudy.svg') }}')"></div>
+             style="background-image: url('{{ asset('images/weather/animated/cloudy.svg') }}')"></div>
         <div class="absolute bottom-[-60px] right-[-60px] w-[220px] h-[220px] opacity-25 bg-no-repeat bg-contain pointer-events-none"
-             style="background-image: url('{{ asset('icons/weather/animated/clear-day.svg') }}')"></div>
+             style="background-image: url('{{ asset('images/weather/animated/clear-day.svg') }}')"></div>
 
         {{-- 🏰 Watermark --}}
         <div class="absolute inset-0 flex justify-center items-end z-0 pointer-events-none select-none">
@@ -107,7 +107,6 @@
         <div class="absolute bottom-0 left-0 w-full h-16 md:h-24 bg-gradient-to-t from-[#1c1e5c] to-transparent z-0 pointer-events-none"></div>
 
         {{-- Lottie Player CDN --}}
-        <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 
         <style>
             /* Mobile First Ansatz */
@@ -412,7 +411,37 @@
         @endif
     </div>
 
+    <div class="mt-6">
+        <span class="block text-sm font-medium text-white mb-2">Teilen:</span>
+        <div class="flex flex-wrap gap-3">
+            {{-- Facebook --}}
+            <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(Request::url()) }}"
+               target="_blank"
+               class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1877F2] hover:bg-[#145fc2] text-white shadow-md transition-all">
+                @svg('lucide-facebook', 'w-4 h-4') Facebook
+            </a>
 
+{{-- X (Twitter) --}}
+<a href="https://twitter.com/intent/tweet?text={{ urlencode($park->name) }}&url={{ urlencode(Request::url()) }}"
+    target="_blank"
+    class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#000000] hover:bg-[#1a1a1a] text-white shadow-md transition-all">
+     @svg('lucide-x', 'w-4 h-4') X
+ </a>
+
+            {{-- WhatsApp --}}
+            <a href="https://wa.me/?text={{ urlencode($park->name . ' – mehr Infos hier: ' . Request::url()) }}"
+               target="_blank"
+               class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#25D366] hover:bg-[#1ebe57] text-white shadow-md transition-all">
+                @svg('lucide-message-circle', 'w-4 h-4') WhatsApp
+            </a>
+
+            {{-- Link kopieren --}}
+            <button onclick="navigator.clipboard.writeText('{{ Request::url() }}')"
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-600 hover:bg-gray-500 text-white shadow-md transition-all">
+                @svg('lucide-copy', 'w-4 h-4') Link kopieren
+            </button>
+        </div>
+    </div>
 
     {{-- Besucherzahlen --}}
     <div class="bg-[#1c1e5c] rounded-xl p-6 shadow-md text-white">
@@ -706,40 +735,20 @@
     <h2 class="text-2xl font-bold text-center mb-6 text-white">📍 Lage des Parks</h2>
     <div class="max-w-4xl mx-auto">
         <div class="rounded-2xl border-4 border-[#ff6600] bg-gray-900 shadow-xl overflow-hidden relative z-10">
-            <div id="parkMap" class="w-full h-[400px] rounded-xl"></div>
+            <div id="parkMap"
+            class="w-full h-[400px] rounded-lg overflow-hidden"
+            data-lat="{{ $park->latitude }}"
+            data-lng="{{ $park->longitude }}"
+            data-logo="{{ $park->logo ? asset($park->logo) : '' }}"
+            data-name="{{ $park->name }}"
+            data-location="{{ $park->location }}"
+            data-country="{{ $park->country }}">
+       </div>
         </div>
     </div>
 </section>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const lat = {{ $park->latitude ?? 'null' }};
-        const lng = {{ $park->longitude ?? 'null' }};
-        const logo = @json($park->logo ? asset($park->logo) : null);
 
-        if (lat && lng) {
-            const map = L.map('parkMap').setView([lat, lng], 16);
-
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> Mitwirkende'
-            }).addTo(map);
-
-            const markerIcon = L.icon({
-                iconUrl: logo || 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-                iconSize: [40, 40],
-                iconAnchor: [20, 40],
-                popupAnchor: [0, -36],
-                className: 'rounded-full border-2 border-white shadow-md bg-white object-cover'
-            });
-
-            L.marker([lat, lng], { icon: markerIcon }).addTo(map)
-                .bindPopup(`<strong>{{ $park->name }}</strong><br>{{ $park->location }}, {{ $park->country }}`)
-                .openPopup();
-        } else {
-            document.getElementById('parkMap').innerHTML = '<p class="text-white p-4">Standortdaten nicht verfügbar.</p>';
-        }
-    });
-</script>
 
 
 

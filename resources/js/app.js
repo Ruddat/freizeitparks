@@ -3,7 +3,8 @@ import L from 'leaflet';
 import '../css/leaflet-custom.css'; // Verwende die angepasste CSS
 import Swiper from 'swiper/bundle';
 import 'swiper/css/bundle';
-
+import '@lottiefiles/lottie-player';
+import { initParkMap } from './components/initParkMap';
 
 window.L = L; // Macht Leaflet global verfügbar
 
@@ -71,3 +72,30 @@ setInterval(() => {
     sendDwellTime();
     startTime = Date.now();
 }, 10000);
+
+
+document.addEventListener('DOMContentLoaded', async () => {
+    if (document.querySelector('lottie-player')) {
+        try {
+            await import('@lottiefiles/lottie-player');
+            console.log('LottiePlayer geladen');
+        } catch (error) {
+            console.error('Fehler beim Laden von LottiePlayer:', error);
+        }
+    }
+});
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const el = document.getElementById('parkMap');
+    if (el) {
+        const lat = parseFloat(el.dataset.lat);
+        const lng = parseFloat(el.dataset.lng);
+        const logo = el.dataset.logo;
+        const name = el.dataset.name;
+        const location = el.dataset.location;
+        const country = el.dataset.country;
+
+        initParkMap({ lat, lng, logo, name, location, country });
+    }
+});

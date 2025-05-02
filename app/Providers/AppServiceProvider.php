@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\Facades\View;
+use BladeUI\Icons\Factory;
 use App\Models\StaticPage;
 use App\Models\ModSiteSettings;
 use App\Services\GeocodeService;
@@ -34,6 +35,11 @@ class AppServiceProvider extends ServiceProvider
         View::composer('*', function ($view) {
             $view->with('siteSettings', ModSiteSettings::getPublicSettings());
         });
+
+        $this->app->make(Factory::class)->add('lucide', [
+            'path' => base_path('node_modules/lucide-static/icons'),
+            'prefix' => 'lucide',
+        ]);
 
     }
 }

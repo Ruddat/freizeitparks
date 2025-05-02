@@ -16,7 +16,14 @@ export default defineConfig({
         tailwindcss(),
     ],
     build: {
+        chunkSizeWarningLimit: 1000, // erhöht Warnungsschwelle
         rollupOptions: {
+            output: {
+                manualChunks: {
+                    leaflet: ['leaflet'],
+                    lottie: ['@lottiefiles/lottie-player'],
+                },
+            },
             external: [
                 '/images/marker-icon.png',
                 '/images/marker-icon-2x.png',

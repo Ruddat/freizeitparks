@@ -28,11 +28,13 @@
                     </p>
 
                     @if (!empty($footerTexts))
-                        <div class="relative h-16 overflow-hidden">
-                            <div id="rotating-footer-text"
-                                 class="absolute inset-0 text-gray-200 text-sm italic transition-all duration-1000 ease-in-out"
-                                 data-footer-texts='@json($footerTexts)'>
-                                {{ $footerTexts[0] }}
+                        <div id="rotating-footer-wrapper" class="relative h-16 overflow-hidden">
+                            <div id="rotating-footer-wrapper" class="relative h-16 overflow-hidden">
+                                <div id="rotating-footer-text"
+                                     class="absolute inset-0 text-gray-200 text-sm italic transition-all duration-1000 ease-in-out"
+                                     data-footer-texts='@json($footerTexts)'>
+                                    {{ $footerTexts[0] }}
+                                </div>
                             </div>
                         </div>
                     @endif
@@ -45,21 +47,21 @@
                     <span class="relative z-10">Links</span>
                     <span class="absolute bottom-0 left-0 w-full h-1 bg-yellow-400 z-0 transform scale-x-75 origin-left"></span>
                 </h4>
-                <ul class="space-y-1">
-                    <li>
+                <ul class="space-y-2 text-gray-300">
+                    <li  class="mb-0">
                         <a href="{{ route('home') }}" class="flex items-center text-gray-300 hover:text-white transition-all duration-300 group">
                             <span class="w-2 h-2 bg-yellow-400 rounded-full mr-2 transform group-hover:scale-150 transition-all duration-300"></span>
                             Startseite
                         </a>
                     </li>
-                    <li>
+                    <li  class="mb-0">
                         <a href="{{ route('blog.index') }}" class="flex items-center text-gray-300 hover:text-white transition-all duration-300 group">
                             <span class="w-2 h-2 bg-yellow-400 rounded-full mr-2 transform group-hover:scale-150 transition-all duration-300"></span>
                             News - Blog
                         </a>
                     </li>
                     @foreach($footerPages as $page)
-                        <li>
+                    <li class="mb-0">
                             <a href="{{ route('static.page', $page->slug) }}" class="flex items-center text-gray-300 hover:text-white transition-all duration-300 group">
                                 <span class="w-2 h-2 bg-yellow-400 rounded-full mr-2 transform group-hover:scale-150 transition-all duration-300"></span>
                                 {{ $page->title }}
@@ -173,12 +175,11 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const el = document.getElementById('rotating-footer-text');
         const wrapper = document.getElementById('rotating-footer-wrapper');
+        if (!wrapper) return;
 
-        if (!el || !wrapper) return;
-
-        const texts = JSON.parse(el.dataset.footerTexts || '[]');
+        let current = document.getElementById('rotating-footer-text');
+        const texts = JSON.parse(current?.dataset.footerTexts || '[]');
         if (texts.length < 2) return;
 
         let index = 0;
@@ -195,22 +196,25 @@
 
             wrapper.appendChild(newText);
 
-            // Animate
+            // Animate in
             setTimeout(() => {
-                el.style.transition = 'all 0.5s ease-in-out';
-                el.style.opacity = '0';
-                el.style.transform = `translateY(-${height}px)`;
+                current.style.transition = 'all 0.5s ease-in-out';
+                current.style.opacity = '0';
+                current.style.transform = `translateY(-${height}px)`;
 
                 newText.style.transition = 'all 0.5s ease-in-out';
                 newText.style.opacity = '1';
                 newText.style.top = '0';
             }, 50);
 
-            // Clean up
+            // Replace old with new
             setTimeout(() => {
-                wrapper.removeChild(el);
+                if (current && current.parentNode === wrapper) {
+                    wrapper.removeChild(current);
+                }
                 newText.id = 'rotating-footer-text';
                 newText.dataset.footerTexts = JSON.stringify(texts);
+                current = newText;
             }, 550);
         }
 
