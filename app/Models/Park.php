@@ -155,4 +155,23 @@ class Park extends Model
     {
         return 'name';
     }
+
+    public function getImageUrlAttribute()
+    {
+        if (!$this->image) {
+            return asset('images/fallback-park.jpg'); // dein Fallback-Bild im public/images/
+        }
+
+        if (Str::startsWith($this->image, ['http://', 'https://'])) {
+            return $this->image;
+        }
+
+        if (Str::startsWith($this->image, ['storage/', '/storage'])) {
+            return asset($this->image);
+        }
+
+        return asset('storage/parks/' . $this->image);
+    }
+
+
 }

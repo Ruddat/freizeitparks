@@ -41,10 +41,14 @@
                 <img src="{{ $park->image_url }}" alt="{{ $park->name }}" class="absolute inset-0 w-full h-full object-cover">
             </video>
         @else
-            <img src="{{ $park->image_url }}"
-                 alt="{{ $park->name }}"
-                 class="absolute inset-0 w-full h-full object-cover opacity-90"
-                 loading="eager">
+        <img
+        src="{{ $park->image_url }}"
+        srcset="{{ $park->image_url }} 1x, {{ $park->image_url }} 2x"
+        alt="{{ $park->name }}"
+        class="absolute inset-0 w-full h-full object-cover opacity-90"
+        loading="lazy"
+        onerror="this.onerror=null;this.src='{{ asset('images/fallback-park.jpg') }}';"
+    >
         @endif
     </div>
 
