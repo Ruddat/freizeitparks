@@ -2,11 +2,12 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\Facades\View;
-use BladeUI\Icons\Factory;
 use App\Models\StaticPage;
+use BladeUI\Icons\Factory;
 use App\Models\ModSiteSettings;
 use App\Services\GeocodeService;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -31,15 +32,18 @@ class AppServiceProvider extends ServiceProvider
             $view->with('footerPages', StaticPage::where('show_in_footer', true)->get());
         });
 
-
         View::composer('*', function ($view) {
             $view->with('siteSettings', ModSiteSettings::getPublicSettings());
         });
 
-        $this->app->make(Factory::class)->add('lucide', [
-            'path' => base_path('node_modules/lucide-static/icons'),
-            'prefix' => 'lucide',
-        ]);
+        // ✅ Nur registrieren, wenn Ordner wirklich existiert
+        $lucidePath = base_path('node_modules/lucide-static/icons');
 
+        if (File::isDirectory($lucidePath)) {
+            $this->app->make(Factory::class)->add('lucide', [
+                'path' => $lucidePath,
+                'prefix' => 'lucide',
+            ]);
+        }
     }
 }
