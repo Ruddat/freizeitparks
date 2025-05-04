@@ -84,10 +84,10 @@
             </p>
         </div>
         <div class="flex flex-col sm:flex-row justify-center gap-4 mt-8">
-            <a href="#park-liste" class="hero-button px-8 py-3 sm:px-10 sm:py-4 text-white font-bold text-lg bg-gradient-to-r from-pink-600 to-purple-600 rounded-full shadow-md">
+            <a href="#park-nav" class="hero-button px-8 py-3 sm:px-10 sm:py-4 text-white font-bold text-lg bg-gradient-to-r from-pink-600 to-purple-600 rounded-full shadow-md">
                 Jetzt entdecken
             </a>
-            <a href="#highlights" class="hero-button px-8 py-3 sm:px-10 sm:py-4 font-bold text-lg bg-white/10 border border-white/30 text-white rounded-full shadow-md hover:bg-white/20">
+            <a href="{{ route('themen.park', ['slug' => $park->slug ]) }}" class="hero-button px-8 py-3 sm:px-10 sm:py-4 font-bold text-lg bg-white/10 border border-white/30 text-white rounded-full shadow-md hover:bg-white/20">
                 Highlights
             </a>
         </div>
@@ -96,8 +96,22 @@
 
     {{-- ⬇️ Scroll Indicator --}}
     <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-30 animate-bounce">
-        <svg class="w-8 h-8 text-white/80 hover:text-white cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-        </svg>
+        @if($park->queueTimes->isNotEmpty())
+        <a href="#wartezeiten" class="flex flex-col items-center">
+            <span class="text-white/80 text-sm font-semibold">Scrollen</span>
+            <svg class="w-8 h-8 text-white/80 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7l9 9 9-9"></path>
+            </svg>
+        </a>
+@else
+        <a href="#park-nav" class="flex flex-col items-center">
+            <span class="text-white/80 text-sm font-semibold">Scrollen</span>
+            <svg class="w-8 h-8 text-white/80 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7l9 9 9-9"></path>
+            </svg>
+        </a>
+@endif
+
     </div>
+    {{-- 🏰 Content Container --}}
 </div>

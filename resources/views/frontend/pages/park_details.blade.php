@@ -168,7 +168,7 @@
 
 
     {{-- Navigation --}}
-    <nav class="w-full sticky top-0 z-50 bg-gradient-to-r from-purple-800 via-indigo-800 to-purple-900 text-white px-4 py-2 shadow-lg">
+    <nav id="park-nav" class="scroll-mt-20 w-full sticky top-0 z-50 bg-gradient-to-r from-purple-800 via-indigo-800 to-purple-900 text-white px-4 py-2 shadow-lg">
         <div class="max-w-screen-xl mx-auto flex flex-wrap justify-center items-center gap-3 text-sm font-medium">
             <!-- Parkname mit Icon -->
             <span class="inline-flex items-center gap-2 bg-purple-700/80 px-4 py-2 rounded-full backdrop-blur-sm border border-purple-500/30">
