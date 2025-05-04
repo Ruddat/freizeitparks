@@ -58,7 +58,7 @@
 
 {{-- Park-Liste  park-liste-anchor --}}
 <div id="park-liste">
-    <livewire:frontend.parks.park-liste />
+    <livewire:frontend.parks.park-liste :lazy="true" />
 </div>
 
 

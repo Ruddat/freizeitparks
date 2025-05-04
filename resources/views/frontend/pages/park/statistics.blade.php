@@ -149,24 +149,24 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             scales: {
                 x: {
-                    grid: { color: 'rgba(0, 0, 0, 0.05)' },
-                    title: {
-                        display: true,
-                        text: '{{ $timeframe === "today" ? "Uhrzeit" : "Datum" }}',
-                        font: { size: 14 }
-                    },
-                    ticks: {
-                        font: { size: 12 },
-                        callback: function(value, index, values) {
-                            // Für längere Zeiträume nur das Datum anzeigen (ohne Jahr)
-                            const label = this.getLabelForValue(value);
-                            if (label.includes('-')) {
-                                return label.split('-').slice(1).join('-'); // Entfernt das Jahr (z. B. "2025-04-30" -> "04-30")
-                            }
-                            return label;
-                        }
-                    }
-                },
+    type: 'category', // <-- NEU!
+    grid: { color: 'rgba(0, 0, 0, 0.05)' },
+    title: {
+        display: true,
+        text: '{{ $timeframe === "today" ? "Uhrzeit" : "Datum" }}',
+        font: { size: 14 }
+    },
+    ticks: {
+        font: { size: 12 },
+        callback: function(value, index, values) {
+            const label = this.getLabelForValue(value);
+            if ("{{ $timeframe }}" !== "today" && label.includes('-')) {
+                return label.split('-').slice(1).join('-');
+            }
+            return label;
+        }
+    }
+},
                 y: {
                     beginAtZero: true,
                     grid: { color: 'rgba(0, 0, 0, 0.05)' },

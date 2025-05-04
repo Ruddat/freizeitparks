@@ -15,6 +15,7 @@ class CrowdChart extends Component
     public $month;
     public $chartLabels = [];
     public $chartData = [];
+    public $viewMode = 'day';
 
     public function mount($park, $year, $month)
     {
@@ -37,6 +38,17 @@ class CrowdChart extends Component
         $this->updateChartData();
     }
 
+    #[On('setChartViewMode')]
+    public function setChartViewMode($mode)
+    {
+        if (in_array($mode, ['day', 'month'])) {
+            $this->viewMode = $mode;
+            $this->updateChartData();
+        }
+    }
+
+
+
     public function getCalendarDataProperty()
     {
         $daysInMonth = collect(range(1, Carbon::create($this->year, $this->month)->daysInMonth))->map(function ($day) {
@@ -49,53 +61,51 @@ class CrowdChart extends Component
             ->get()
             ->keyBy('date');
 
-        $crowdReports = ParkCrowdReport::where('park_id', $this->park->id)
-            ->whereMonth('created_at', $this->month)
-            ->whereYear('created_at', $this->year)
+        $queueData = \App\Models\ParkQueueTime::where('park_id', $this->park->id)
+            ->whereMonth('fetched_at', $this->month)
+            ->whereYear('fetched_at', $this->year)
             ->get()
-            ->groupBy(function ($report) {
-                return Carbon::parse($report->created_at)->setTimezone('UTC')->startOfDay()->toDateString();
-            });
-
-       // \Log::info('Crowd Reports (Chart)', [
-       //     'park_id' => $this->park->id,
-       //     'month' => $this->month,
-       //     'year' => $this->year,
-       //     'crowdReports' => $crowdReports->toArray(),
-       // ]);
+            ->groupBy(fn ($entry) => Carbon::parse($entry->fetched_at)->startOfDay()->toDateString());
 
         return [
             'days' => $daysInMonth,
             'openings' => $openings,
-            'crowdReports' => $crowdReports,
+            'queueData' => $queueData,
         ];
     }
 
     public function updateChartData()
     {
-        $calendar = $this->calendarData;
-
         $this->chartLabels = [];
         $this->chartData = [];
-        foreach ($calendar['days'] as $day) {
-            $dateStr = $day->toDateString();
-            $reports = $calendar['crowdReports'][$dateStr] ?? collect();
 
-            $validReports = $reports->filter(function ($report) {
-                return !is_null($report->crowd_level);
-            });
+        if ($this->viewMode === 'day') {
+            $entries = \App\Models\ParkQueueTime::where('park_id', $this->park->id)
+                ->whereDate('fetched_at', now())
+                ->get()
+                ->groupBy(fn ($item) => Carbon::parse($item->fetched_at)->format('H:00'));
 
-            $avg = $validReports->avg('crowd_level');
+            $hours = collect(range(0, 23))->map(fn ($h) => str_pad($h, 2, '0', STR_PAD_LEFT) . ':00');
 
-          //  \Log::info("Chart Datum: $dateStr", [
-          //      'reports' => $reports->toArray(),
-          //      'valid_reports' => $validReports->toArray(),
-          //      'avg' => $avg,
-          //      'calculated_value' => $avg !== null ? round($avg * 33) : 0,
-          //  ]);
+            $this->chartLabels = $hours->toArray();
+            $this->chartData = $hours->map(function ($hour) use ($entries) {
+                $group = $entries[$hour] ?? collect();
+                $avg = $group->pluck('wait_time')->filter(fn ($v) => is_numeric($v))->avg();
+                return $avg !== null ? round($avg) : 0;
+            })->toArray();
+        } else {
+            $calendar = $this->calendarData;
 
-            $this->chartLabels[] = $day->day;
-            $this->chartData[] = $avg !== null ? round($avg * 20) : 0;
+            foreach ($calendar['days'] as $day) {
+                $dateStr = $day->toDateString();
+                $queueEntries = $calendar['queueData'][$dateStr] ?? collect();
+
+                $validWaitTimes = $queueEntries->pluck('wait_time')->filter(fn ($v) => is_numeric($v) && $v >= 0);
+                $avg = $validWaitTimes->avg();
+
+                $this->chartLabels[] = $day->day;
+                $this->chartData[] = $avg !== null ? round($avg) : 0;
+            }
         }
     }
 

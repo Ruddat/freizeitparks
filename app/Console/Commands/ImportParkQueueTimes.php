@@ -127,16 +127,20 @@ class ImportParkQueueTimes extends Command
 
     protected function saveRide(Park $park, array $ride, string $landName, string $timezone): void
     {
-        ParkQueueTime::create([
-            'park_id'      => $park->id,
-            'ride_id'      => $ride['id'],
-            'ride_name'    => $ride['name'] ?? 'Unbekannt',
-            'is_open'      => $ride['is_open'] ?? false,
-            'wait_time'    => $ride['wait_time'] ?? 0,
-            'last_updated' => $this->parseLastUpdated($ride['last_updated'] ?? now(), $timezone),
-            'land_name'    => $landName,
-            'fetched_at'   => now(),
-        ]);
+        ParkQueueTime::updateOrCreate(
+            [
+                'park_id' => $park->id,
+                'ride_id' => $ride['id'],
+            ],
+            [
+                'ride_name'    => $ride['name'] ?? 'Unbekannt',
+                'is_open'      => $ride['is_open'] ?? false,
+                'wait_time'    => $ride['wait_time'] ?? 0,
+                'last_updated' => $this->parseLastUpdated($ride['last_updated'] ?? now(), $timezone),
+                'land_name'    => $landName,
+                'fetched_at'   => now(),
+            ]
+        );
 
         $this->updateAverageWaitTime($park->id, $ride, $landName);
     }

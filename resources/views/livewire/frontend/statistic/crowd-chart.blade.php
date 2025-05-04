@@ -12,7 +12,17 @@
             <canvas id="crowdChart"></canvas>
         </div>
     </div>
-
+    <div class="flex justify-end gap-2 mb-4">
+        <button class="px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-800 font-medium rounded"
+                @click="$dispatch('setChartViewMode', 'day')">
+            Tagesverlauf
+        </button>
+        <button class="px-4 py-2 bg-green-100 hover:bg-green-200 text-green-800 font-medium rounded"
+                @click="$dispatch('setChartViewMode', 'month')">
+            Monatsübersicht
+        </button>
+    </div>
+    
     <style>
         #chartContainer {
             position: relative;
