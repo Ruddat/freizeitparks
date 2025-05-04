@@ -30,7 +30,11 @@ Schedule::command('holidays:import ' . (now()->addYear()->year))
 Schedule::command('parks:generate-crowd-reports')->dailyAt('02:30')->withoutOverlapping();
 Schedule::command('blog:generate-daily-post')->dailyAt('03:00')->withoutOverlapping();
 
-Schedule::command('parks:import-queue-times')
-    ->hourly()
+//Schedule::command('parks:import-queue-times')
+//    ->hourly()
+//    ->withoutOverlapping();
+
+    Schedule::command('parks:import-queue-times')
+    ->everyFifteenMinutes()
     ->withoutOverlapping();
-    
+    Schedule::command('parks:aggregate-daily-stats')->dailyAt('01:00')->withoutOverlapping();

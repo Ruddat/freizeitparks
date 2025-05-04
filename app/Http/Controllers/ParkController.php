@@ -11,6 +11,7 @@ use App\Models\ParkDailyStats;
 use App\Models\ParkCrowdReport;
 use App\Models\ParkCrowdForecas;
 use App\Models\ModVisitorSession;
+use Illuminate\Support\Facades\DB;
 use App\Services\NewWeatherService;
 use Illuminate\Support\Facades\Http;
 use App\Models\ParkQueueTimeAverages;
@@ -155,74 +156,78 @@ class ParkController extends Controller
 
     public function statistics(Request $request, Park $park)
     {
-        // Zeitraum aus dem Request holen (Standard: "today")
         $timeframe = $request->input('timeframe', 'today');
 
-        // Datum basierend auf dem Zeitraum berechnen
-        $startDate = now();
-        if ($timeframe === '7days') {
-            $startDate = now()->subDays(7);
-        } elseif ($timeframe === '1month') {
-            $startDate = now()->subMonth();
-        } elseif ($timeframe === '3months') {
-            $startDate = now()->subMonths(3);
-        } else {
-            $timeframe = 'today'; // Standard: Heute
-            $startDate = now()->startOfDay();
-        }
+        $startDate = match ($timeframe) {
+            '7days' => now()->subDays(7),
+            '1month' => now()->subMonth(),
+            '3months' => now()->subMonths(3),
+            default => now()->startOfDay(),
+        };
 
-        // Hole alle eindeutigen Attraktionen aus der park_queue_time_averages-Tabelle für diesen Park
-        $allRides = ParkQueueTimeAverages::where('park_id', $park->id)
-            ->distinct()
-            ->pluck('ride_name');
+        // Datenbasis: Echtzeit (heute) oder Aggregat (älter)
+        $rideStats = $timeframe === 'today'
+            ? \App\Models\ParkQueueTimeLog::query()
+                ->selectRaw('ride_name, ROUND(AVG(wait_time), 1) as avg_wait')
+                ->where('park_id', $park->id)
+                ->where('fetched_at', '>=', $startDate)
+                ->groupBy('ride_name')
+                ->get()
+            : \App\Models\ParkDailyRideStats::query()
+                ->selectRaw('ride_name, ROUND(AVG(avg_wait_time), 1) as avg_wait')
+                ->where('park_id', $park->id)
+                ->where('date', '>=', $startDate->toDateString())
+                ->groupBy('ride_name')
+                ->get();
 
-        // ⏱️ Durchschnittliche Wartezeit pro Attraktion aus der neuen Tabelle
-        $waitTimesQuery = ParkQueueTimeAverages::where('park_id', $park->id)
-            ->select('ride_name', 'average_wait_time')
-            ->orderByDesc('average_wait_time');
+        $allRides = $rideStats->pluck('ride_name')->unique();
 
-        $waitTimes = $waitTimesQuery->get()->keyBy('ride_name');
-
-        // Erstelle eine Liste mit allen Attraktionen, auch solchen ohne Wartezeit
-        $averageWaits = $allRides->map(function ($rideName) use ($waitTimes) {
+        $averageWaits = $allRides->map(function ($rideName) use ($rideStats) {
+            $entry = $rideStats->firstWhere('ride_name', $rideName);
             return [
                 'ride_name' => $rideName,
-                'avg_wait' => $waitTimes->has($rideName) ? round($waitTimes[$rideName]->average_wait_time, 1) : 0,
+                'avg_wait' => $entry ? $entry->avg_wait : 0,
             ];
         })->sortByDesc('avg_wait')->values();
 
-        // 📈 Verlauf der Wartezeiten (bleibt aus park_queue_times)
-        $waitTimelineRaw = $park->queueTimes()
-            ->where('fetched_at', '>=', $startDate)
-            ->whereNotNull('wait_time')
-            ->select('fetched_at', 'wait_time')
-            ->orderBy('fetched_at')
-            ->get();
+        // Verlauf
+        $waitTimelineRaw = $timeframe === 'today'
+            ? \App\Models\ParkQueueTimeLog::where('park_id', $park->id)
+                ->where('fetched_at', '>=', $startDate)
+                ->whereNotNull('wait_time')
+                ->select('fetched_at', 'wait_time')
+                ->orderBy('fetched_at')
+                ->get()
+            : \App\Models\ParkDailyRideStats::where('park_id', $park->id)
+                ->where('date', '>=', $startDate->toDateString())
+                ->select('date', DB::raw('ROUND(AVG(avg_wait_time),1) as wait_time'))
+                ->groupBy('date')
+                ->orderBy('date')
+                ->get()
+                ->map(function ($item) {
+                    $item->fetched_at = Carbon::parse($item->date);
+                    return $item;
+                });
 
-        // Gruppierung basierend auf dem Zeitraum
+        // Gruppieren nach Stunde/Datum
+        $waitTimeline = $timeframe === 'today'
+            ? $waitTimelineRaw->groupBy(fn($entry) => Carbon::parse($entry->fetched_at)->format('H:00'))
+            : $waitTimelineRaw->groupBy(fn($entry) => Carbon::parse($entry->fetched_at)->format('Y-m-d'));
+
+        $allIntervals = collect();
         if ($timeframe === 'today') {
-            // Pro Stunde für "Heute"
-            $waitTimeline = $waitTimelineRaw
-                ->groupBy(fn($entry) => $entry->fetched_at->format('H:00'));
-
-            $allIntervals = collect();
             for ($hour = 0; $hour < 24; $hour++) {
-                $hourLabel = sprintf('%02d:00', $hour);
-                $allIntervals[$hourLabel] = $waitTimeline->has($hourLabel)
-                    ? round($waitTimeline[$hourLabel]->avg('wait_time'), 1)
+                $label = sprintf('%02d:00', $hour);
+                $allIntervals[$label] = $waitTimeline->has($label)
+                    ? round($waitTimeline[$label]->avg('wait_time'), 1)
                     : 0;
             }
         } else {
-            // Pro Tag für längere Zeiträume
-            $waitTimeline = $waitTimelineRaw
-                ->groupBy(fn($entry) => $entry->fetched_at->format('Y-m-d'));
-
-            $allIntervals = collect();
             $currentDate = $startDate->copy();
             while ($currentDate <= now()) {
-                $dateLabel = $currentDate->format('Y-m-d');
-                $allIntervals[$dateLabel] = $waitTimeline->has($dateLabel)
-                    ? round($waitTimeline[$dateLabel]->avg('wait_time'), 1)
+                $label = $currentDate->format('Y-m-d');
+                $allIntervals[$label] = $waitTimeline->has($label)
+                    ? round($waitTimeline[$label]->avg('wait_time'), 1)
                     : 0;
                 $currentDate->addDay();
             }
@@ -231,11 +236,23 @@ class ParkController extends Controller
         $chartLabels = $allIntervals->keys();
         $chartData = $allIntervals->values();
 
-        // Debugging
-        // dd($averageWaits, $chartLabels, $chartData);
+        // Wochentag-Stats aus park_daily_stats
+        $weekdayAverages = \App\Models\ParkDailyRideStats::where('park_id', $park->id)
+            ->where('date', '>=', now()->subMonths(3))
+            ->selectRaw('WEEKDAY(date) as weekday, ROUND(AVG(avg_wait_time),1) as avg_wait')
+            ->groupBy('weekday')
+            ->orderBy('weekday')
+            ->get()
+            ->mapWithKeys(fn($row) => [
+                Carbon::create()->startOfWeek()->addDays($row->weekday)->locale('de')->isoFormat('dddd') => $row->avg_wait
+            ]);
 
-        return view('frontend.pages.park.statistics', compact('park', 'averageWaits', 'chartLabels', 'chartData', 'timeframe'));
+        return view('frontend.pages.park.statistics', compact(
+            'park', 'averageWaits', 'chartLabels', 'chartData', 'timeframe', 'weekdayAverages'
+        ));
     }
+
+
 
 
     protected function updateQueueTimesFor(Park $park): void
