@@ -13,6 +13,9 @@ Ein modernes Laravel-Projekt zur Übersicht und Bewertung von Freizeitparks in E
 - 🛰️ Automatisches Tracking von Besuchern (GeoIP)
 - 🎬 YouTube/Vimeo/MP4-Videos direkt im Parkprofil
 - 💡 Flip-Cards mit animierten Effekten & Bewertung
+- 🧠 Automatische SEO-Textgenerierung
+- 🗂 Dynamische sitemap.xml
+- 💾 Backup-Manager (manuell & automatisch)
 
 ---
 
@@ -38,3 +41,45 @@ npm install && npm run build
 
 php artisan key:generate
 php artisan migrate
+php artisan db:seed   # optional: Beispieldaten laden
+php artisan serve
+```
+
+---
+
+## 🗺️ Datenquellen
+
+- Wetterdaten: [Open-Meteo API](https://open-meteo.com/)
+- Geodaten: [OpenStreetMap / Nominatim](https://nominatim.openstreetmap.org/)
+- Besucherdaten: Eigene Datenbank + Crowd-API
+
+---
+
+## 🛠 Technologien
+
+- Laravel 10+
+- TailwindCSS
+- Alpine.js
+- Leaflet.js
+- Axios
+- Blade Templates
+- SQLite/MySQL
+
+---
+
+## 📸 Screenshots
+
+
+
+---
+
+## 🤝 Mitwirken
+
+Pull Requests willkommen!  
+Bei Fehlern, Ideen oder Vorschlägen bitte ein Issue eröffnen.
+
+---
+
+## 📄 Lizenz
+
+MIT License – frei nutzbar mit Namensnennung.
