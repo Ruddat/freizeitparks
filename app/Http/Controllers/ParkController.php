@@ -134,6 +134,9 @@ class ParkController extends Controller
 
         $seo = app(SeoService::class)->getSeoData($park);
 
+      //  dd($park->queueTimes->groupBy('ride_id')->map->count()->filter(fn($c) => $c > 1));
+
+
         return view('frontend.pages.park_details', compact(
             'park', 'nearbyParks', 'forecast', 'showCrowdModal', 'visits24h', 'seo'
         ));
@@ -235,7 +238,6 @@ class ParkController extends Controller
     }
 
 
-
     protected function updateQueueTimesFor(Park $park): void
     {
         if (!$park->queue_times_id) return;
@@ -248,24 +250,18 @@ class ParkController extends Controller
         $data = $response->json();
         $now = now();
 
-        foreach ($data['rides'] ?? [] as $ride) {
-            $park->queueTimes()->updateOrCreate(
-                ['ride_id' => $ride['id']],
-                [
-                    'ride_name'    => $ride['name'],
-                    'is_open'      => $ride['is_open'],
-                    'wait_time'    => $ride['wait_time'],
-                    'last_updated' => Carbon::parse($ride['last_updated']),
-                    'land_name'    => null,
-                    'fetched_at'   => $now,
-                ]
-            );
-        }
+        $existingRides = [];
 
+        // 🗺️ Erst rides aus lands durchgehen
         foreach ($data['lands'] ?? [] as $land) {
             foreach ($land['rides'] ?? [] as $ride) {
+                $key = $ride['id'] . '-' . $park->id;
+                if (isset($existingRides[$key])) continue;
+
+                $existingRides[$key] = true;
+
                 $park->queueTimes()->updateOrCreate(
-                    ['ride_id' => $ride['id']],
+                    ['ride_id' => $ride['id'], 'park_id' => $park->id],
                     [
                         'ride_name'    => $ride['name'],
                         'is_open'      => $ride['is_open'],
@@ -277,5 +273,26 @@ class ParkController extends Controller
                 );
             }
         }
+
+        // 📦 Dann rides ohne Land, aber nur wenn noch nicht verarbeitet
+        foreach ($data['rides'] ?? [] as $ride) {
+            $key = $ride['id'] . '-' . $park->id;
+            if (isset($existingRides[$key])) continue;
+
+            $existingRides[$key] = true;
+
+            $park->queueTimes()->updateOrCreate(
+                ['ride_id' => $ride['id'], 'park_id' => $park->id],
+                [
+                    'ride_name'    => $ride['name'],
+                    'is_open'      => $ride['is_open'],
+                    'wait_time'    => $ride['wait_time'],
+                    'last_updated' => Carbon::parse($ride['last_updated']),
+                    'land_name'    => null,
+                    'fetched_at'   => $now,
+                ]
+            );
+        }
     }
+
 }

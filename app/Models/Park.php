@@ -35,6 +35,7 @@ class Park extends Model
         'description',
         'opening_hours',
         'type',
+        'seo_text',
     ];
 
     protected $casts = [
@@ -171,6 +172,11 @@ class Park extends Model
         }
 
         return asset('storage/parks/' . $this->image);
+    }
+
+    public function getThemenUrlAttribute()
+    {
+        return route('themen.park', ['slug' => $this->slug]);
     }
 
 

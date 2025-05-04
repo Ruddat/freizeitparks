@@ -9,6 +9,7 @@ use App\Http\Controllers\Frontend\Blog\BlogController;
 use App\Http\Controllers\Frontend\Seo\RobotsController;
 use App\Http\Controllers\Frontend\StaticPageController;
 use App\Http\Controllers\Frontend\Seo\SitemapController;
+use App\Http\Controllers\Frontend\Park\ParkTopicController;
 
 //Route::get('/', function () {
 //    return view('welcome');
@@ -30,6 +31,13 @@ Route::get('/seite/{slug}', [StaticPageController::class, 'show'])
     Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.xml');
 
 
+    Route::get('/themen/{slug}-tipps', [ParkTopicController::class, 'show'])->name('themen.park');
+    Route::get('/themen/{slug}', [ParkTopicController::class, 'show'])->name('themen.park');
+
+    Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+    Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
+
+
     Route::prefix('parks')->name('parks.')->group(function () {
         Route::get('/{park}/summary', [ParkController::class, 'summary'])->name('summary');
         Route::get('/{park}/calendar', [ParkController::class, 'calendar'])->name('calendar');
@@ -37,7 +45,7 @@ Route::get('/seite/{slug}', [StaticPageController::class, 'show'])
         Route::get('/{park}', [ParkController::class, 'show'])->name('show'); // letzter!
     });
 
-    Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
-    Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
+
+
 
 

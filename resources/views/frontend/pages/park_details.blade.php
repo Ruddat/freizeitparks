@@ -454,6 +454,8 @@
                title="Externe Statistikseite öffnen">
                 🌍
             </a>
+
+            <x-park-tipps-button :slug="$park->slug" label="🎟️ Alle Besuchstipps" />
         </div>
 
         <div class="space-y-2 text-sm">

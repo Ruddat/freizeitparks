@@ -60,6 +60,17 @@ class SitemapController extends Controller
             ];
         }
 
+
+        // Themen-Landingpages (nur wenn seo_text bereits existiert)
+        foreach (Park::where('status', 'active')->whereNotNull('seo_text')->get() as $park) {
+            $urls[] = [
+                'loc' => route('themen.park', ['slug' => $park->slug]),
+                'priority' => '0.7',
+                'changefreq' => 'monthly',
+                'lastmod' => optional($park->updated_at)->toW3cString(),
+            ];
+        }
+
         $xml = view('sitemap.xml', ['urls' => $urls]);
 
         return Response::make($xml, 200)->header('Content-Type', 'application/xml');
