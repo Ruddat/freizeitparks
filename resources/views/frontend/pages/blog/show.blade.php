@@ -6,7 +6,7 @@
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
     <!-- Hauptartikel -->
-    <article class="lg:col-span-2">
+    <article class="lg:col-span-2 bg-white dark:bg-gray-900 rounded-xl shadow px-6 py-8">
         <!-- Featured Image mit Lazy Loading -->
         <img src="{{ asset($post->featured_image) }}"
              alt="{{ $post->title }}"
@@ -44,7 +44,7 @@
 
 
         <!-- Inhalt mit verbesserter Formatierung -->
-        <div class="prose dark:prose-invert prose-lg max-w-none mb-8">
+        <div class="prose dark:prose-invert prose-lg max-w-none mb-8 text-gray-800">
             @php
                 // HTML aus der Datenbank bereinigen und formatieren
                 $content = $post->content;
@@ -66,7 +66,7 @@
 
 
                 // Emojis etwas größer darstellen
-                $content = preg_replace_callback('/[^\x00-\x7F]/u', function($match) {
+                $content = preg_replace_callback('/[\x{1F300}-\x{1F6FF}\x{1F900}-\x{1F9FF}]/u', function ($match) {
                     return '<span class="text-xl inline-block mx-0.5">'.$match[0].'</span>';
                 }, $content);
 
@@ -109,7 +109,7 @@
     {{-- Tags --}}
     <div class="flex flex-wrap gap-2">
         @foreach ($post->tags as $tag)
-            <a href="{{ route('blog.index', ['tag' => $tag->slug]) }}"
+        <a href="{{ route('blog.tag', ['slug' => $tag->slug]) }}"
                class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full bg-pink-500/10 text-pink-400 hover:bg-pink-500/20 transition">
                 #{{ $tag->name }}
             </a>
@@ -204,13 +204,15 @@
                 </svg>
                 Meistgelesen
             </h2>
-            <div class="space-y-3">
+            <div class="space-y-4">
                 @foreach($popularPosts as $popular)
                     <a href="{{ route('blog.show', $popular->slug) }}"
-                       class="block text-sm text-gray-700 dark:text-gray-300 hover:text-pink-600 dark:hover:text-pink-400 transition pl-2 border-l-2 border-transparent hover:border-pink-500">
-                        {{ $popular->title }}
-                        <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">
-                            ({{ number_format($popular->views, 0, ',', '.') }} Aufrufe)
+                       class="flex justify-between items-center p-3 bg-white dark:bg-gray-700 rounded-lg shadow-sm hover:bg-gray-100 dark:hover:bg-gray-600 transition">
+                        <div class="text-sm text-gray-800 dark:text-gray-200 font-medium line-clamp-2">
+                            {{ $popular->title }}
+                        </div>
+                        <span class="text-xs bg-pink-500 text-white px-2 py-0.5 rounded-full min-w-[40px] text-center">
+                            {{ $popular->views }}
                         </span>
                     </a>
                 @endforeach
@@ -227,11 +229,11 @@
             </h2>
             <div class="space-y-2">
                 @foreach($categories as $category)
-                    <a href="{{ route('blog.index', ['cat' => $category->slug]) }}"
+                <a href="{{ route('blog.category', ['slug' => $category->slug]) }}"
                        class="flex items-center justify-between text-sm text-gray-700 dark:text-gray-300 hover:text-pink-600 dark:hover:text-pink-400 transition px-2 py-1 rounded hover:bg-gray-50 dark:hover:bg-gray-700/50">
                         <span>{{ $category->name }}</span>
                         <span class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full">
-                            {{ $category->posts_count }}
+                            {{ $category->posts_count ?? $category->posts()->count() }}
                         </span>
                     </a>
                 @endforeach

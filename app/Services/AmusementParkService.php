@@ -223,6 +223,7 @@ class AmusementParkService
             // Speichern
             $filename = 'img/parklogos/parklogo_' . Str::slug($parkName) . '_' . uniqid() . '.' . $extension;
             Storage::disk('public')->put($filename, (string) $canvas->toWebp(quality: 85));
+           // Storage::disk('public')->put(str_replace('.webp', '.jpg', $filename), (string) $canvas->encode('jpg', 80));
 
             return '/storage/' . $filename;
         } catch (\Exception $e) {

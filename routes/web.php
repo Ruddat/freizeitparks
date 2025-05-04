@@ -36,7 +36,8 @@ Route::get('/seite/{slug}', [StaticPageController::class, 'show'])
 
     Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
     Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
-
+    Route::get('/blog/kategorie/{slug}', [BlogController::class, 'category'])->name('blog.category');
+    Route::get('/blog/tag/{slug}', [BlogController::class, 'tag'])->name('blog.tag');
 
     Route::prefix('parks')->name('parks.')->group(function () {
         Route::get('/{park}/summary', [ParkController::class, 'summary'])->name('summary');

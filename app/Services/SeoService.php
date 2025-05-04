@@ -34,9 +34,9 @@ class SeoService
 
             if (!$seo) {
                 Log::info("Kein SEO-Eintrag für {$modelType} ID: {$modelId} – wird erstellt.");
-                $seo = $this->createSeoEntry($modelType, $modelId, $titleBase, $keywords, $imageUrl, $canonicalUrl, $siteName);
+                $seo = $this->createSeoEntry($modelType, $modelId, $titleBase, $keywords, $imageUrl, $canonicalUrl, $siteName, $model);
             } elseif (!$seo->prevent_override) {
-                $this->updateSeoEntry($seo, $titleBase, $keywords, $imageUrl, $canonicalUrl, $siteName);
+                $this->updateSeoEntry($seo, $titleBase, $keywords, $imageUrl, $canonicalUrl, $siteName, $model);
             }
 
             return [
@@ -50,7 +50,7 @@ class SeoService
         });
     }
 
-    private function createSeoEntry($modelType, $modelId, $titleBase, $keywords, $imageUrl, $canonicalUrl, $siteName)
+    private function createSeoEntry($modelType, $modelId, $titleBase, $keywords, $imageUrl, $canonicalUrl, $siteName, $model = null)
     {
         return ModSeoMeta::create([
             'model_type' => $modelType,
@@ -59,12 +59,14 @@ class SeoService
             'description' => $keywords['description'],
             'image' => $imageUrl,
             'canonical' => $canonicalUrl,
-            'extra_meta' => json_encode($this->generateDefaultExtraMeta($titleBase, $keywords, $imageUrl, $canonicalUrl, $siteName)),
+'extra_meta' => json_encode(
+    $this->generateDefaultExtraMeta($titleBase, $keywords, $imageUrl, $canonicalUrl, $siteName, $model)
+),
             'keywords' => json_encode($keywords),
         ]);
     }
 
-    private function updateSeoEntry($seo, $titleBase, $keywords, $imageUrl, $canonicalUrl, $siteName)
+    private function updateSeoEntry($seo, $titleBase, $keywords, $imageUrl, $canonicalUrl, $siteName, $model = null)
     {
         $newTitle = "{$titleBase} – {$siteName}";
         $newDescription = $keywords['description'];
@@ -76,27 +78,39 @@ class SeoService
                 'description' => $newDescription,
                 'image' => $imageUrl,
                 'canonical' => $canonicalUrl,
-                'extra_meta' => json_encode($this->generateDefaultExtraMeta($titleBase, $keywords, $imageUrl, $canonicalUrl, $siteName)),
+'extra_meta' => json_encode(
+    $this->generateDefaultExtraMeta($titleBase, $keywords, $imageUrl, $canonicalUrl, $siteName, $model)
+),
                 'keywords' => json_encode($keywords),
             ]);
             Log::info("SEO aktualisiert für {$seo->model_type} ID {$seo->model_id}");
         }
     }
 
-    private function generateDefaultExtraMeta($titleBase, $keywords, $imageUrl, $canonicalUrl, $siteName)
+    private function generateDefaultExtraMeta($titleBase, $keywords, $imageUrl, $canonicalUrl, $siteName, $model = null)
     {
-        return [
+        $isBlog = $model instanceof \App\Models\BlogPost;
+
+        $meta = [
             'og:title' => "{$titleBase} – {$siteName}",
             'og:description' => $keywords['description'],
-            'og:image' => $imageUrl,
+            'og:image' => $imageUrl ?: asset('img/default-bg.jpg'),
             'og:url' => $canonicalUrl,
-            'og:type' => 'website',
+            'og:type' => $isBlog ? 'article' : 'website',
             'og:locale' => 'de_DE',
             'twitter:card' => 'summary_large_image',
             'twitter:title' => "{$titleBase} – {$siteName}",
             'twitter:description' => $keywords['description'],
-            'twitter:image' => $imageUrl,
+            'twitter:image' => $imageUrl ?: asset('img/default-bg.jpg'),
         ];
+
+        // ➕ Zusätzliche Tags für Artikel
+        if ($isBlog && isset($model->publish_start)) {
+            $meta['article:published_time'] = $model->publish_start->toAtomString();
+            $meta['article:author'] = 'Parkverzeichnis.de';
+        }
+
+        return $meta;
     }
 
     private function generateCanonicalUrl($model)
@@ -123,13 +137,15 @@ class SeoService
 
     private function getModelImage($model)
     {
-        $image = $model->seo_image ?? $model->logo ?? $model->image ?? null;
+        // Reihenfolge: individuell definiertes SEO-Bild, dann typische Felder
+        $image = $model->seo_image
+            ?? $model->featured_image
+            ?? $model->logo
+            ?? $model->image
+            ?? null;
 
-        if ($image) {
-            return $this->formatImageUrl($image);
-        }
-
-        return null;
+        // Wenn kein Bild gefunden, gib Standardbild zurück
+        return $this->formatImageUrl($image ?: 'img/default-bg.jpg');
     }
 
     private function formatImageUrl($path)
@@ -225,4 +241,7 @@ class SeoService
             ],
         ];
     }
+
+
+
 }
