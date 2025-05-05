@@ -2,9 +2,10 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
+use Carbon\Carbon;
 use App\Models\Park;
 use App\Models\ParkWeather;
+use Illuminate\Console\Command;
 use App\Services\WeatherService;
 use Illuminate\Support\Facades\Cache;
 
@@ -34,17 +35,49 @@ class RefreshParkWeather extends Command
 
                 foreach ($forecast as $day) {
                     ParkWeather::updateOrCreate(
-                        ['park_id' => $park->id, 'date' => $day['date']],
+                        ['park_id' => $park->id, 'date' => Carbon::parse($day['date'])->format('Y-m-d')],
                         [
-                            'temp_day'    => round($day['temp_day'], 1),
-                            'temp_night'  => round($day['temp_night'], 1),
-                            'weather_code'=> $day['weather_code'],
-                            'description' => $this->getWeatherDescription($day['weather_code']),
-                            'icon'        => $this->getWeatherIcon($day['weather_code']),
-                            'fetched_at'  => now(),
+                            'temp_day'        => round($day['temp_day'] ?? 0, 1),
+                            'temp_night'      => round($day['temp_night'] ?? 0, 1),
+                            'temp_mean'       => $day['temp_mean'] ?? null,
+
+                            'apparent_temp_max'  => $day['apparent_temp_max'] ?? null,
+                            'apparent_temp_min'  => $day['apparent_temp_min'] ?? null,
+                            'apparent_temp_mean' => $day['apparent_temp_mean'] ?? null,
+
+                            'precipitation'      => $day['precipitation_sum'] ?? null,
+                            'rain_sum'           => $day['rain_sum'] ?? null,
+                            'showers_sum'        => $day['showers_sum'] ?? null,
+                            'snowfall_sum'       => $day['snowfall_sum'] ?? null,
+                            'precipitation_hours'=> $day['precipitation_hours'] ?? null,
+
+                            'rain_chance'        => $day['precip_prob_max'] ?? null,
+                            'precip_prob_mean'   => $day['precip_prob_mean'] ?? null,
+                            'precip_prob_min'    => $day['precip_prob_min'] ?? null,
+
+                            'sunrise'            => $day['sunrise'] ?? null,
+                            'sunset'             => $day['sunset'] ?? null,
+                            'sunshine_duration'  => $day['sunshine_duration'] ?? null,
+                            'daylight_duration'  => $day['daylight_duration'] ?? null,
+
+                            'wind_speed'         => $day['wind_speed'] ?? null,
+                            'wind_gusts'         => $day['wind_gusts'] ?? null,
+                            'wind_direction'     => $day['wind_direction'] ?? null,
+
+                            'uv_index'           => $day['uv_index'] ?? null,
+                            'uv_index_clear_sky' => $day['uv_index_clear_sky'] ?? null,
+
+                            'radiation_sum'      => $day['radiation_sum'] ?? null,
+                            'evapotranspiration' => $day['evapotranspiration'] ?? null,
+
+                            'weather_code'       => $day['weather_code'],
+                            'description'        => $this->getWeatherDescription($day['weather_code']),
+                            'icon'               => $this->getWeatherIcon($day['weather_code']),
+                            'fetched_at'         => now(),
                         ]
                     );
                 }
+
 
                 // Cache für den Park löschen, damit er frisch gezogen wird
                 Cache::forget('park_forecast_' . $park->id);

@@ -43,6 +43,7 @@ Route::get('/seite/{slug}', [StaticPageController::class, 'show'])
         Route::get('/{park}/summary', [ParkController::class, 'summary'])->name('summary');
         Route::get('/{park}/calendar', [ParkController::class, 'calendar'])->name('calendar');
         Route::get('/{park}/statistics', [ParkController::class, 'statistics'])->name('statistics');
+        Route::get('/{park}/summary', [ParkController::class, 'summary'])->name('summary');
         Route::get('/{park}', [ParkController::class, 'show'])->name('show'); // letzter!
     });
 

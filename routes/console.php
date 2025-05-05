@@ -37,4 +37,6 @@ Schedule::command('blog:generate-daily-post')->dailyAt('03:00')->withoutOverlapp
     Schedule::command('parks:import-queue-times')
     ->everyFifteenMinutes()
     ->withoutOverlapping();
+
     Schedule::command('parks:aggregate-daily-stats')->dailyAt('01:00')->withoutOverlapping();
+    Schedule::command('parks:archive-daily-stats')->dailyAt('01:20')->withoutOverlapping();

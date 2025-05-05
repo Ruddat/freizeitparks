@@ -21,6 +21,27 @@ class ParkWeather extends Model
         'wind_speed',
         'uv_index',
         'rain_chance',
+        'temp_mean',
+        'apparent_temp_max',
+        'apparent_temp_min',
+        'apparent_temp_mean',
+        'precipitation',
+        'rain_sum',
+        'showers_sum',
+        'snowfall_sum',
+        'precipitation_hours',
+        'precip_prob_mean',
+        'precip_prob_min',
+        'sunrise',
+        'sunset',
+        'sunshine_duration',
+        'daylight_duration',
+        'wind_gusts',
+        'wind_direction',
+        'radiation_sum',
+        'evapotranspiration',
+        'uv_index_clear_sky',
+
 
     ];
 

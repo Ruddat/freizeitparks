@@ -145,7 +145,24 @@ class ParkController extends Controller
 
     public function summary(Park $park)
     {
-        return view('parks.summary', compact('park'));
+        $days = ParkDailyStats::where('park_id', $park->id)
+            ->orderByDesc('date')
+            ->limit(30)
+            ->get();
+
+        $sunnyDays = $days->sortByDesc('sunshine_duration')->take(5);
+        $rainyDays = $days->sortByDesc('precipitation_sum')->take(5);
+        $crowdedDays = $days->sortByDesc('avg_crowd_level')->take(5);
+        $emptyDays = $days->sortBy('avg_crowd_level')->take(5);
+
+        return view('frontend.pages.park.summary', compact(
+            'park',
+            'days',
+            'sunnyDays',
+            'rainyDays',
+            'crowdedDays',
+            'emptyDays'
+        ));
     }
 
     public function calendar(Park $park)

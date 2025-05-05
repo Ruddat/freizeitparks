@@ -480,6 +480,15 @@
                 </a>
             </div>
 
+            <div>
+                <a href="{{ route('parks.summary', $park) }}"
+                   class="text-emerald-400 hover:underline hover:text-emerald-300 transition">
+                    📊 Zusammenfassung (Statistiken)
+                </a>
+
+            </div>
+
+
             @if($visits24h > 0)
             <div
                 class="inline-block bg-gradient-to-r from-red-600 to-yellow-500 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg animate__animated animate__bounceIn mb-4"
