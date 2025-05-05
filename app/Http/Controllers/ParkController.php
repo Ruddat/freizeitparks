@@ -143,11 +143,13 @@ class ParkController extends Controller
         ));
     }
 
-    public function summary(Park $park)
+    public function summary(Request $request, Park $park)
     {
+        $range = (int) $request->input('range', 30); // Standard: 30 Tage
+
         $days = ParkDailyStats::where('park_id', $park->id)
+            ->where('date', '>=', now()->subDays($range)->toDateString())
             ->orderByDesc('date')
-            ->limit(30)
             ->get();
 
         $sunnyDays = $days->sortByDesc('sunshine_duration')->take(5);
@@ -157,6 +159,7 @@ class ParkController extends Controller
 
         return view('frontend.pages.park.summary', compact(
             'park',
+            'range',
             'days',
             'sunnyDays',
             'rainyDays',

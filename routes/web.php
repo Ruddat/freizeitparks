@@ -10,6 +10,7 @@ use App\Http\Controllers\Frontend\Seo\RobotsController;
 use App\Http\Controllers\Frontend\StaticPageController;
 use App\Http\Controllers\Frontend\Seo\SitemapController;
 use App\Http\Controllers\Frontend\Park\ParkTopicController;
+use App\Http\Controllers\Frontend\Widgets\WidgetController;
 
 //Route::get('/', function () {
 //    return view('welcome');
@@ -38,6 +39,12 @@ Route::get('/seite/{slug}', [StaticPageController::class, 'show'])
     Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
     Route::get('/blog/kategorie/{slug}', [BlogController::class, 'category'])->name('blog.category');
     Route::get('/blog/tag/{slug}', [BlogController::class, 'tag'])->name('blog.tag');
+
+    Route::get('/widgets/{park}/trend', [WidgetController::class, 'trend'])
+    ->name('widgets.trend');
+
+    Route::get('/widgets', [WidgetController::class, 'overview'])
+    ->name('widgets.overview');
 
     Route::prefix('parks')->name('parks.')->group(function () {
         Route::get('/{park}/summary', [ParkController::class, 'summary'])->name('summary');

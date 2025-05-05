@@ -15,6 +15,7 @@
         {{-- 📱 Desktop Nav --}}
         <div class="hidden md:flex space-x-8 text-white">
             <a href="/" class="hover:text-gray-300 transition">Startseite</a>
+            <a href="{{ route('widgets.overview') }}" class="hover:text-gray-300 transition">Widgets</a>
             @foreach($navPages as $page)
                 <a href="{{ route('static.page', $page->slug) }}" class="hover:text-gray-300 transition">
                     {{ $page->title }}
@@ -35,6 +36,7 @@
     <div id="mobile-menu" class="hidden md:hidden bg-gray-800 text-white">
         <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col space-y-4">
             <a href="/" class="hover:text-gray-300 transition">Startseite</a>
+            <a href="{{ route('widgets.overview') }}" class="hover:text-gray-300 transition">Widgets</a>
             @foreach($navPages as $page)
                 <a href="{{ route('static.page', $page->slug) }}" class="hover:text-gray-300 transition">
                     {{ $page->title }}
